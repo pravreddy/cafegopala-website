@@ -1,0 +1,45 @@
+name: Deploy Cafe Gopala Website
+
+# Push to main -> copy the static site to the Hetzner server and reload nginx.
+# Reuses the SAME server + SSH secrets as the care-ai / guhya-website repos:
+#   UK_SERVER_IP, SSH_USER, SSH_PRIVATE_KEY
+# Add these under: GitHub repo -> Settings -> Secrets and variables -> Actions.
+#
+# One-time prerequisite (done once, see DEPLOY-cafegopala.md):
+#   - cafegopal.co.in DNS points at the server
+#   - /home/deploy/careai/sites/cafegopal.co.in exists
+#   - nginx-cafegopala.conf is wired into nginx + a TLS cert is in place
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # lets you trigger a deploy manually from the Actions tab
+
+jobs:
+  deploy:
+    name: Deploy to Hetzner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload static files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.UK_SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "index.html,logo.png,logo2.png,manifest.json,robots.txt,sitemap.xml"
+          target: "/home/deploy/careai/sites/cafegopal.co.in"
+          overwrite: true
+
+      - name: Reload nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.UK_SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            docker exec careai-nginx nginx -t
+            docker exec careai-nginx nginx -s reload
+            echo "Cafe Gopala site deployed and nginx reloaded"

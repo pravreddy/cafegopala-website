@@ -1,0 +1,11 @@
+{
+  "name": "Cafe Gopala",
+  "short_name": "Cafe Gopala",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#3E1206",
+  "theme_color": "#E4611C",
+  "icons": [
+    { "src": "./logo.png", "sizes": "1283x1600", "type": "image/png" }
+  ]
+}
