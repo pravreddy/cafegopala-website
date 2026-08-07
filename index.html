@@ -77,7 +77,7 @@
 
   .hero{padding:3rem 0 3.4rem;text-align:center;position:relative;overflow:hidden}
   .arch{display:block;width:min(360px,80vw);margin:0 auto -8px;color:var(--maroon);opacity:.9}
-  .hero-logo-wrap{position:relative;width:min(340px,78vw);aspect-ratio:820/1024;margin:0 auto 1.5rem;
+  .hero-logo-wrap{position:relative;width:clamp(340px, 44vw, 560px);max-width:88vw;aspect-ratio:820/1024;margin:0 auto 1.5rem;
     animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
   .hero-logo-wrap::before{content:"";position:absolute;inset:-22% -22% -14%;z-index:0;border-radius:50%;
     background:radial-gradient(circle at 50% 42%,rgba(243,199,102,.55),rgba(228,97,28,.25) 45%,transparent 70%);filter:blur(4px)}
@@ -162,7 +162,7 @@
       <a href="#menu">Menu</a>
       <a href="#visit">Visit</a>
     </nav>
-    <a class="cta" href="https://pos.cafegopal.co.in/">Order online</a>
+    <a class="cta" href="#order-options">Order online</a>
   </div>
 </header>
 
@@ -183,7 +183,7 @@
       <div class="tagline">The Flavor of Krishna's Grace</div>
       <p class="lede">Warm North Indian vegetarian food, made fresh and served with love — chaat and snacks, hearty mains with hot breads, and sweets with masala chai. Dine in, or have it sent over.</p>
       <div class="hero-actions">
-        <a class="cta" href="https://pos.cafegopal.co.in/">Order online</a>
+        <a class="cta" href="#order-options">Order online</a>
         <a class="cta ghost" href="#menu">See the menu</a>
       </div>
       <div class="garland" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -300,7 +300,7 @@
       </div>
            ============================================================ -->
 
-      <div class="menu-cta"><a class="cta" href="https://pos.cafegopal.co.in/">Order the full menu online</a></div>
+      <div class="menu-cta"><a class="cta" href="#order-options">See the full menu (200+ dishes) &amp; order &rarr;</a></div>
     </div>
   </section>
 
@@ -322,10 +322,21 @@
         <div class="info-row"><div class="k">Phone</div><div class="v"><a href="tel:+910000000000">[Add phone number]</a></div></div>
         <div class="info-row"><div class="k">Dining</div><div class="v">Dine-in &#183; Takeaway &#183; Delivery</div></div>
       </div>
-      <aside class="visit-card">
-        <h3>Prefer it delivered?</h3>
-        <p>Order in two taps and we'll have it sent over hot.</p>
-        <a class="cta" href="https://pos.cafegopal.co.in/">Order online</a>
+      <aside class="visit-card" id="order-options">
+        <h3>Three ways to enjoy Gopala</h3>
+        <p style="margin:.2rem 0 .5rem"><b style="color:var(--gold-soft)">1 &middot; Order &amp; collect</b><br>
+          Order online now, pay by UPI, and pick up at the counter &mdash; book a time up to 7 days ahead.</p>
+        <a class="cta" href="order.html">Order online now</a>
+        <p style="margin:1.2rem 0 .35rem"><b style="color:var(--gold-soft)">2 &middot; Home delivery</b><br>
+          Order through our delivery partners:</p>
+        <p style="margin:0">
+          <!-- EDIT: paste your real restaurant page links -->
+          <a href="https://www.zomato.com" target="_blank" rel="noopener" style="color:var(--gold-soft);font-weight:600">Zomato</a> &nbsp;&middot;&nbsp;
+          <a href="https://www.swiggy.com" target="_blank" rel="noopener" style="color:var(--gold-soft);font-weight:600">Swiggy</a> &nbsp;&middot;&nbsp;
+          <a href="https://www.rapido.bike" target="_blank" rel="noopener" style="color:var(--gold-soft);font-weight:600">Rapido</a></p>
+        <p style="margin:1.2rem 0 0"><b style="color:var(--gold-soft)">3 &middot; Reserve a table</b><br>
+          Book your table &mdash; and even your dishes &mdash; in advance.
+          <i>Coming soon; for now, call us to reserve.</i></p>
       </aside>
     </div>
   </section>
@@ -338,9 +349,84 @@
       <img src="logo.png" alt="" aria-hidden="true"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
-    <div class="fine">&#169; 2026 Cafe Gopala &#183; Malleshwaram, Bengaluru &#183; Order at <a href="https://pos.cafegopal.co.in/">pos.cafegopal.co.in</a></div>
+    <div class="fine">&#169; 2026 Cafe Gopala &#183; Malleshwaram, Bengaluru &#183; <a href="order.html">Order online &amp; collect</a></div>
   </div>
 </footer>
 
+<script>
+/* ============================================================
+   LIVE MENU from FastPOS (pos.cafegopal.co.in)
+   ------------------------------------------------------------
+   Fetches the live public menu and REPLACES the hardcoded cards
+   above. If anything fails (key not set, POS down, sharing off,
+   network error) it does NOTHING — the static menu above stays,
+   so the page never shows a blank menu. SEO also reads the
+   static menu (this runs only in browsers).
+
+   SETUP: in the POS -> Settings -> "Share menu with your
+   website": enable sharing, copy the share key, paste it below.
+   The key is PUBLISHABLE (an identity + kill switch bound to
+   this domain via the allowed-origins list) — not a secret.
+
+   LOCAL TESTING before the site is deployed:
+     python3 -m http.server 8080   (in this folder)
+   and add http://localhost:8080 to the allowed origins in POS
+   Settings. Remove it again when done.
+   ============================================================ */
+(function () {
+  var POS_BASE  = "https://app.fastpos.in";      /* final website domain TBD — this is where the POS API lives */
+  var SLUG      = "cafe-gopala";
+  var SHARE_KEY = "pub_898a1d4c99270a973da57277d368fabe";
+
+  if (!SHARE_KEY || SHARE_KEY.indexOf("PASTE_") === 0) return;  /* not configured yet */
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function rupees(p) {                        /* "90.00" -> "90", "90.50" stays */
+    var n = parseFloat(p);
+    if (isNaN(n)) return esc(p);
+    return (n % 1 === 0 ? n.toFixed(0) : n.toFixed(2));
+  }
+  var ARCH = '<svg class="arch-top" width="60" height="20" viewBox="0 0 60 20" aria-hidden="true"><path d="M2 20 C2 8 16 2 30 2 C44 2 58 8 58 20" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+
+  fetch(POS_BASE + "/api/public/" + SLUG + "/menu/", {
+    headers: { "X-Share-Key": SHARE_KEY }
+  })
+    .then(function (r) { if (!r.ok) throw new Error("menu " + r.status); return r.json(); })
+    .then(function (data) {
+      if (!data || !data.categories || !data.categories.length) return;  /* keep static */
+      /* CURATED TEASER (agreed 2026-08-08): the homepage is a shop window,
+         not the full catalogue. Show ~6 signature categories, 5 dishes each,
+         then send people to order.html for the complete searchable menu. */
+      var WANT = ["snack", "biryani", "paratha", "thali", "milkshake", "sweet"];
+      var picked = [];
+      WANT.forEach(function (kw) {
+        var hit = data.categories.find(function (c) {
+          return c.name.toLowerCase().indexOf(kw) >= 0 && picked.indexOf(c) < 0;
+        });
+        if (hit) picked.push(hit);
+      });
+      if (picked.length < 4) picked = data.categories.slice(0, 6);  /* names changed? fall back */
+      picked = picked.map(function (c) {
+        return { name: c.name, sort_order: c.sort_order, items: c.items.slice(0, 5) };
+      });
+      var html = picked.map(function (cat) {
+        var lis = cat.items.map(function (it) {
+          var mark  = it.food_type === "veg" ? '<i class="veg"></i>' : "";
+          var price = "&#8377;" + rupees(it.price) +
+                      (it.half_price ? ' <small style="color:var(--muted);font-weight:500">&middot; half &#8377;' + rupees(it.half_price) + "</small>" : "");
+          return "<li><b>" + mark + esc(it.name) + "</b><span>" + price + "</span></li>";
+        }).join("");
+        return '<article class="card">' + ARCH + "<h3>" + esc(cat.name) + "</h3><ul>" + lis + "</ul></article>";
+      }).join("");
+      var cards = document.querySelector("#menu .cards");
+      if (cards && html) cards.innerHTML = html;   /* swap only now, all-or-nothing */
+    })
+    .catch(function () { /* static menu stays — never blank */ });
+})();
+</script>
 </body>
 </html>

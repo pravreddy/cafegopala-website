@@ -1,0 +1,815 @@
+<!doctype html>
+<!-- ============================================================
+     CAFE GOPALA — ORDER ONLINE & COLLECT
+     ------------------------------------------------------------
+     The customer flow over the FastPOS public API:
+       menu cart → pickup slot (7 days, real service windows)
+       → verified email (6-digit code, remembered 30 days)
+       → place order → UPI pay screen (QR + tap-to-pay link)
+       → "I've paid" + UTR → live status page (magic link).
+     Payment goes straight to the cafe's own UPI. The cashier
+     confirms it in the POS before the food is handed over.
+     Config below: same POS_BASE / SLUG / SHARE_KEY as index.html.
+     ============================================================ -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order online — Cafe Gopala</title>
+<meta name="robots" content="noindex"><!-- transactional page -->
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Mukta:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+  :root{
+    --saffron:#E4611C; --ember:#BE3E0C; --gold:#E0A029; --gold-soft:#F3C766;
+    --maroon:#3E1206; --maroon-2:#571C0A; --cream:#FCF4E2; --ink:#2A130A;
+    --muted:#835435; --veg:#1a7d3a; --line:rgba(62,18,6,.14); --ok:#1a7d3a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);color:var(--ink);
+    font-family:"Mukta",system-ui,-apple-system,sans-serif;line-height:1.55}
+  header{position:sticky;top:0;z-index:20;background:rgba(252,244,226,.95);backdrop-filter:blur(8px);
+    border-bottom:2px solid var(--gold);padding:.6rem 1rem;display:flex;align-items:center;gap:.7rem}
+  header img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+  header .t{font-family:"Marcellus",serif;font-size:1.25rem;color:var(--maroon)}
+  header .sub{font-size:.65rem;letter-spacing:.14em;color:var(--saffron);text-transform:uppercase}
+  header a.back{color:var(--ember);text-decoration:none;font-size:.9rem}
+  .hcart{margin-left:auto;border:1.5px solid var(--ember);background:#fff;border-radius:999px;
+    padding:.35rem .8rem;font-size:.95rem;cursor:pointer;color:var(--ember);font-weight:700;
+    display:flex;align-items:center;gap:.35rem}
+  .hcart .b{background:var(--ember);color:#fff;border-radius:999px;font-size:.75rem;
+    min-width:1.2rem;padding:.05rem .3rem;text-align:center}
+  /* checkout steps — the familiar 4-step breadcrumb */
+  .steps{display:flex;gap:.25rem;align-items:center;margin:.6rem 0 .2rem;font-size:.78rem;color:var(--muted)}
+  .steps span{padding:.2rem .6rem;border-radius:999px}
+  .steps span.on{background:var(--maroon);color:var(--cream);font-weight:700}
+  .steps i{font-style:normal;color:var(--line)}
+  .wrap{max-width:680px;margin:0 auto;padding:1rem 1rem 7rem}
+  h1{font-family:"Marcellus",serif;color:var(--maroon);font-size:1.6rem;margin:.8rem 0 .2rem}
+  h2{font-family:"Marcellus",serif;color:var(--ember);font-size:1.15rem;margin:1.2rem 0 .5rem}
+  .note{color:var(--muted);font-size:.88rem;margin:.1rem 0 .8rem}
+  .card{background:linear-gradient(180deg,#fff,var(--cream));border:1px solid var(--line);
+    border-radius:14px;padding:1rem;margin-bottom:.9rem;box-shadow:0 8px 22px rgba(62,18,6,.05)}
+  /* menu */
+  .cat h3{margin:.2rem 0 .3rem;color:var(--ember);font-family:"Marcellus",serif;font-size:1.05rem;
+    cursor:pointer;display:flex;align-items:center;gap:.5rem}
+  .cat h3 .n{margin-left:auto;color:var(--muted);font-size:.8rem;font-weight:400}
+  .item{display:flex;align-items:center;gap:.6rem;padding:.45rem 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+  .item:last-child{border-bottom:none}
+  .veg{width:11px;height:11px;border:1.5px solid var(--veg);border-radius:2px;position:relative;flex:0 0 auto}
+  .veg::after{content:"";position:absolute;inset:2px;background:var(--veg);border-radius:50%}
+  .item .nm{flex:1}
+  .item .pr{color:var(--saffron);font-weight:600;white-space:nowrap}
+  .step{display:flex;align-items:center;gap:.45rem}
+  .step button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#fff;
+    color:var(--ember);font-size:1rem;font-weight:700;cursor:pointer}
+  .step span{min-width:1.2rem;text-align:center;font-weight:700}
+  /* buttons */
+  .btn{display:inline-block;background:linear-gradient(180deg,var(--saffron),var(--ember));color:#fff;
+    border:none;border-radius:999px;padding:.7rem 1.5rem;font-size:1rem;font-weight:700;cursor:pointer;
+    text-decoration:none;text-align:center}
+  .btn.ghost{background:#fff;color:var(--ember);border:1.5px solid var(--ember)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.small{padding:.45rem 1rem;font-size:.9rem}
+  /* cart bar */
+  .cartbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--maroon);color:var(--cream);
+    padding:.7rem 1rem;display:none;align-items:center;gap:.8rem;box-shadow:0 -8px 24px rgba(62,18,6,.25)}
+  .cartbar.on{display:flex}
+  .cartbar b{font-size:1.05rem}
+  .cartbar .btn{margin-left:auto}
+  /* slots */
+  .days{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.4rem}
+  .day{flex:0 0 auto;border:1.5px solid var(--line);border-radius:12px;padding:.45rem .8rem;text-align:center;
+    cursor:pointer;background:#fff;font-size:.85rem}
+  .day.sel{border-color:var(--ember);background:#fdeee8}
+  .day.closed{opacity:.45;cursor:not-allowed}
+  .slots{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem}
+  .slot{border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:.4rem .7rem;cursor:pointer;font-size:.9rem}
+  .slot.sel{border-color:var(--ember);background:#fdeee8;font-weight:700}
+  /* forms */
+  label{display:block;font-size:.82rem;color:var(--muted);margin:.6rem 0 .15rem}
+  input[type=text],input[type=tel],input[type=email],textarea{width:100%;padding:.6rem .7rem;border:1px solid var(--line);
+    border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+  .row{display:flex;gap:.7rem}.row>div{flex:1}
+  .check{display:flex;align-items:center;gap:.5rem;font-size:.92rem;margin-top:.6rem}
+  .okmsg{color:var(--ok);font-weight:600;font-size:.9rem}
+  .errmsg{color:#b3261e;font-weight:600;font-size:.9rem;margin-top:.4rem;min-height:1.2rem}
+  /* pay + status */
+  #qr{display:flex;justify-content:center;margin:.8rem 0}
+  #qr img{width:210px;height:210px;image-rendering:pixelated;border:8px solid #fff;border-radius:8px;
+    box-shadow:0 8px 22px rgba(62,18,6,.12)}
+  .big{font-size:1.7rem;font-family:"Marcellus",serif;color:var(--maroon);text-align:center}
+  .deadline{text-align:center;color:#b3261e;font-weight:600;font-size:.92rem}
+  .statusline{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px dashed var(--line)}
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--line)}
+  .dot.on{background:var(--ok)}
+  .chip{display:inline-block;border-radius:999px;padding:.15rem .8rem;font-size:.85rem;font-weight:700}
+  .hide{display:none!important}
+  .center{text-align:center}
+  code{background:#fff;border:1px solid var(--line);border-radius:6px;padding:0 .3rem}
+  /* decorative side logos — only when there is real empty space (wide
+     desktop); never on tablets/phones. Dark logo left, coloured right. */
+  .side-logo{position:fixed;top:24%;z-index:1;display:none;
+    /* as big as the free gutter allows, never touching the centred content:
+       gutter = (viewport − ~740px content) / 2, minus a breathing margin */
+    width:min(360px, calc((100vw - 740px)/2 - 3vw));
+    border-radius:26px;filter:drop-shadow(0 14px 32px rgba(62,18,6,.24));
+    animation:floaty 7s ease-in-out infinite;pointer-events:none}
+  .side-logo.l{left:2vw}
+  .side-logo.r{right:2vw;animation-delay:3.5s}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @media(min-width:1200px){.side-logo{display:block}}
+  @media(prefers-reduced-motion:reduce){.side-logo{animation:none}}
+  /* menu shop layout: menu + always-visible cart (desktop) */
+  .search{width:100%;padding:.65rem .9rem;border:1.5px solid var(--line);border-radius:999px;
+    font-size:1rem;font-family:inherit;background:#fff;margin:.2rem 0 .6rem}
+  .chips{display:flex;gap:.5rem;overflow-x:auto;padding:.15rem 0 .5rem;margin-bottom:.3rem;
+    scroll-behavior:smooth;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip-cat{flex:0 0 auto;border:2px solid var(--line);border-radius:999px;background:#fff;
+    padding:.45rem 1.05rem;font-size:.92rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .chip-cat:active{background:#fdeee8}
+  /* horizontal-scroll affordance: arrows appear only when content overflows */
+  .hs-wrap{position:relative}
+  .hs-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:36px;height:36px;
+    border-radius:50%;border:2px solid var(--ember);background:#fff;color:var(--ember);
+    font-size:1.25rem;font-weight:700;cursor:pointer;display:none;align-items:center;
+    justify-content:center;line-height:1;box-shadow:0 4px 14px rgba(62,18,6,.22);padding:0}
+  .hs-btn.l{left:-8px}.hs-btn.r{right:-8px}
+  .hs-btn.on{display:flex}
+  .days{scroll-behavior:smooth;scrollbar-width:none}
+  .days::-webkit-scrollbar{display:none}
+  .shop{display:grid;grid-template-columns:1fr 310px;gap:1rem;align-items:start}
+  .cartpanel{position:sticky;top:70px;background:#fff;border:1.5px solid var(--gold);
+    border-radius:14px;padding:1rem;box-shadow:0 10px 28px rgba(62,18,6,.08);
+    /* like the cashier's bill: the panel FITS the screen; items scroll
+       inside it, the total + button stay pinned and always visible */
+    display:flex;flex-direction:column;max-height:calc(100vh - 120px)}
+  .cartpanel h2{margin:.1rem 0 .5rem;font-size:1.05rem}
+  .cbody{overflow-y:auto;min-height:0;flex:1}
+  .cfoot{border-top:2px solid var(--gold);padding-top:.55rem;margin-top:.55rem}
+  .cline{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+  .cline .nm{flex:1;line-height:1.25}
+  .cline .lt{font-weight:700;color:var(--maroon);white-space:nowrap;min-width:3.2rem;text-align:right}
+  .cline .rm{border:none;background:none;color:#b3261e;font-size:1rem;cursor:pointer;padding:0 .15rem}
+  .ctotal{display:flex;justify-content:space-between;font-size:1.05rem;margin-top:.6rem}
+  .cempty{color:var(--muted);font-size:.9rem}
+  /* mobile: cart lives in a slide-up sheet */
+  #cart-sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;
+    border-radius:18px 18px 0 0;box-shadow:0 -12px 40px rgba(62,18,6,.35);
+    padding:1rem 1rem 5.5rem;max-height:70vh;overflow-y:auto}
+  #cart-sheet h2{margin:.1rem 0 .5rem}
+  #cart-sheet .close{position:absolute;top:.7rem;right:1rem;border:none;background:none;
+    font-size:1.3rem;color:var(--muted);cursor:pointer}
+  @media(max-width:899px){.cartpanel{display:none}}
+  @media(min-width:900px){#cart-sheet{display:none!important}
+    .cartbar .viewcart{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="Cafe Gopala">
+  <div><div class="t">Cafe Gopala</div><div class="sub">Order &amp; collect</div></div>
+  <button class="hcart" onclick="cartClick()">🛒 Cart <span class="b" id="hcart-n">0</span></button>
+  <button class="hcart" style="margin-left:.5rem" onclick="showOrders()">My orders</button>
+  <a class="back" href="index.html#menu">&larr; site</a>
+</header>
+
+<img class="side-logo l" src="logo2.png" alt="" aria-hidden="true">
+<img class="side-logo r" src="logo.png" alt="" aria-hidden="true">
+
+<div class="wrap">
+  <div class="steps hide" id="steps">
+    <span data-s="menu">1 Cart</span><i>›</i>
+    <span data-s="slot">2 Pickup time</span><i>›</i>
+    <span data-s="contact">3 Details</span><i>›</i>
+    <span data-s="pay">4 Pay</span>
+  </div>
+
+  <!-- ================= STEP 1: MENU / CART ================= -->
+  <section id="sec-menu">
+    <h1>Order online, collect at the counter</h1>
+    <p class="note">Pay by UPI straight to the cafe — no delivery apps, no commission.
+      Pick your dishes, choose a pickup time (up to 7 days ahead), and your food is
+      ready when you arrive.</p>
+    <input class="search" id="menu-search" type="text" placeholder="🔍  Search the menu (dosa, paratha, lassi…)"
+      oninput="SEARCH=this.value;renderMenu()">
+    <div class="hs-wrap" id="chips-wrap">
+      <button class="hs-btn l" aria-label="scroll left">‹</button>
+      <div class="chips" id="cat-chips"></div>
+      <button class="hs-btn r" aria-label="scroll right">›</button>
+    </div>
+    <div class="shop">
+      <div id="menu-list"><div class="card center">Loading the live menu…</div></div>
+      <aside class="cartpanel">
+        <h2>Your order</h2>
+        <div class="cbody" id="cart-body-side"><div class="cempty">Nothing yet — tap Add on a dish.</div></div>
+        <div class="cfoot">
+          <div id="cart-foot-side"></div>
+          <div class="center" style="margin-top:.6rem">
+            <button class="btn" id="side-continue" disabled onclick="show('slot');loadDays()">Proceed to checkout &rarr;</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- mobile cart sheet -->
+  <div id="cart-sheet" class="hide">
+    <button class="close" onclick="toggleSheet(false)">✕</button>
+    <h2>Your order</h2>
+    <div class="cbody" id="cart-body-sheet" style="max-height:42vh"></div>
+    <div class="cfoot">
+      <div id="cart-foot-sheet"></div>
+      <div class="center" style="margin-top:.6rem">
+        <button class="btn" onclick="toggleSheet(false);show('slot');loadDays()">Proceed to checkout &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STEP 2: SLOT ================= -->
+  <section id="sec-slot" class="hide">
+    <h1>Pickup time</h1>
+    <p class="note">Times shown are the cafe's real service hours.</p>
+    <div class="card">
+      <div class="hs-wrap" id="days-wrap">
+        <button class="hs-btn l" aria-label="scroll left">‹</button>
+        <div class="days" id="days"></div>
+        <button class="hs-btn r" aria-label="scroll right">›</button>
+      </div>
+      <div class="slots" id="slots"><span class="note">Pick a day above.</span></div>
+    </div>
+    <button class="btn ghost small" onclick="show('menu')">&larr; menu</button>
+    <button class="btn" id="to-contact" disabled onclick="show('contact')">Continue &rarr;</button>
+  </section>
+
+  <!-- ================= STEP 3: CONTACT + EMAIL VERIFY ================= -->
+  <section id="sec-contact" class="hide">
+    <h1>Your details</h1>
+    <div class="card">
+      <div class="row">
+        <div><label>Name</label><input type="text" id="f-name" autocomplete="name"></div>
+        <div><label>Phone</label><input type="tel" id="f-phone" autocomplete="tel" inputmode="tel"></div>
+      </div>
+      <label>Email (we send your order updates here)</label>
+      <input type="email" id="f-email" autocomplete="email">
+      <div id="email-verify-block">
+        <div style="display:flex;gap:.6rem;align-items:center;margin-top:.5rem">
+          <button class="btn ghost small" id="send-code" onclick="sendCode()">Send verification code</button>
+          <span class="okmsg hide" id="email-ok">verified ✓</span>
+        </div>
+        <div id="code-row" class="hide" style="display:flex;gap:.6rem;align-items:center;margin-top:.5rem">
+          <input type="text" id="f-code" inputmode="numeric" placeholder="6-digit code" style="width:130px">
+          <button class="btn small" onclick="verifyCode()">Verify</button>
+        </div>
+      </div>
+      <div class="check"><input type="checkbox" id="f-wa"><label for="f-wa" style="margin:0">This phone number is on WhatsApp</label></div>
+      <label>Telegram username (optional)</label>
+      <input type="text" id="f-tg" placeholder="@name">
+      <label>Note for the kitchen (optional)</label>
+      <textarea id="f-notes" rows="2"></textarea>
+      <!-- honeypot: humans never see it -->
+      <input type="text" id="f-website" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
+      <div class="errmsg" id="err-contact"></div>
+    </div>
+    <button class="btn ghost small" onclick="show('slot')">&larr; time</button>
+    <button class="btn" id="place-btn" onclick="placeOrder()">Place order</button>
+  </section>
+
+  <!-- ================= STEP 4: PAY ================= -->
+  <section id="sec-pay" class="hide">
+    <h1 class="center">Pay to confirm</h1>
+    <div class="card">
+      <div class="big" id="pay-amount"></div>
+      <p class="deadline" id="pay-deadline"></p>
+      <div id="qr"></div>
+      <div class="center"><a class="btn" id="upi-link">Pay by UPI app</a></div>
+      <p class="note center">Scan the QR or tap the button — the amount and order number are
+        pre-filled. Paying from this phone? Tap the button, pay, then come back to this tab.</p>
+      <h2>After paying</h2>
+      <label>UPI reference (UTR) number — 12 digits, shown in your UPI app after payment</label>
+      <input type="text" id="f-utr" inputmode="numeric" placeholder="e.g. 428671903215">
+      <div style="margin-top:.7rem;display:flex;gap:.7rem;flex-wrap:wrap">
+        <button class="btn" onclick="claim()">I've paid ✓</button>
+        <button class="btn ghost small" onclick="claim(true)">I've paid but can't find the UTR</button>
+      </div>
+      <div class="errmsg" id="err-pay"></div>
+      <p class="note"><a href="#" onclick="cancelOrder();return false">Cancel this order</a></p>
+    </div>
+  </section>
+
+  <!-- ================= MY ORDERS (this device) ================= -->
+  <section id="sec-orders" class="hide">
+    <h1>My orders</h1>
+    <p class="note">Orders placed on this device — including cancelled ones. (Tip: your
+      order page link also arrives by email, so you can find an order from any device.)</p>
+    <div id="orders-list"><div class="card center">Loading…</div></div>
+    <p class="center"><a class="btn" href="order.html">Order something</a></p>
+  </section>
+
+  <!-- ================= STEP 5: STATUS ================= -->
+  <section id="sec-status" class="hide">
+    <h1 class="center">Your order</h1>
+    <div class="card" id="status-card"></div>
+    <p class="note center">This page updates itself. Keep the link — it's your order slip.</p>
+    <p class="center"><a class="btn ghost small" href="order.html">Order something else</a></p>
+  </section>
+</div>
+
+<div class="cartbar" id="cartbar">
+  <span id="cart-n"></span> · <b id="cart-total"></b>
+  <button class="btn ghost small viewcart" style="background:transparent;color:var(--gold-soft);border-color:var(--gold-soft)"
+    onclick="toggleSheet(true)">View / edit ▴</button>
+  <button class="btn" onclick="show('slot');loadDays()">Proceed &rarr;</button>
+</div>
+
+<script>
+/* ================= CONFIG (same as index.html) ================= */
+var POS_BASE  = "https://app.fastpos.in";
+var SLUG      = "cafe-gopala";
+var SHARE_KEY = "pub_898a1d4c99270a973da57277d368fabe";
+
+var API = POS_BASE + "/api/public/" + SLUG;
+function hdrs(extra) {
+  var h = { "X-Share-Key": SHARE_KEY };
+  if (extra) for (var k in extra) h[k] = extra[k];
+  return h;
+}
+function req(path, method, body) {
+  return fetch(API + path, {
+    method: method || "GET",
+    headers: hdrs(body ? { "Content-Type": "application/json" } : null),
+    body: body ? JSON.stringify(body) : undefined,
+  }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, s: r.status, j: j }; }); });
+}
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function rupees(p) { var n = parseFloat(p); return isNaN(n) ? esc(p) : (n % 1 === 0 ? n.toFixed(0) : n.toFixed(2)); }
+
+/* ================= state ================= */
+var MENU = null;                       // categories from the live menu
+var CART = {};                         // item_id -> {item, qty}
+var SEARCH = "";                       // live menu filter
+var SLOT = null;                       // chosen slot iso
+var EMAIL_TOKEN = localStorage.getItem("cg_email_token") || "";
+var EMAIL_FOR = localStorage.getItem("cg_email_for") || "";
+var ORDER_TOKEN = null;                // magic-link token of the placed order
+var LAST = null;                       // last status payload
+var pollTimer = null;
+
+function show(name) {
+  ["menu", "slot", "contact", "pay", "status", "orders"].forEach(function (s) {
+    document.getElementById("sec-" + s).classList.toggle("hide", s !== name);
+  });
+  if (name === "menu") { renderCart(); }
+  else { document.getElementById("cartbar").classList.remove("on"); toggleSheet(false); }
+  var steps = document.getElementById("steps");
+  steps.classList.toggle("hide", name === "status" || name === "orders");
+  steps.querySelectorAll("span").forEach(function (s) {
+    s.classList.toggle("on", s.getAttribute("data-s") === name);
+  });
+  window.scrollTo(0, 0);
+}
+function cartClick() {
+  var onMenu = !document.getElementById("sec-menu").classList.contains("hide");
+  if (!onMenu) { show("menu"); return; }
+  if (window.innerWidth < 900 && cartCount() > 0) toggleSheet(true);
+  else { var cp = document.querySelector(".cartpanel"); if (cp) cp.scrollIntoView({ behavior: "smooth" }); }
+}
+window.addEventListener("resize", function () {
+  if (!document.getElementById("sec-menu").classList.contains("hide")) renderCart();
+});
+
+/* ================= step 1: menu + cart ================= */
+function cartCount() { var n = 0; for (var k in CART) n += CART[k].qty; return n; }
+function cartTotal() {
+  var t = 0;
+  for (var k in CART) t += parseFloat(CART[k].item.price) * CART[k].qty;
+  return t;
+}
+function bump(id, d) {
+  var e = CART[id];
+  if (!e) return;
+  e.qty += d;
+  if (e.qty <= 0) delete CART[id];
+  renderMenu();
+}
+function add(item) { CART[item.id] = CART[item.id] || { item: item, qty: 0 }; CART[item.id].qty++; renderMenu(); }
+
+function itemRow(it) {
+  var inCart = CART[it.id];
+  var right = inCart
+    ? '<span class="step"><button onclick=\'bump(' + it.id + ',-1)\'>−</button><span>' + inCart.qty +
+      '</span><button onclick=\'bump(' + it.id + ',1)\'>+</button></span>'
+    : '<button class="btn small" onclick=\'add(' + JSON.stringify({id:it.id,name:it.name,price:it.price}).replace(/'/g,"&#39;") + ')\'>Add</button>';
+  return '<div class="item"><i class="veg"></i><span class="nm">' + esc(it.name) +
+    (it.half_price ? ' <small style="color:var(--muted)">(half ₹' + rupees(it.half_price) + ')</small>' : '') +
+    '</span><span class="pr">₹' + rupees(it.price) + '</span>' + right + '</div>';
+}
+
+function renderMenu() {
+  var el = document.getElementById("menu-list");
+  if (!MENU) return;
+  var q = SEARCH.trim().toLowerCase();
+  el.innerHTML = MENU.map(function (cat, ci) {
+    var items = cat.items;
+    if (q) {
+      items = items.filter(function (it) { return it.name.toLowerCase().indexOf(q) >= 0; });
+      if (!items.length) return "";                    // category has no matches
+    }
+    var open = q ? true : cat._open;                   // searching opens matches
+    var inCartN = cat.items.reduce(function (a, it) { return a + (CART[it.id] ? CART[it.id].qty : 0); }, 0);
+    var body = open ? items.map(itemRow).join("") : "";
+    return '<div class="card cat" id="cat-' + ci + '"><h3 onclick="MENU[' + ci + ']._open=!MENU[' + ci + ']._open;renderMenu()">' +
+      (open ? "▾ " : "▸ ") + esc(cat.name) +
+      (inCartN ? ' <span style="background:var(--ember);color:#fff;border-radius:999px;font-size:.7rem;padding:.05rem .5rem">' + inCartN + '</span>' : '') +
+      '<span class="n">' + cat.items.length + ' items</span></h3>' + body + "</div>";
+  }).join("") || '<div class="card center">Nothing matches “' + esc(SEARCH) + '”.</div>';
+  renderCart();
+}
+
+function cartLinesHtml() {
+  var keys = Object.keys(CART);
+  if (!keys.length) return '<div class="cempty">Nothing yet — tap Add on a dish.</div>';
+  return keys.map(function (k) {
+    var e = CART[k];
+    return '<div class="cline"><span class="nm">' + esc(e.item.name) +
+      '<br><small style="color:var(--muted)">₹' + rupees(e.item.price) + ' each</small></span>' +
+      '<span class="step"><button onclick=\'bump(' + k + ',-1)\'>−</button><span>' + e.qty +
+      '</span><button onclick=\'bump(' + k + ',1)\'>+</button></span>' +
+      '<span class="lt">₹' + rupees(parseFloat(e.item.price) * e.qty) + '</span>' +
+      '<button class="rm" title="Remove" onclick=\'bump(' + k + ',-999)\'>✕</button></div>';
+  }).join("");
+}
+
+function cartFootHtml() {
+  if (!Object.keys(CART).length) return "";
+  var n = cartCount();
+  return '<div class="ctotal" style="margin-top:0"><span>' + n + (n === 1 ? " item" : " items") +
+    '</span><b>₹' + rupees(cartTotal()) + "</b></div>" +
+    '<p class="note" style="margin:.15rem 0 0">GST (if any) is added at checkout.</p>';
+}
+
+function renderCart() {
+  var linesStr = cartLinesHtml(), footStr = cartFootHtml();
+  [["cart-body-side", linesStr], ["cart-body-sheet", linesStr],
+   ["cart-foot-side", footStr], ["cart-foot-sheet", footStr]].forEach(function (p) {
+    var el = document.getElementById(p[0]);
+    if (el) el.innerHTML = p[1];
+  });
+  var n = cartCount();
+  var cont = document.getElementById("side-continue");
+  if (cont) cont.disabled = n === 0;
+  document.getElementById("hcart-n").textContent = n;
+  document.getElementById("cart-n").textContent = n + (n === 1 ? " item" : " items");
+  document.getElementById("cart-total").textContent = "₹" + rupees(cartTotal());
+  var onMenu = !document.getElementById("sec-menu").classList.contains("hide");
+  var narrow = window.innerWidth < 900;
+  document.getElementById("cartbar").classList.toggle("on", n > 0 && onMenu && narrow);
+  if (n === 0) toggleSheet(false);
+}
+
+function toggleSheet(on) {
+  document.getElementById("cart-sheet").classList.toggle("hide", !on);
+}
+
+function bindHScroll(wrapId) {
+  /* arrows show only while there is hidden content on that side */
+  var wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  var sc = wrap.querySelector(".chips,.days");
+  var l = wrap.querySelector(".hs-btn.l"), r = wrap.querySelector(".hs-btn.r");
+  function upd() {
+    var over = sc.scrollWidth > sc.clientWidth + 4;
+    l.classList.toggle("on", over && sc.scrollLeft > 4);
+    r.classList.toggle("on", over && sc.scrollLeft < sc.scrollWidth - sc.clientWidth - 4);
+  }
+  l.onclick = function () { sc.scrollBy({ left: -sc.clientWidth * 0.7 }); };
+  r.onclick = function () { sc.scrollBy({ left: sc.clientWidth * 0.7 }); };
+  sc.onscroll = upd;
+  window.addEventListener("resize", upd);
+  setTimeout(upd, 50);
+  upd();
+}
+
+function renderChips() {
+  var el = document.getElementById("cat-chips");
+  if (!el || !MENU) return;
+  el.innerHTML = MENU.map(function (cat, ci) {
+    return '<span class="chip-cat" onclick="jumpCat(' + ci + ')">' + esc(cat.name) + "</span>";
+  }).join("");
+  bindHScroll("chips-wrap");
+}
+function jumpCat(ci) {
+  MENU.forEach(function (c, i) { c._open = i === ci; });
+  renderMenu();
+  var t = document.getElementById("cat-" + ci);
+  if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+req("/menu/").then(function (r) {
+  if (!r.ok) { document.getElementById("menu-list").innerHTML = '<div class="card center">Ordering is not available right now — please call the cafe.</div>'; return; }
+  MENU = r.j.categories;
+  if (MENU.length) MENU[0]._open = true;
+  renderChips();
+  renderMenu();
+});
+
+/* ================= step 2: slots ================= */
+function isoLocal(d) {
+  /* LOCAL date, never toISOString(): that converts to UTC and shifts the
+     day for any browser ahead of UTC (all of India!) — the bug that made
+     Saturday look "closed". */
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+         "-" + String(d.getDate()).padStart(2, "0");
+}
+function loadDays() {
+  var days = document.getElementById("days");
+  days.innerHTML = "";
+  var today = new Date();
+  for (var i = 0; i <= 7; i++) {
+    (function (i) {
+      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+      var iso = isoLocal(d);
+      var el = document.createElement("div");
+      el.className = "day";
+      el.id = "day-" + iso;
+      el.innerHTML = "<b>" + (i === 0 ? "Today" : d.toLocaleDateString("en-IN", { weekday: "short" })) +
+        "</b><br>" + d.getDate() + " " + d.toLocaleDateString("en-IN", { month: "short" });
+      el.onclick = function () { if (!el.classList.contains("closed")) pickDay(iso); };
+      days.appendChild(el);
+    })(i);
+  }
+  bindHScroll("days-wrap");
+}
+function pickDay(iso) {
+  document.querySelectorAll(".day").forEach(function (e) { e.classList.remove("sel"); });
+  var de = document.getElementById("day-" + iso);
+  de.classList.add("sel");
+  var slots = document.getElementById("slots");
+  slots.innerHTML = '<span class="note">Loading…</span>';
+  req("/pickup/slots/?date=" + iso).then(function (r) {
+    if (!r.ok) { slots.innerHTML = '<span class="note">' + esc(r.j.detail || "Not available") + "</span>"; return; }
+    if (!r.j.slots.length) {
+      de.classList.add("closed");
+      var isToday = iso === isoLocal(new Date());
+      slots.innerHTML = '<span class="note">' + (isToday
+        ? "Ordering for today has finished — pick another day."
+        : "The cafe is closed this day — pick another day.") + "</span>";
+      return;
+    }
+    slots.innerHTML = r.j.slots.map(function (s) {
+      return '<div class="slot" data-iso="' + esc(s.iso) + '" onclick="pickSlot(this)">' + esc(s.start) +
+        (s.remaining <= 2 ? ' <small style="color:#b3261e">(' + s.remaining + ' left)</small>' : "") + "</div>";
+    }).join("");
+  });
+}
+function pickSlot(el) {
+  document.querySelectorAll(".slot").forEach(function (e) { e.classList.remove("sel"); });
+  el.classList.add("sel");
+  SLOT = el.getAttribute("data-iso");
+  document.getElementById("to-contact").disabled = false;
+}
+
+/* ================= step 3: email verify + place ================= */
+function emailNow() { return document.getElementById("f-email").value.trim().toLowerCase(); }
+function refreshEmailUI() {
+  var verified = EMAIL_TOKEN && EMAIL_FOR && EMAIL_FOR === emailNow();
+  document.getElementById("email-ok").classList.toggle("hide", !verified);
+  document.getElementById("send-code").classList.toggle("hide", !!verified);
+  if (!verified) document.getElementById("code-row").classList.toggle("hide", true);
+}
+document.getElementById("f-email").addEventListener("input", refreshEmailUI);
+
+function sendCode() {
+  var email = emailNow();
+  var err = document.getElementById("err-contact");
+  err.textContent = "";
+  if (email.indexOf("@") < 1) { err.textContent = "Type your email first."; return; }
+  req("/pickup/email-code/", "POST", { email: email }).then(function (r) {
+    if (!r.ok) { err.textContent = r.j.detail || "Could not send the code."; return; }
+    document.getElementById("code-row").classList.remove("hide");
+    document.getElementById("send-code").textContent = "Resend code";
+    err.textContent = "";
+  });
+}
+function verifyCode() {
+  var email = emailNow();
+  var err = document.getElementById("err-contact");
+  req("/pickup/email-verify/", "POST", { email: email, code: document.getElementById("f-code").value.trim() })
+    .then(function (r) {
+      if (!r.ok) { err.textContent = r.j.detail || "Wrong code."; return; }
+      EMAIL_TOKEN = r.j.email_token; EMAIL_FOR = email;
+      localStorage.setItem("cg_email_token", EMAIL_TOKEN);
+      localStorage.setItem("cg_email_for", EMAIL_FOR);
+      err.textContent = "";
+      refreshEmailUI();
+    });
+}
+
+function placeOrder() {
+  var err = document.getElementById("err-contact");
+  err.textContent = "";
+  var lines = Object.keys(CART).map(function (k) { return { item_id: Number(k), qty: CART[k].qty }; });
+  if (!lines.length) { err.textContent = "Your cart is empty."; show("menu"); return; }
+  if (!SLOT) { err.textContent = "Pick a pickup time."; show("slot"); return; }
+  var email = emailNow();
+  if (!(EMAIL_TOKEN && EMAIL_FOR === email)) { err.textContent = "Please verify your email (button above)."; return; }
+  var btn = document.getElementById("place-btn");
+  btn.disabled = true;
+  var tg = document.getElementById("f-tg").value.trim();
+  var notes = document.getElementById("f-notes").value.trim();
+  var extra = [];
+  if (document.getElementById("f-wa").checked) extra.push("has WhatsApp");
+  if (tg) extra.push("Telegram " + tg);
+  req("/pickup/orders/", "POST", {
+    name: document.getElementById("f-name").value.trim(),
+    phone: document.getElementById("f-phone").value.trim(),
+    email: email, email_token: EMAIL_TOKEN,
+    slot_iso: SLOT,
+    lines: lines,
+    notes: (notes + (extra.length ? "  [" + extra.join(", ") + "]" : "")).trim(),
+    website: document.getElementById("f-website").value,   /* honeypot */
+  }).catch(function () {
+    btn.disabled = false;
+    err.textContent = "Network problem — your order was NOT placed. Please try again.";
+  }).then(function (r) {
+    if (!r) return;                       /* the catch above already handled it */
+    btn.disabled = false;
+    if (!r.ok) { err.textContent = r.j.detail || "Could not place the order."; return; }
+    ORDER_TOKEN = r.j.token;
+    saveOrderToken(ORDER_TOKEN);
+    history.replaceState(null, "", "order.html?token=" + ORDER_TOKEN);
+    LAST = r.j;
+    renderPay();
+    show("pay");
+  });
+}
+
+/* ================= step 4: pay ================= */
+function renderPay() {
+  document.getElementById("pay-amount").textContent = "₹" + rupees(LAST.total);
+  var dl = LAST.expires_at ? new Date(LAST.expires_at) : null;
+  document.getElementById("pay-deadline").textContent = dl
+    ? "Pay before " + dl.toLocaleString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" }) + " or the order is cancelled."
+    : "";
+  var link = document.getElementById("upi-link");
+  link.href = LAST.upi_intent || "#";
+  var q = document.getElementById("qr");
+  q.innerHTML = "";
+  if (LAST.upi_intent && window.qrcode) {
+    var qr = qrcode(0, "M");
+    qr.addData(LAST.upi_intent);
+    qr.make();
+    q.innerHTML = qr.createImgTag(5, 8);
+  }
+}
+function claim(noUtr) {
+  var err = document.getElementById("err-pay");
+  err.textContent = "";
+  var utr = noUtr ? "" : document.getElementById("f-utr").value.trim();
+  if (!noUtr && utr.replace(/\D/g, "").length < 10) {
+    err.textContent = "That UTR looks too short — or use the button below.";
+    return;
+  }
+  req("/pickup/orders/" + ORDER_TOKEN + "/claim/", "POST", { utr: utr }).then(function (r) {
+    if (!r.ok) { err.textContent = r.j.detail || "Try again."; return; }
+    LAST = r.j;
+    renderStatus();
+    show("status");
+    startPoll();
+  });
+}
+function cancelOrder() {
+  if (!confirm("Cancel this order?")) return;
+  req("/pickup/orders/" + ORDER_TOKEN + "/cancel/", "POST", {}).then(function (r) {
+    if (r.ok) { LAST = r.j; renderStatus(); show("status"); }
+  });
+}
+
+/* ================= step 5: status ================= */
+var STEPS = [
+  ["placed", "Order placed"],
+  ["payment_claimed", "Payment sent — the cafe is checking"],
+  ["confirmed", "Payment confirmed — cooking for your slot"],
+  ["collected", "Collected — thank you!"],
+];
+function renderStatus() {
+  var chipMap = {
+    placed: ["#9a6700", "#fff8c5"], payment_claimed: ["#0550ae", "#ddf4ff"],
+    confirmed: ["#1a7d3a", "#dafbe1"], collected: ["#57606a", "#f6f8fa"],
+    cancelled: ["#57606a", "#f6f8fa"], rejected: ["#b3261e", "#ffebe9"], expired: ["#57606a", "#f6f8fa"],
+  };
+  var c = chipMap[LAST.status] || ["#57606a", "#f6f8fa"];
+  var idx = STEPS.findIndex(function (s) { return s[0] === LAST.status; });
+  var terminal = ["cancelled", "rejected", "expired"].indexOf(LAST.status) >= 0;
+  var html = '<div class="center"><span class="chip" style="color:' + c[0] + ";background:" + c[1] + '">' +
+    esc(LAST.status_display) + "</span></div>";
+  if (!terminal) {
+    html += STEPS.map(function (s, i) {
+      return '<div class="statusline"><span class="dot' + (i <= idx ? " on" : "") + '"></span>' + s[1] + "</div>";
+    }).join("");
+  }
+  html += '<div style="margin-top:.8rem;font-size:.95rem">';
+  html += "<b>Pickup:</b> " + esc(LAST.pickup_date) + " at <b>" + esc(LAST.slot_start) + "</b><br>";
+  if (LAST.counter_no) html += "<b>Counter number:</b> " + esc(LAST.counter_no) + "<br>";
+  html += (LAST.lines || []).map(function (l) { return l.qty + " × " + esc(l.name); }).join(" · ");
+  html += "<br><b>Total: ₹" + rupees(LAST.total) + "</b></div>";
+  if (LAST.status === "placed") {
+    html += '<div class="center" style="margin-top:.8rem"><button class="btn" onclick="renderPay();show(\'pay\')">Pay now</button></div>';
+  }
+  document.getElementById("status-card").innerHTML = html;
+}
+function poll() {
+  if (!ORDER_TOKEN) return;
+  req("/pickup/orders/" + ORDER_TOKEN + "/").then(function (r) {
+    if (r.ok) { LAST = r.j; renderStatus(); }
+  });
+}
+function startPoll() { if (!pollTimer) pollTimer = setInterval(poll, 15000); }
+
+/* ================= my orders (this device) ================= */
+function orderTokens() {
+  try { return JSON.parse(localStorage.getItem("cg_orders") || "[]"); }
+  catch (e) { return []; }
+}
+function saveOrderToken(t) {
+  var l = orderTokens().filter(function (x) { return x !== t; });
+  l.unshift(t);
+  localStorage.setItem("cg_orders", JSON.stringify(l.slice(0, 10)));
+}
+function viewOrder(t) {
+  ORDER_TOKEN = t;
+  history.replaceState(null, "", "order.html?token=" + t);
+  req("/pickup/orders/" + t + "/").then(function (r) {
+    if (!r.ok) return;
+    LAST = r.j;
+    if (LAST.status === "placed") { renderPay(); show("pay"); }
+    else { renderStatus(); show("status"); }
+    startPoll();
+  });
+}
+function showOrders() {
+  show("orders");
+  var el = document.getElementById("orders-list");
+  var toks = orderTokens();
+  if (!toks.length) {
+    el.innerHTML = '<div class="card center">No orders on this device yet.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="card center">Loading…</div>';
+  Promise.all(toks.map(function (t) {
+    return req("/pickup/orders/" + t + "/").then(function (r) {
+      return r.ok ? { t: t, o: r.j } : null;
+    }).catch(function () { return null; });
+  })).then(function (rows) {
+    rows = rows.filter(Boolean);
+    if (!rows.length) {
+      el.innerHTML = '<div class="card center">No orders found for this device.</div>';
+      return;
+    }
+    var chipMap = {
+      placed: ["#9a6700", "#fff8c5"], payment_claimed: ["#0550ae", "#ddf4ff"],
+      confirmed: ["#1a7d3a", "#dafbe1"], collected: ["#57606a", "#f6f8fa"],
+      cancelled: ["#57606a", "#f6f8fa"], rejected: ["#b3261e", "#ffebe9"],
+      expired: ["#57606a", "#f6f8fa"],
+    };
+    el.innerHTML = rows.map(function (r) {
+      var c = chipMap[r.o.status] || ["#57606a", "#f6f8fa"];
+      var items = (r.o.lines || []).map(function (l) { return l.qty + " × " + esc(l.name); }).join(" · ");
+      return '<div class="card" style="cursor:pointer" onclick="viewOrder(\'' + r.t + '\')">' +
+        '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">' +
+        '<b>' + esc(r.o.pickup_date) + " · " + esc(r.o.slot_start) + "</b>" +
+        '<span class="chip" style="color:' + c[0] + ";background:" + c[1] + '">' + esc(r.o.status_display) + "</span>" +
+        '<span style="margin-left:auto;font-weight:700;color:var(--maroon)">₹' + rupees(r.o.total) + "</span></div>" +
+        '<div class="note" style="margin:.3rem 0 0">' + items +
+        (r.o.status === "placed" ? ' &mdash; <b style="color:#b3261e">payment pending, tap to pay</b>' : "") +
+        "</div></div>";
+    }).join("");
+  });
+}
+
+/* ================= entry: magic link? ================= */
+(function () {
+  var m = location.search.match(/token=([0-9a-f-]{20,})/i);
+  if (m) {
+    ORDER_TOKEN = m[1];
+    saveOrderToken(ORDER_TOKEN);        /* opened from a mail link → remember it here too */
+    req("/pickup/orders/" + ORDER_TOKEN + "/").then(function (r) {
+      if (r.ok) {
+        LAST = r.j;
+        if (LAST.status === "placed") { renderPay(); show("pay"); }
+        else { renderStatus(); show("status"); }
+        startPoll();
+      }
+    });
+  } else {
+    show("menu");                       // step indicator: 1 Cart active
+  }
+  refreshEmailUI();
+})();
+</script>
+</body>
+</html>
