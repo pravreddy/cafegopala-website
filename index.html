@@ -410,8 +410,15 @@
         if (hit) picked.push(hit);
       });
       if (picked.length < 4) picked = data.categories.slice(0, 6);  /* names changed? fall back */
+      var todayIso = (function (d) {
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+               "-" + String(d.getDate()).padStart(2, "0");
+      })(new Date());
       picked = picked.map(function (c) {
-        return { name: c.name, sort_order: c.sort_order, items: c.items.slice(0, 5) };
+        var avail = c.items.filter(function (i) {   /* homepage = today's menu */
+          return !(i.unavailable_until && i.unavailable_until >= todayIso);
+        });
+        return { name: c.name, sort_order: c.sort_order, items: avail.slice(0, 5) };
       });
       var html = picked.map(function (cat) {
         var lis = cat.items.map(function (it) {

@@ -240,9 +240,10 @@
         <button class="hs-btn r" aria-label="scroll right">›</button>
       </div>
       <div class="slots" id="slots"><span class="note">Pick a day above.</span></div>
+      <div class="errmsg hide" id="date-warn" style="margin-top:.6rem"></div>
     </div>
     <button class="btn ghost small" onclick="show('menu')">&larr; menu</button>
-    <button class="btn" id="to-contact" disabled onclick="show('contact')">Continue &rarr;</button>
+    <button class="btn" id="to-contact" disabled onclick="show('contact');prefillContact()">Continue &rarr;</button>
   </section>
 
   <!-- ================= STEP 3: CONTACT + EMAIL VERIFY ================= -->
@@ -403,15 +404,44 @@ function bump(id, d) {
 }
 function add(item) { CART[item.id] = CART[item.id] || { item: item, qty: 0 }; CART[item.id].qty++; renderMenu(); }
 
+function chosenDateIso() { return SLOT ? SLOT.slice(0, 10) : null; }
+function blockedFor(it, dateIso) {
+  return !!(it.unavailable_until && dateIso && it.unavailable_until >= dateIso);
+}
+function backOnLabel(it) {
+  /* "back on <day after unavailable_until>" */
+  var d = new Date(it.unavailable_until + "T00:00:00");
+  d.setDate(d.getDate() + 1);
+  return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+}
+
 function itemRow(it) {
+  var dateIso = chosenDateIso();
+  if (blockedFor(it, dateIso)) {
+    /* greyed for the CHOSEN pickup date — visible but not addable */
+    return '<div class="item" style="opacity:.45"><i class="veg"></i><span class="nm">' + esc(it.name) +
+      '<br><small style="color:#b3261e">not available on your pickup day — back ' + backOnLabel(it) + '</small>' +
+      '</span><span class="pr">₹' + rupees(it.price) + "</span></div>";
+  }
+  var hint = "";
+  if (!dateIso && blockedFor(it, isoLocal(new Date()))) {
+    hint = '<br><small style="color:var(--muted)">not available today — fine for pickup from ' + backOnLabel(it) + "</small>";
+  }
   var inCart = CART[it.id];
   var right = inCart
     ? '<span class="step"><button onclick=\'bump(' + it.id + ',-1)\'>−</button><span>' + inCart.qty +
       '</span><button onclick=\'bump(' + it.id + ',1)\'>+</button></span>'
-    : '<button class="btn small" onclick=\'add(' + JSON.stringify({id:it.id,name:it.name,price:it.price,packaging:it.packaging||"0"}).replace(/'/g,"&#39;") + ')\'>Add</button>';
+    : '<button class="btn small" onclick=\'add(' + JSON.stringify({id:it.id,name:it.name,price:it.price,packaging:it.packaging||"0",unavailable_until:it.unavailable_until||null}).replace(/'/g,"&#39;") + ')\'>Add</button>';
   return '<div class="item"><i class="veg"></i><span class="nm">' + esc(it.name) +
     (it.half_price ? ' <small style="color:var(--muted)">(half ₹' + rupees(it.half_price) + ')</small>' : '') +
+    hint +
     '</span><span class="pr">₹' + rupees(it.price) + '</span>' + right + '</div>';
+}
+
+function blockedCartKeys() {
+  var d = chosenDateIso();
+  if (!d) return [];
+  return Object.keys(CART).filter(function (k) { return blockedFor(CART[k].item, d); });
 }
 
 function renderMenu() {
@@ -560,6 +590,9 @@ function loadDays() {
 }
 function pickDay(iso) {
   document.querySelectorAll(".day").forEach(function (e) { e.classList.remove("sel"); });
+  SLOT = null;                                   // stale slot from another day
+  document.getElementById("to-contact").disabled = true;
+  document.getElementById("date-warn").classList.add("hide");
   var de = document.getElementById("day-" + iso);
   de.classList.add("sel");
   var slots = document.getElementById("slots");
@@ -584,7 +617,30 @@ function pickSlot(el) {
   document.querySelectorAll(".slot").forEach(function (e) { e.classList.remove("sel"); });
   el.classList.add("sel");
   SLOT = el.getAttribute("data-iso");
-  document.getElementById("to-contact").disabled = false;
+  checkCartForDate();
+}
+function checkCartForDate() {
+  /* the moment a date is chosen, re-judge every cart line against it */
+  var warn = document.getElementById("date-warn");
+  var blocked = blockedCartKeys();
+  if (!blocked.length) {
+    warn.classList.add("hide");
+    document.getElementById("to-contact").disabled = !SLOT;
+    return;
+  }
+  renderMenu();                                  // grey blocked items for this date
+  var names = blocked.map(function (k) { return esc(CART[k].item.name); }).join(", ");
+  warn.innerHTML = "⚠ <b>" + names + "</b> " + (blocked.length === 1 ? "isn't" : "aren't") +
+    " available on that day — pick another day, or " +
+    '<a href="#" onclick="removeBlocked();return false">remove ' +
+    (blocked.length === 1 ? "it" : "them") + " from your order</a>.";
+  warn.classList.remove("hide");
+  document.getElementById("to-contact").disabled = true;
+}
+function removeBlocked() {
+  blockedCartKeys().forEach(function (k) { delete CART[k]; });
+  renderCart();
+  checkCartForDate();
 }
 
 /* ================= step 3: email verify + place ================= */
@@ -620,6 +676,7 @@ function verifyCode() {
       localStorage.setItem("cg_email_for", EMAIL_FOR);
       err.textContent = "";
       refreshEmailUI();
+      prefillContact();          /* returning customer on a new device: load profile */
     });
 }
 
@@ -633,18 +690,15 @@ function placeOrder() {
   if (!(EMAIL_TOKEN && EMAIL_FOR === email)) { err.textContent = "Please verify your email (button above)."; return; }
   var btn = document.getElementById("place-btn");
   btn.disabled = true;
-  var tg = document.getElementById("f-tg").value.trim();
-  var notes = document.getElementById("f-notes").value.trim();
-  var extra = [];
-  if (document.getElementById("f-wa").checked) extra.push("has WhatsApp");
-  if (tg) extra.push("Telegram " + tg);
   req("/pickup/orders/", "POST", {
     name: document.getElementById("f-name").value.trim(),
     phone: document.getElementById("f-phone").value.trim(),
     email: email, email_token: EMAIL_TOKEN,
     slot_iso: SLOT,
     lines: lines,
-    notes: (notes + (extra.length ? "  [" + extra.join(", ") + "]" : "")).trim(),
+    notes: document.getElementById("f-notes").value.trim(),
+    has_whatsapp: document.getElementById("f-wa").checked,       /* real fields now */
+    telegram: document.getElementById("f-tg").value.trim(),
     website: document.getElementById("f-website").value,   /* honeypot */
   }).catch(function () {
     btn.disabled = false;
@@ -745,6 +799,29 @@ function poll() {
 }
 function startPoll() { if (!pollTimer) pollTimer = setInterval(poll, 15000); }
 
+/* ================= profile prefill (verified email = logged in) ========= */
+function fetchMe(cb) {
+  if (!(EMAIL_TOKEN && EMAIL_FOR)) { if (cb) cb(null); return; }
+  req("/pickup/me/?email=" + encodeURIComponent(EMAIL_FOR) +
+      "&email_token=" + encodeURIComponent(EMAIL_TOKEN))
+    .then(function (r) { if (cb) cb(r.ok ? r.j : null); })
+    .catch(function () { if (cb) cb(null); });
+}
+function prefillContact() {
+  fetchMe(function (me) {
+    if (!me || !me.profile) return;
+    var p = me.profile;
+    var f = function (id, v) {
+      var el = document.getElementById(id);
+      if (el && !el.value && v) el.value = v;
+    };
+    f("f-name", p.name); f("f-phone", p.phone);
+    f("f-email", p.email); f("f-tg", p.telegram);
+    if (p.has_whatsapp) document.getElementById("f-wa").checked = true;
+    refreshEmailUI();
+  });
+}
+
 /* ================= my orders (this device) ================= */
 function orderTokens() {
   try { return JSON.parse(localStorage.getItem("cg_orders") || "[]"); }
@@ -769,22 +846,27 @@ function viewOrder(t) {
 function showOrders() {
   show("orders");
   var el = document.getElementById("orders-list");
-  var toks = orderTokens();
-  if (!toks.length) {
-    el.innerHTML = '<div class="card center">No orders on this device yet.</div>';
-    return;
-  }
   el.innerHTML = '<div class="card center">Loading…</div>';
-  Promise.all(toks.map(function (t) {
-    return req("/pickup/orders/" + t + "/").then(function (r) {
-      return r.ok ? { t: t, o: r.j } : null;
-    }).catch(function () { return null; });
-  })).then(function (rows) {
-    rows = rows.filter(Boolean);
-    if (!rows.length) {
-      el.innerHTML = '<div class="card center">No orders found for this device.</div>';
-      return;
-    }
+  var toks = orderTokens();
+  /* CROSS-DEVICE: with a verified email, the server's history merges in —
+     same email = same orders on any device. Local tokens still cover
+     orders placed before verifying (or with another email). */
+  fetchMe(function (me) {
+    var serverRows = (me && me.orders || []).map(function (o) { return { t: o.token, o: o }; });
+    var seen = {};
+    serverRows.forEach(function (r) { seen[r.t] = true; });
+    var localToks = toks.filter(function (t) { return !seen[t]; });
+    Promise.all(localToks.map(function (t) {
+      return req("/pickup/orders/" + t + "/").then(function (r) {
+        return r.ok ? { t: t, o: r.j } : null;
+      }).catch(function () { return null; });
+    })).then(function (localRows) {
+      var rows = serverRows.concat(localRows.filter(Boolean));
+      if (!rows.length) {
+        el.innerHTML = '<div class="card center">No orders yet' +
+          (EMAIL_TOKEN ? "" : " on this device. Verify your email during an order to see your history everywhere") + ".</div>";
+        return;
+      }
     var chipMap = {
       placed: ["#9a6700", "#fff8c5"], payment_claimed: ["#0550ae", "#ddf4ff"],
       confirmed: ["#1a7d3a", "#dafbe1"], collected: ["#57606a", "#f6f8fa"],
@@ -802,7 +884,8 @@ function showOrders() {
         '<div class="note" style="margin:.3rem 0 0">' + items +
         (r.o.status === "placed" ? ' &mdash; <b style="color:#b3261e">payment pending, tap to pay</b>' : "") +
         "</div></div>";
-    }).join("");
+      }).join("");
+    });
   });
 }
 
