@@ -389,6 +389,11 @@ function cartTotal() {
   for (var k in CART) t += parseFloat(CART[k].item.price) * CART[k].qty;
   return t;
 }
+function cartPackaging() {
+  var t = 0;
+  for (var k in CART) t += (parseFloat(CART[k].item.packaging) || 0) * CART[k].qty;
+  return t;
+}
 function bump(id, d) {
   var e = CART[id];
   if (!e) return;
@@ -403,7 +408,7 @@ function itemRow(it) {
   var right = inCart
     ? '<span class="step"><button onclick=\'bump(' + it.id + ',-1)\'>−</button><span>' + inCart.qty +
       '</span><button onclick=\'bump(' + it.id + ',1)\'>+</button></span>'
-    : '<button class="btn small" onclick=\'add(' + JSON.stringify({id:it.id,name:it.name,price:it.price}).replace(/'/g,"&#39;") + ')\'>Add</button>';
+    : '<button class="btn small" onclick=\'add(' + JSON.stringify({id:it.id,name:it.name,price:it.price,packaging:it.packaging||"0"}).replace(/'/g,"&#39;") + ')\'>Add</button>';
   return '<div class="item"><i class="veg"></i><span class="nm">' + esc(it.name) +
     (it.half_price ? ' <small style="color:var(--muted)">(half ₹' + rupees(it.half_price) + ')</small>' : '') +
     '</span><span class="pr">₹' + rupees(it.price) + '</span>' + right + '</div>';
@@ -447,9 +452,18 @@ function cartLinesHtml() {
 function cartFootHtml() {
   if (!Object.keys(CART).length) return "";
   var n = cartCount();
-  return '<div class="ctotal" style="margin-top:0"><span>' + n + (n === 1 ? " item" : " items") +
-    '</span><b>₹' + rupees(cartTotal()) + "</b></div>" +
+  var pack = cartPackaging();
+  var out = "";
+  if (pack > 0) {
+    out += '<div class="ctotal" style="margin-top:0;font-size:.9rem"><span>' + n +
+      (n === 1 ? " item" : " items") + '</span><span>₹' + rupees(cartTotal()) + "</span></div>" +
+      '<div class="ctotal" style="margin-top:0;font-size:.9rem"><span>Packaging</span><span>₹' +
+      rupees(pack) + "</span></div>";
+  }
+  out += '<div class="ctotal" style="margin-top:0"><span>' + (pack > 0 ? "Total" : n + (n === 1 ? " item" : " items")) +
+    '</span><b>₹' + rupees(cartTotal() + pack) + "</b></div>" +
     '<p class="note" style="margin:.15rem 0 0">GST (if any) is added at checkout.</p>';
+  return out;
 }
 
 function renderCart() {
@@ -716,6 +730,7 @@ function renderStatus() {
   html += "<b>Pickup:</b> " + esc(LAST.pickup_date) + " at <b>" + esc(LAST.slot_start) + "</b><br>";
   if (LAST.counter_no) html += "<b>Counter number:</b> " + esc(LAST.counter_no) + "<br>";
   html += (LAST.lines || []).map(function (l) { return l.qty + " × " + esc(l.name); }).join(" · ");
+  if (parseFloat(LAST.packaging) > 0) html += "<br>Packaging: ₹" + rupees(LAST.packaging);
   html += "<br><b>Total: ₹" + rupees(LAST.total) + "</b></div>";
   if (LAST.status === "placed") {
     html += '<div class="center" style="margin-top:.8rem"><button class="btn" onclick="renderPay();show(\'pay\')">Pay now</button></div>';
