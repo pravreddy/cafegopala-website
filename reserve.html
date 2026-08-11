@@ -101,6 +101,7 @@
       <img src="logo.png" alt="Cafe Gopala"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
+    <button class="cta ghost" type="button" id="mine">My bookings</button>
     <a class="cta ghost" href="index.html#order-options">Other ways to order</a>
   </div>
 </header>
@@ -159,6 +160,9 @@
 
   <!-- ══ the booking, once made ══ -->
   <div id="result-area" style="display:none"></div>
+
+  <!-- ══ everything this email has booked ══ -->
+  <div id="mine-area" style="display:none"></div>
 
 </main>
 
@@ -406,6 +410,62 @@ function renderResult(r) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+/* ---- my bookings ----
+   Fed by the SAME /pickup/me/ endpoint the ordering page uses for "My orders",
+   authenticated by the same verified-email token. No new identity, no new
+   login, and no second source of truth about what this person has booked. */
+function statusPill(st, label) {
+  var cls = st === "confirmed" || st === "seated" ? "confirmed"
+          : (["cancelled", "released", "expired", "no_show"].indexOf(st) >= 0
+             ? "cancelled" : "held");
+  return '<span class="pill ' + cls + '">' + label + "</span>";
+}
+
+function showMine() {
+  var email = state.emailVerified || ($("email").value || "").trim().toLowerCase();
+  if (!email || !state.emailToken) {
+    alert("Verify your email in the form below and your bookings will appear here.");
+    return;
+  }
+  $("form-area").style.display = "none";
+  $("result-area").style.display = "none";
+  var area = $("mine-area");
+  area.style.display = "";
+  area.innerHTML = '<div class="card">Looking up your bookings…</div>';
+  api("/pickup/me/?email=" + encodeURIComponent(email)
+      + "&email_token=" + encodeURIComponent(state.emailToken))
+    .then(function (j) {
+      var list = j.bookings || [];
+      if (!list.length) {
+        area.innerHTML = '<div class="card"><h2 style="font-size:1.4rem;color:var(--maroon)">'
+          + "No bookings yet</h2><p class=\"hint\">Once you book a table it will "
+          + 'appear here — on any device you verify this email on.</p>'
+          + '<p style="margin-top:1rem"><a class="cta" href="reserve.html">Book a table</a></p></div>';
+        return;
+      }
+      area.innerHTML = '<div class="card"><h2 style="font-size:1.4rem;color:var(--maroon);margin-bottom:.6rem">'
+        + "Your bookings</h2>"
+        + list.map(function (b) {
+            var dishes = (b.preorder || []).length
+              ? '<div class="hint">' + b.preorder.map(function (l) {
+                  return l.qty + " \u00d7 " + l.name; }).join(", ") + "</div>"
+              : "";
+            return '<div style="padding:.7rem 0;border-bottom:1px solid var(--line)">'
+              + '<div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">'
+              + statusPill(b.status, b.status_display)
+              + '<b>' + b.when + "</b>"
+              + '<span class="hint" style="margin:0">table for ' + b.party_size + "</span>"
+              + '<a href="reserve.html?booking=' + b.token
+              + '" style="margin-left:auto;font-weight:600;color:var(--ember)">Open</a></div>'
+              + dishes + "</div>";
+          }).join("")
+        + '<p style="margin-top:1rem"><a class="cta ghost" href="reserve.html">Book another table</a></p></div>';
+    }).catch(function (e) {
+      area.innerHTML = '<div class="card"><p class="msg err">' + e.message + "</p></div>";
+    });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 /* ---- go ---- */
 (function init() {
   var today = new Date();
@@ -420,6 +480,8 @@ function renderResult(r) {
   renderParty();
   renderVerify();
   loadSlots();
+
+  $("mine").onclick = showMine;
 
   $("book").onclick = function () {
     show("", "");

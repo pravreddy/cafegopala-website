@@ -933,8 +933,8 @@ function showOrders() {
       }).catch(function () { return null; });
     })).then(function (localRows) {
       var rows = serverRows.concat(localRows.filter(Boolean));
-      if (!rows.length) {
-        el.innerHTML = '<div class="card center">No orders yet' +
+      if (!rows.length && !(me && me.bookings || []).length) {
+        el.innerHTML = '<div class="card center">Nothing yet' +
           (EMAIL_TOKEN ? "" : " on this device. Verify your email during an order to see your history everywhere") + ".</div>";
         return;
       }
@@ -944,7 +944,39 @@ function showOrders() {
       cancelled: ["#57606a", "#f6f8fa"], rejected: ["#b3261e", "#ffebe9"],
       expired: ["#57606a", "#f6f8fa"],
     };
-    el.innerHTML = rows.map(function (r) {
+    /* TABLE BOOKINGS BELONG HERE TOO.
+       A customer opening "My orders" is asking "what have I got coming up at
+       Cafe Gopala?" — they are not asking "which of their systems is holding
+       it". Same verified email, same endpoint, one list. */
+    var bookings = (me && me.bookings || []);
+    var bookingHtml = "";
+    if (bookings.length) {
+      var bchip = {
+        held: ["#9a6700", "#fff8c5"], payment_claimed: ["#0550ae", "#ddf4ff"],
+        confirmed: ["#1a7d3a", "#dafbe1"], seated: ["#57606a", "#f6f8fa"],
+        cancelled: ["#57606a", "#f6f8fa"], released: ["#b3261e", "#ffebe9"],
+        expired: ["#57606a", "#f6f8fa"], no_show: ["#b3261e", "#ffebe9"],
+      };
+      bookingHtml = '<h3 style="margin:.2rem 0 .5rem;color:var(--maroon)">Your table bookings</h3>'
+        + bookings.map(function (b) {
+            var c2 = bchip[b.status] || ["#57606a", "#f6f8fa"];
+            var dishes = (b.preorder || []).map(function (l) {
+              return l.qty + " × " + esc(l.name); }).join(" · ");
+            return '<div class="card" style="cursor:pointer" '
+              + "onclick=\"location.href='reserve.html?booking=" + b.token + "'\">"
+              + '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
+              + "<b>" + esc(b.when) + "</b>"
+              + '<span class="chip" style="color:' + c2[0] + ";background:" + c2[1] + '">'
+              + esc(b.status_display) + "</span>"
+              + '<span style="margin-left:auto;color:var(--muted)">table for '
+              + b.party_size + "</span></div>"
+              + (dishes ? '<div class="note" style="margin:.3rem 0 0">' + dishes + "</div>" : "")
+              + "</div>";
+          }).join("")
+        + '<h3 style="margin:1.2rem 0 .5rem;color:var(--maroon)">Your orders</h3>';
+    }
+
+    el.innerHTML = bookingHtml + rows.map(function (r) {
       var c = chipMap[r.o.status] || ["#57606a", "#f6f8fa"];
       var items = (r.o.lines || []).map(function (l) { return l.qty + " × " + esc(l.name); }).join(" · ");
       return '<div class="card" style="cursor:pointer" onclick="viewOrder(\'' + r.t + '\')">' +
