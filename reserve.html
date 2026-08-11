@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reserve a table — Cafe Gopala</title>
+<meta name="description" content="Book a table at Cafe Gopala — choose your day, time and party size." />
+<link rel="icon" href="logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=Mukta:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --saffron:#E4611C; --ember:#BE3E0C; --gold:#E0A029; --gold-soft:#F3C766;
+    --maroon:#3E1206; --maroon-2:#571C0A; --cream:#FCF4E2; --ink:#2A130A;
+    --muted:#835435; --veg:#1a7d3a; --line:rgba(62,18,6,.14);
+  }
+  *{box-sizing:border-box}
+  html{background:var(--cream)}
+  body{margin:0;color:var(--ink);background:var(--cream);
+    font-family:"Mukta",system-ui,-apple-system,sans-serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(120% 70% at 50% -10%, rgba(228,97,28,.14), transparent 60%);
+    background-attachment:fixed;}
+  h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;line-height:1.1;margin:0}
+  a{color:inherit} img{max-width:100%;display:block}
+  .wrap{width:min(680px,92vw);margin-inline:auto}
+
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+    background:linear-gradient(180deg,rgba(252,244,226,.96),rgba(252,244,226,.82));
+    border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:1rem;padding:.6rem 0;width:min(1080px,92vw);margin-inline:auto}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;margin-right:auto}
+  .brand img{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:50% 30%;
+    border:2px solid var(--gold)}
+  .brand b{font-family:"Cormorant Garamond",serif;font-size:1.35rem;font-weight:700;color:var(--maroon);line-height:1}
+  .brand small{display:block;font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ember);font-weight:600}
+  .cta{display:inline-block;text-decoration:none;font-weight:600;font-size:.95rem;border:none;cursor:pointer;
+    padding:.7rem 1.3rem;border-radius:999px;background:linear-gradient(180deg,var(--saffron),var(--ember));
+    color:#fff;box-shadow:0 6px 18px rgba(190,62,12,.3)}
+  .cta[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+  .cta.ghost{background:transparent;color:var(--maroon);box-shadow:none;border:1.5px solid var(--gold)}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  .hero{padding:2.2rem 0 1rem;text-align:center}
+  .hero h1{font-size:clamp(2rem,6vw,3rem);color:var(--maroon)}
+  .hero p{color:var(--muted);margin:.5rem auto 0;max-width:34rem}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.2rem;margin:1rem 0;
+    box-shadow:0 6px 20px rgba(62,18,6,.06)}
+  .step{display:flex;align-items:center;gap:.6rem;margin:0 0 .9rem}
+  .step i{width:26px;height:26px;border-radius:50%;background:var(--maroon);color:#fff;font-style:normal;
+    font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex:none}
+  .step h2{font-size:1.3rem;color:var(--maroon)}
+
+  label{display:block;font-size:.82rem;color:var(--muted);font-weight:600;margin:.7rem 0 .25rem}
+  input,select,textarea{width:100%;padding:.7rem .8rem;border:1px solid var(--line);border-radius:10px;
+    font:inherit;background:#fff;color:var(--ink)}
+  .row{display:flex;gap:.7rem;flex-wrap:wrap}
+  .row > *{flex:1;min-width:150px}
+  .hint{font-size:.8rem;color:var(--muted);margin:.35rem 0 0}
+
+  .party{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
+  .party button{border:1px solid var(--line);background:#fff;border-radius:10px;min-width:44px;
+    padding:.55rem .2rem;font-weight:700;cursor:pointer;color:var(--ink)}
+  .party button[aria-pressed="true"]{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+
+  .times{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.4rem}
+  .times button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:.5rem .9rem;
+    font-weight:600;cursor:pointer;color:var(--ink)}
+  .times button[aria-pressed="true"]{background:var(--ember);color:#fff;border-color:var(--ember)}
+  .times .none{color:var(--muted);font-size:.9rem;padding:.5rem 0}
+
+  .deposit{background:var(--cream);border:1px solid var(--gold);border-radius:12px;padding:.9rem 1rem;margin:.9rem 0}
+  .deposit b{color:var(--maroon)}
+
+  .msg{border-radius:10px;padding:.8rem 1rem;margin:.8rem 0;font-size:.95rem}
+  .msg.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+  .msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+
+  .result h2{font-size:1.6rem;color:var(--maroon);margin-bottom:.3rem}
+  .kv{display:flex;justify-content:space-between;gap:1rem;padding:.5rem 0;border-bottom:1px solid var(--line)}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-weight:600;text-align:right}
+  .pill{display:inline-block;padding:.25rem .7rem;border-radius:999px;font-size:.8rem;font-weight:700}
+  .pill.held{background:#fef3c7;color:#92400e}
+  .pill.confirmed{background:#dcfce7;color:#166534}
+  .pill.cancelled{background:#fee2e2;color:#991b1b}
+
+  footer{background:var(--maroon);color:rgba(252,244,226,.75);padding:2rem 0;text-align:center;margin-top:3rem}
+  footer a{color:var(--gold-soft);text-decoration:none;font-weight:600}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img src="logo.png" alt="Cafe Gopala"/>
+      <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
+    </a>
+    <a class="cta ghost" href="index.html#order-options">Other ways to order</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Reserve a table</h1>
+    <p>Choose your day, the number of people and a time. We will hold the table for you.</p>
+  </div>
+</section>
+
+<main class="wrap" id="main">
+
+  <!-- ══ the booking form ══ -->
+  <div id="form-area">
+    <div class="card">
+      <div class="step"><i>1</i><h2>When, and how many</h2></div>
+
+      <label for="date">Day</label>
+      <input type="date" id="date" />
+
+      <label id="partyLabel">How many people</label>
+      <div class="party" id="party" role="group" aria-labelledby="partyLabel"></div>
+
+      <label>Time</label>
+      <div class="times" id="times"><span class="none">Pick a day first.</span></div>
+
+      <div id="depositBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="step"><i>2</i><h2>Your details</h2></div>
+      <div class="row">
+        <div><label for="name">Name</label><input id="name" autocomplete="name" /></div>
+        <div><label for="phone">Phone</label><input id="phone" inputmode="numeric" autocomplete="tel" placeholder="10 digits" /></div>
+      </div>
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
+      <div id="verifyArea"></div>
+
+      <label for="occasion">Occasion (optional)</label>
+      <input id="occasion" placeholder="Birthday, anniversary…" />
+      <label for="notes">Anything we should know? (optional)</label>
+      <textarea id="notes" rows="2" placeholder="High chair needed, wheelchair access, quiet corner…"></textarea>
+
+      <!-- honeypot: real guests never see or fill this -->
+      <input id="website" class="sr" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    </div>
+
+    <div id="msg"></div>
+    <p style="text-align:center;margin:1.2rem 0 0">
+      <button class="cta" id="book" disabled>Book the table</button>
+    </p>
+    <p class="hint" style="text-align:center">You can cancel any time from the link we email you.</p>
+  </div>
+
+  <!-- ══ the booking, once made ══ -->
+  <div id="result-area" style="display:none"></div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>&copy; 2026 Cafe Gopala &middot; Bengaluru</div>
+    <div style="margin-top:.4rem">
+      <a href="index.html">Home</a> &middot;
+      <a href="order.html">Order &amp; collect</a> &middot;
+      <a href="story.html">Our story</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ───────────────────────────────────────────────────────────────────────────
+   Same POS_BASE / SLUG / SHARE_KEY as index.html and order.html.
+   The share key is PUBLISHABLE (it ships in this file): it identifies the
+   restaurant and can be revoked from POS Settings. It is not a secret.
+   ─────────────────────────────────────────────────────────────────────────── */
+var POS_BASE  = "https://app.fastpos.in";
+var SLUG      = "cafe-gopala";
+var SHARE_KEY = "pub_898a1d4c99270a973da57277d368fabe";
+
+var API = POS_BASE + "/api/public/" + SLUG;
+function headers(json) {
+  var h = { "X-Share-Key": SHARE_KEY };
+  if (json) h["Content-Type"] = "application/json";
+  return h;
+}
+function api(path, opts) {
+  opts = opts || {};
+  return fetch(API + path, {
+    method: opts.method || "GET",
+    headers: headers(!!opts.body),
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  }).then(function (r) {
+    return r.json().catch(function () { return {}; }).then(function (j) {
+      if (!r.ok) throw new Error(j.detail || ("Something went wrong (" + r.status + ")"));
+      return j;
+    });
+  });
+}
+
+/* Local date, NOT toISOString(): that converts to UTC, and a guest in another
+   timezone (or just late at night) would ask us for the wrong day. This bug
+   already bit us once on the ordering page. */
+function isoLocal(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")
+       + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+var state = {
+  party: 2, slot: null, slots: [], maxParty: 8,
+  depositPerHead: "0", depositTotal: "0",
+  emailToken: localStorage.getItem("cg.emailToken") || "",
+  emailVerified: localStorage.getItem("cg.email") || ""
+};
+
+var $ = function (id) { return document.getElementById(id); };
+function show(kind, text) {
+  $("msg").innerHTML = text ? '<div class="msg ' + kind + '">' + text + "</div>" : "";
+}
+
+/* ---- party size ---- */
+function renderParty() {
+  var out = "";
+  for (var n = 1; n <= state.maxParty; n++) {
+    out += '<button type="button" aria-pressed="' + (n === state.party) + '" data-n="' + n + '">' + n + "</button>";
+  }
+  out += '<span class="hint" style="align-self:center;margin-left:.4rem">'
+       + "Larger group? Please call us.</span>";
+  $("party").innerHTML = out;
+  Array.prototype.forEach.call($("party").querySelectorAll("button"), function (b) {
+    b.onclick = function () {
+      state.party = parseInt(b.dataset.n, 10);
+      state.slot = null;
+      renderParty();
+      loadSlots();
+    };
+  });
+}
+
+/* ---- times ---- */
+function renderTimes() {
+  var box = $("times");
+  if (!state.slots.length) {
+    box.innerHTML = '<span class="none">No tables free that day for '
+      + state.party + (state.party === 1 ? " person" : " people")
+      + ". Try another day, or call us.</span>";
+    return;
+  }
+  box.innerHTML = state.slots.map(function (s) {
+    return '<button type="button" aria-pressed="' + (state.slot === s.iso) + '" data-iso="'
+      + s.iso + '">' + s.start + "</button>";
+  }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
+    b.onclick = function () { state.slot = b.dataset.iso; renderTimes(); refreshButton(); };
+  });
+}
+
+function renderDeposit() {
+  var per = Number(state.depositPerHead || 0);
+  if (!per) { $("depositBox").innerHTML = ""; return; }
+  $("depositBox").innerHTML =
+    '<div class="deposit">A deposit of <b>&#8377;' + per + " per person</b> confirms your table — "
+    + "<b>&#8377;" + (per * state.party).toFixed(2) + "</b> for "
+    + state.party + (state.party === 1 ? " person" : " people") + ".<br>"
+    + "It comes off your bill on the day. Until it is paid the table is only <b>held</b>.</div>";
+}
+
+function loadSlots() {
+  var d = $("date").value;
+  if (!d) return;
+  $("times").innerHTML = '<span class="none">Looking…</span>';
+  api("/reserve/slots/?date=" + d + "&party=" + state.party).then(function (j) {
+    state.slots = j.slots || [];
+    state.maxParty = j.max_party_size || 8;
+    state.depositPerHead = j.deposit_per_head || "0";
+    state.depositTotal = j.deposit_total || "0";
+    if (state.party > state.maxParty) state.party = state.maxParty;
+    renderParty();
+    renderTimes();
+    renderDeposit();
+    refreshButton();
+  }).catch(function (e) {
+    $("times").innerHTML = '<span class="none">' + e.message + "</span>";
+  });
+}
+
+/* ---- email verification: the SAME identity the ordering page uses ---- */
+function renderVerify() {
+  var email = ($("email").value || "").trim().toLowerCase();
+  if (state.emailToken && state.emailVerified === email && email) {
+    $("verifyArea").innerHTML = '<p class="hint">&#10003; Email verified.</p>';
+    return;
+  }
+  $("verifyArea").innerHTML =
+    '<p class="hint">We email your booking here, so we verify it once.</p>'
+    + '<div class="row" style="margin-top:.4rem">'
+    + '<button class="cta ghost" type="button" id="sendCode">Send me a code</button>'
+    + '<input id="code" inputmode="numeric" placeholder="6-digit code" />'
+    + '<button class="cta ghost" type="button" id="checkCode">Verify</button></div>';
+  $("sendCode").onclick = function () {
+    var e = ($("email").value || "").trim().toLowerCase();
+    if (!e) { show("err", "Please type your email first."); return; }
+    show("", "");
+    api("/pickup/email-code/", { method: "POST", body: { email: e } })
+      .then(function () { show("ok", "Code sent — check your inbox."); })
+      .catch(function (err) { show("err", err.message); });
+  };
+  $("checkCode").onclick = function () {
+    var e = ($("email").value || "").trim().toLowerCase();
+    api("/pickup/email-verify/", { method: "POST", body: { email: e, code: $("code").value } })
+      .then(function (j) {
+        state.emailToken = j.email_token;
+        state.emailVerified = e;
+        localStorage.setItem("cg.emailToken", j.email_token);
+        localStorage.setItem("cg.email", e);
+        show("ok", "Email verified.");
+        renderVerify();
+        refreshButton();
+      }).catch(function (err) { show("err", err.message); });
+  };
+}
+
+function refreshButton() {
+  var ok = state.slot
+    && ($("name").value || "").trim().length > 1
+    && ($("phone").value || "").replace(/\D/g, "").length >= 10
+    && state.emailToken
+    && state.emailVerified === ($("email").value || "").trim().toLowerCase();
+  $("book").disabled = !ok;
+}
+
+/* ---- the booking, once made ---- */
+function renderResult(r) {
+  $("form-area").style.display = "none";
+  var area = $("result-area");
+  area.style.display = "";
+  localStorage.setItem("cg.lastBooking", r.token);
+
+  var pillClass = r.status === "confirmed" ? "confirmed"
+                : (r.status === "cancelled" || r.status === "released" ? "cancelled" : "held");
+  var pay = "";
+  if (r.status === "held" && Number(r.deposit) > 0) {
+    pay = '<div class="deposit"><b>Pay &#8377;' + r.deposit + " to confirm your table.</b>"
+        + (r.upi_intent
+            ? '<p style="margin:.7rem 0 0"><a class="cta" href="' + r.upi_intent + '">Pay by UPI now</a></p>'
+              + '<p class="hint">Open this on your phone — the amount is filled in for you.</p>'
+            : '<p class="hint" style="margin-top:.5rem">UPI to <b>' + (r.upi_vpa || "") + "</b></p>")
+        + '<p style="margin:.8rem 0 0"><button class="cta ghost" id="paid">I have paid</button></p>'
+        + "</div>";
+  }
+
+  area.innerHTML =
+    '<div class="card result">'
+    + '<span class="pill ' + pillClass + '">' + r.status_display + "</span>"
+    + "<h2 style=\"margin-top:.5rem\">Table for " + r.party_size + "</h2>"
+    + '<div class="kv"><span class="k">When</span><span class="v">' + r.when + "</span></div>"
+    + '<div class="kv"><span class="k">Party</span><span class="v">' + r.party_size
+      + (r.party_size === 1 ? " person" : " people") + "</span></div>"
+    + (Number(r.deposit) > 0
+        ? '<div class="kv"><span class="k">Deposit</span><span class="v">&#8377;' + r.deposit + "</span></div>"
+        : "")
+    + (r.occasion ? '<div class="kv"><span class="k">Occasion</span><span class="v">' + r.occasion + "</span></div>" : "")
+    + pay
+    + (r.status === "confirmed"
+        ? '<p class="hint">Please arrive on time — we can only hold the table a short while past the booked time.</p>'
+        : "")
+    + (["cancelled", "released", "expired", "no_show", "seated"].indexOf(r.status) < 0
+        ? '<p style="margin-top:1rem"><button class="cta ghost" id="cancel">Cancel this booking</button></p>'
+        : '<p style="margin-top:1rem"><a class="cta ghost" href="reserve.html">Book another table</a></p>')
+    + "</div>";
+
+  if ($("paid")) {
+    $("paid").onclick = function () {
+      var utr = prompt("Enter the UPI reference number (UTR) from your payment app:");
+      if (utr === null) return;
+      api("/reserve/" + r.token + "/claim/", { method: "POST", body: { utr: utr } })
+        .then(renderResult).catch(function (e) { alert(e.message); });
+    };
+  }
+  if ($("cancel")) {
+    $("cancel").onclick = function () {
+      if (!confirm("Cancel this booking?")) return;
+      api("/reserve/" + r.token + "/cancel/", { method: "POST", body: {} })
+        .then(renderResult).catch(function (e) { alert(e.message); });
+    };
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---- go ---- */
+(function init() {
+  var today = new Date();
+  $("date").min = isoLocal(today);
+  $("date").value = isoLocal(today);
+  $("date").onchange = function () { state.slot = null; loadSlots(); };
+  ["name", "phone", "email"].forEach(function (id) {
+    $(id).oninput = function () { if (id === "email") renderVerify(); refreshButton(); };
+  });
+  if (state.emailVerified) $("email").value = state.emailVerified;
+
+  renderParty();
+  renderVerify();
+  loadSlots();
+
+  $("book").onclick = function () {
+    show("", "");
+    $("book").disabled = true;
+    api("/reserve/", { method: "POST", body: {
+      name: $("name").value.trim(),
+      phone: $("phone").value.replace(/\D/g, ""),
+      email: ($("email").value || "").trim().toLowerCase(),
+      email_token: state.emailToken,
+      slot_iso: state.slot,
+      party_size: state.party,
+      occasion: $("occasion").value.trim(),
+      notes: $("notes").value.trim(),
+      website: $("website").value
+    } }).then(renderResult).catch(function (e) {
+      show("err", e.message);
+      $("book").disabled = false;
+      loadSlots();               // the time may have just filled up
+    });
+  };
+
+  // coming back to an existing booking
+  var last = localStorage.getItem("cg.lastBooking");
+  var qs = new URLSearchParams(location.search);
+  var token = qs.get("booking") || (qs.has("last") ? last : null);
+  if (token) {
+    api("/reserve/" + token + "/").then(renderResult).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

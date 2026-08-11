@@ -8,3 +8,12 @@ Thumbs.db
 # Logs / temp
 *.log
 node_modules/
+
+# Local scratch copy of the homepage — the real one is index.html.
+index_backup.html
+
+# NOTE (2026-08-11): videos and photo originals ARE committed on purpose.
+# They are Praveen's source material and being in git is what backs them up.
+# Cost of that choice: ~21MB in the repo, and git keeps every future version of
+# a binary forever — so re-export rather than re-commit variants of the same
+# clip, and if the repo ever feels slow, that is the thing to revisit.

@@ -3,8 +3,8 @@
   Cafe Gopala — public website (repo: cafegopala-website, domain: cafegopal.co.in)
   ──────────────────────────────────────────────────────────────────────────────
   Self-contained single page. Brand logos are separate files kept in this folder:
-  logo.png (coloured — header, favicon, hero) and logo2.png (dark — hero only).
-  The hero cross-fades between the two every ~8s (slow 3s fade).
+  logo.png (coloured — header, favicon, hero poster/fallback).
+  The hero shows an animated logo video (webm + mp4 fallback) with a static poster.
 
   CURRENT MENU: North Indian vegetarian only (as of now).
   The old South Indian menu is preserved lower down inside an HTML comment
@@ -19,10 +19,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cafe Gopala — Malleshwaram | North Indian vegetarian caf&eacute;</title>
-<meta name="description" content="Cafe Gopala, Malleshwaram — warm North Indian vegetarian food. Chaat, paneer, dal, hot naan and masala chai. Dine in or order online." />
+<title>Cafe Gopala — Malleshwaram | Saatvik vegetarian caf&eacute;</title>
+<meta name="description" content="Cafe Gopala, Malleshwaram — warm saatvik vegetarian food. Chaat, paneer, dal, hot naan and masala chai. No onion, no garlic, no mushroom. Dine in or order online." />
 <meta property="og:title" content="Cafe Gopala — The Flavor of Krishna's Grace" />
-<meta property="og:description" content="North Indian vegetarian food in Malleshwaram. Chaat, paneer, dal &amp; masala chai. Dine in or order online." />
+<meta property="og:description" content="Saatvik vegetarian food in Malleshwaram. Chaat, paneer, dal &amp; masala chai. No onion, no garlic, no mushroom. Dine in or order online." />
 <meta property="og:image" content="https://cafegopal.co.in/logo.png" />
 <link rel="icon" href="logo.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@
   *{box-sizing:border-box}
   html{scroll-behavior:smooth;background:var(--cream)}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
-  @media (prefers-reduced-motion:reduce){.hero-logo.alt{opacity:0}}  /* show coloured only */
+  @media (prefers-reduced-motion:reduce){.hero-logo{display:none}}  /* show static poster only */
   body{margin:0;color:var(--ink);background:var(--cream);
     font-family:"Mukta",system-ui,-apple-system,sans-serif;font-weight:400;line-height:1.65;
     -webkit-font-smoothing:antialiased;
@@ -67,6 +67,8 @@
   .nav-links{display:flex;gap:1.6rem;font-weight:500;font-size:.95rem}
   .nav-links a{text-decoration:none;color:var(--maroon);opacity:.85;transition:opacity .2s}
   .nav-links a:hover{opacity:1;color:var(--ember)}
+  .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer}
+  .nav-toggle span{display:block;width:24px;height:2px;background:var(--maroon);border-radius:2px;transition:transform .2s,opacity .2s}
   .cta{display:inline-block;text-decoration:none;font-weight:600;font-size:.92rem;
     padding:.6rem 1.15rem;border-radius:999px;background:linear-gradient(180deg,var(--saffron),var(--ember));
     color:#fff;box-shadow:0 6px 18px rgba(190,62,12,.32);transition:transform .18s,box-shadow .18s}
@@ -82,11 +84,10 @@
   .hero-logo-wrap::before{content:"";position:absolute;inset:-22% -22% -14%;z-index:0;border-radius:50%;
     background:radial-gradient(circle at 50% 42%,rgba(243,199,102,.55),rgba(228,97,28,.25) 45%,transparent 70%);filter:blur(4px)}
   .hero-logo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:18px;
-    box-shadow:0 22px 55px rgba(62,18,6,.4),0 0 0 1px rgba(224,160,41,.5)}
-  .hero-logo.base{z-index:1}                     /* coloured, always underneath */
-  .hero-logo.alt{z-index:2;animation:heroSwap 16s ease-in-out infinite}  /* dark, fades over it */
-  /* equal cross-fade: each shown ~5s, 3s fade, swaps every 8s */
-  @keyframes heroSwap{0%,31.25%{opacity:1}50%,81.25%{opacity:0}100%{opacity:1}}
+    box-shadow:0 22px 55px rgba(62,18,6,.4),0 0 0 1px rgba(224,160,41,.5);z-index:2}
+  .hero-logo-static{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:18px;
+    box-shadow:0 22px 55px rgba(62,18,6,.4),0 0 0 1px rgba(224,160,41,.5);z-index:1}
+  @media (prefers-reduced-motion:reduce){.hero-logo{display:none}}
   h1{font-size:clamp(2.9rem,8vw,5rem);color:var(--maroon)}
   .tagline{font-family:"Cormorant Garamond",serif;font-style:italic;
     font-size:clamp(1.2rem,3.4vw,1.7rem);color:var(--ember);margin:.35rem 0 1.1rem}
@@ -103,6 +104,26 @@
   .strip h3{font-size:1.6rem;color:var(--gold-soft);margin-bottom:.2rem}
   .strip p{margin:0;color:rgba(252,244,226,.8);font-size:.98rem}
   @media(max-width:640px){.strip-grid{grid-template-columns:1fr;gap:1.2rem}}
+
+  .saatvik{padding:3.4rem 0;background:linear-gradient(180deg,#fff,var(--cream));color:var(--ink);border-top:1px solid var(--line);border-bottom:1px solid var(--line);text-align:center}
+  .saatvik h2{font-size:clamp(2rem,5vw,2.8rem);color:var(--maroon);margin:.4rem 0 .8rem;text-align:center}
+  .saatvik .eyebrow{justify-content:center}
+  .saatvik p{max-width:38rem;margin:.5rem auto;color:var(--muted);font-size:1.05rem;text-align:center}
+  .saatvik p strong{color:var(--ink)}
+  .saatvik-badges{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:1.2rem 0}
+  .saatvik-badges .badge{display:inline-block;padding:.35rem .8rem;border-radius:999px;background:rgba(30,125,58,.08);color:var(--veg);font-weight:600;font-size:.9rem;border:1px solid rgba(30,125,58,.2)}
+  .saatvik-note{font-style:italic;color:var(--muted);max-width:32rem;margin:1rem auto 0;font-size:1rem}
+  @media(max-width:640px){.saatvik-badges{gap:.45rem}.saatvik-badges .badge{font-size:.82rem;padding:.3rem .65rem}}
+
+  .about{padding:4.2rem 0;background:var(--cream);color:var(--ink)}
+  .about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:2.6rem;align-items:center}
+  .about h2{font-size:clamp(2.1rem,5vw,3rem);color:var(--maroon);margin:.4rem 0 .8rem}
+  .about p{color:var(--muted);font-size:1.05rem;line-height:1.7;margin:.6rem 0}
+  .about p strong{color:var(--ink)}
+  .about-lineage{font-style:italic;color:var(--muted);font-size:.98rem;max-width:38rem}
+  .about-visual{display:flex;justify-content:center}
+  .about-visual img{max-width:280px;width:100%;border-radius:18px;box-shadow:0 18px 44px rgba(62,18,6,.25);border:2px solid var(--gold);object-fit:cover}
+  @media(max-width:760px){.about-grid{grid-template-columns:1fr;gap:1.8rem;text-align:center}.about-visual{order:-1}.about-visual img{max-width:220px}}
 
   .menu{padding:4.2rem 0}
   .menu-head{text-align:center;margin-bottom:2.4rem}
@@ -126,6 +147,17 @@
   .verse .sk{font-family:"Cormorant Garamond",serif;font-size:1.5rem;font-weight:600}
   .verse .en{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(1.4rem,3.6vw,2rem);max-width:26ch;margin:.5rem auto 0;line-height:1.3}
 
+  .quotes{background:linear-gradient(180deg,#fff,var(--cream));color:var(--ink);padding:4rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .quotes-grid{display:grid;grid-template-columns:1fr;gap:2rem;max-width:960px;margin:0 auto;position:relative}
+  .quote-slide{display:grid;grid-template-columns:220px 1fr;gap:2rem;align-items:center;opacity:0;transition:opacity 2s ease-in-out;position:absolute;inset:0}
+  .quote-slide.active{opacity:1;position:relative}
+  .quote-face img{width:220px;height:220px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 18px 44px rgba(62,18,6,.25)}
+  .quote-face.rectangular img{width:320px;height:220px;border-radius:12px;object-fit:cover}
+  .quote-text{font-family:"Cormorant Garamond",serif;font-size:clamp(1.25rem,2.6vw,1.6rem);line-height:1.45;color:var(--maroon);font-style:italic}
+  .quote-ref{margin-top:.8rem;font-family:"Mukta",system-ui,sans-serif;font-size:.95rem;color:var(--ember);font-weight:600}
+  @media(max-width:760px){.quote-slide{grid-template-columns:1fr;text-align:center;gap:1.2rem}.quote-face img{width:160px;height:160px}.quote-face.rectangular img{width:100%;height:auto;max-width:320px;border-radius:12px}}
+  @media(prefers-reduced-motion:reduce){.quote-slide{transition:none}}
+
   .visit{padding:4.2rem 0}
   .visit-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:2.6rem;align-items:start}
   .visit h2{font-size:clamp(2.1rem,5vw,3rem);color:var(--maroon);margin:.6rem 0 1.2rem}
@@ -141,13 +173,38 @@
   .visit-card p{color:rgba(252,244,226,.8);margin:.2rem 0 1.4rem}
   .visit-card .cta{width:100%;text-align:center}
 
+  .jain{padding:4.2rem 0;background:linear-gradient(180deg,#fff,var(--cream));color:var(--ink);border-top:1px solid var(--line)}
+  .jain-head{text-align:center;margin-bottom:2rem}
+  .jain-head h2{font-size:clamp(2rem,5vw,2.8rem);color:var(--maroon);margin:.4rem 0 .6rem}
+  .jain-head .sub{color:var(--muted);font-size:1.05rem;max-width:38rem;margin:0 auto}
+  .jain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem}
+  .jain-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.6rem;box-shadow:0 8px 22px rgba(62,18,6,.05)}
+  .jain-card h3{font-size:1.25rem;color:var(--ember);margin:0 0 .6rem}
+  .jain-card p{color:var(--muted);font-size:.98rem;line-height:1.6;margin:.3rem 0}
+  .jain-card ul{margin:.3rem 0;padding-left:1.2rem;color:var(--muted);font-size:.98rem}
+  .jain-card li{margin:.25rem 0}
+  .jain-notice{background:rgba(30,125,58,.06);border:1.5px solid rgba(30,125,58,.18);border-radius:14px;padding:1.2rem 1.4rem;margin-top:1.6rem;color:var(--ink);font-size:1.02rem;line-height:1.6;text-align:center;max-width:38rem;margin-left:auto;margin-right:auto}
+  .jain-notice strong{color:var(--maroon)}
+  @media(max-width:760px){.jain-grid{grid-template-columns:1fr}.jain-notice{font-size:.95rem}}
+
   footer{background:var(--maroon);color:rgba(252,244,226,.75);padding:2.2rem 0;text-align:center}
   footer .brand{justify-content:center;margin:0 0 .8rem}
   footer .brand b{color:#fff}
   footer .fine{font-size:.85rem}
   footer .fine a{color:var(--gold-soft);text-decoration:none;font-weight:600}
 
-  @media (max-width:760px){.nav-links{display:none}.cards{grid-template-columns:1fr}.visit-grid{grid-template-columns:1fr;gap:1.8rem}}
+  @media (max-width:760px){
+    .nav-toggle{display:flex}
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(252,244,226,.98);backdrop-filter:blur(10px);flex-direction:column;gap:0;padding:0;border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(62,18,6,.1)}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:.9rem 1.2rem;border-top:1px solid var(--line);font-size:1rem;opacity:1}
+    .nav-links a:hover{background:rgba(224,160,41,.1)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+    .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+    .cards{grid-template-columns:1fr}
+    .visit-grid{grid-template-columns:1fr;gap:1.8rem}
+  }
 </style>
 </head>
 <body>
@@ -158,10 +215,16 @@
       <img src="logo.png" alt="Cafe Gopala — Krishna playing the flute beside a cow"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
-    <nav class="nav-links">
+    <nav class="nav-links" id="navLinks">
+      <a href="#saatvik">Saatvik</a>
       <a href="#menu">Menu</a>
+      <a href="story.html">Our story</a>
+      <a href="#jain">Jain</a>
       <a href="#visit">Visit</a>
     </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
     <a class="cta" href="#order-options">Order online</a>
   </div>
 </header>
@@ -176,34 +239,45 @@
         <circle cx="180" cy="10" r="4" fill="var(--gold)"/>
       </svg>
       <div class="hero-logo-wrap">
-        <img class="hero-logo base" src="logo.png" alt="Cafe Gopala logo: Gopala Krishna playing his flute beside a resting cow"/>
-        <img class="hero-logo alt" src="logo2.png" alt="" aria-hidden="true"/>
+        <img class="hero-logo-static" src="logo.png" alt="Cafe Gopala logo: Gopala Krishna playing his flute beside a resting cow"/>
+        <video class="hero-logo" autoplay muted loop playsinline poster="logo.png" aria-label="Cafe Gopala animated logo">
+          <source src="cafe_gopala_animated_logo_clean_optimized.webm" type="video/webm">
+          <source src="cafe_gopala_animated_logo_clean_optimized.mp4" type="video/mp4">
+        </video>
       </div>
       <h1>Cafe Gopala</h1>
       <div class="tagline">The Flavor of Krishna's Grace</div>
-      <p class="lede">Warm North Indian vegetarian food, made fresh and served with love — chaat and snacks, hearty mains with hot breads, and sweets with masala chai. Dine in, or have it sent over.</p>
+      <p class="lede">Warm, homemade saatvik vegetarian food — pure vegetarian, with no onion, no garlic, and no mushroom in every dish. Chaat and snacks, hearty mains with hot breads, and sweets with masala chai. Dine in, or have it sent over.</p>
       <div class="hero-actions">
         <a class="cta" href="#order-options">Order online</a>
         <a class="cta ghost" href="#menu">See the menu</a>
       </div>
       <div class="garland" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </div>
-  </section>
+   </section>
 
-  <section class="strip">
-    <div class="wrap strip-grid">
-      <div><h3>Chaat &amp; snacks</h3><p>Samosa, aloo tikki, pani puri — fresh through the day.</p></div>
-      <div><h3>Mains &amp; breads</h3><p>Paneer, dal &amp; chole with hot naan and roti.</p></div>
-      <div><h3>Chai &amp; sweets</h3><p>Masala chai, lassi, gulab jamun and jalebi.</p></div>
-    </div>
-  </section>
+   <section class="saatvik" id="saatvik">
+     <div class="wrap">
+       <span class="eyebrow">Our promise</span>
+       <h2>Fully saatvik — every dish, every day</h2>
+       <p>At <strong>Cafe Gopala</strong>, <strong>every dish</strong> is <strong>100% vegetarian</strong> and strictly prepared <strong>without onion, garlic, or mushroom</strong> — no exceptions. We cook fresh daily with whole grains, seasonal vegetables, legumes, pure dairy, and aromatic spices like cumin, coriander, turmeric, and hing.</p>
+       <div class="saatvik-badges">
+         <span class="badge">Pure vegetarian</span>
+         <span class="badge">No onion</span>
+         <span class="badge">No garlic</span>
+         <span class="badge">No mushroom</span>
+         <span class="badge">Fresh daily</span>
+       </div>
+       <p class="saatvik-note">Saatvik food — in the mode of goodness — is pure, fresh, and nourishing. It supports a calm mind and healthy body, the way scripture and tradition teach us to honour what we eat.</p>
+     </div>
+   </section>
 
-  <section class="menu" id="menu">
+   <section class="menu" id="menu">
     <div class="wrap">
       <div class="menu-head">
         <span class="eyebrow">On the table</span>
         <h2>The menu</h2>
-        <p>Everything freshly made and pure vegetarian. The green mark is the FSSAI vegetarian symbol.</p>
+        <p>Everything freshly made and <strong>fully saatvik</strong> — pure vegetarian, with <strong>no onion, no garlic, and no mushroom</strong> in any dish. The green mark is the FSSAI vegetarian symbol.</p>
       </div>
 
       <!-- ============================================================
@@ -304,10 +378,73 @@
     </div>
   </section>
 
+  <section class="about" id="about">
+    <div class="wrap about-grid">
+      <div class="about-text">
+        <span class="eyebrow">Our story</span>
+        <h2>About Cafe Gopala</h2>
+        <p>Cafe Gopala began the way good things often do — around a kitchen, among <strong>ISKCON friends</strong>. The intention was simple, and still is: <strong>saatvik food for everyone</strong>, cooked the friendly way it is cooked at home.</p>
+        <p>We welcome everyone to <strong>dine in</strong>, <strong>take away</strong>, or <strong>order ahead online</strong>. Every plate is <strong>fully saatvik</strong>, made fresh in our kitchen — <strong>no onion, no garlic, no mushroom</strong>, ever — the way we would serve our own family.</p>
+        <p class="about-lineage">We are ISKCON devotees, in the line of the Brahma-Madhva-Gaudiya Sampradaya and guided by the teachings of Sri Chaitanya Mahaprabhu and Srila Prabhupada. What we serve is prasadam — food prepared with devotion and offered to Lord Krishna.</p>
+        <p><a class="cta ghost" href="story.html">Read our story</a></p>
+      </div>
+      <div class="about-visual" aria-hidden="true">
+        <img src="pics/prabhupad-pics/Prabhupada-cooking-edit-3.webp" alt="Srila Prabhupada" loading="lazy"/>
+      </div>
+    </div>
+  </section>
+
   <section class="verse">
     <div class="wrap">
       <div class="sk">&#2309;&#2344;&#2381;&#2344;&#2306; &#2348;&#2381;&#2352;&#2361;&#2381;&#2350; &#8212; Annam Brahma</div>
       <div class="en">Food is sacred. What is offered with love nourishes far more than the body.</div>
+    </div>
+  </section>
+
+   <section class="quotes" aria-label="Srila Prabhupada quotes on sattvic food">
+     <div class="wrap quotes-grid" id="quotesGrid"></div>
+   </section>
+
+   <section class="jain" id="jain">
+    <div class="wrap">
+      <div class="jain-head">
+        <span class="eyebrow">Hospitality for all</span>
+        <h2>Pure Jain Dining at Cafe Gopala</h2>
+        <p class="sub">Prepared in strict harmony with Ahimsa &amp; Satya</p>
+      </div>
+      <div class="jain-grid">
+        <div class="jain-card">
+          <h3>Our core kitchen is already Jain-friendly</h3>
+          <p>Every regular dish at Cafe Gopala is <strong>100% vegetarian</strong> and prepared <strong>without onion, garlic, or mushroom</strong>. That means most of our menu is already suitable for Jain guests.</p>
+        </div>
+        <div class="jain-card">
+          <h3>Dedicated Jain-prep options</h3>
+          <p>For our Jain guests, we offer dishes prepared <strong>strictly free of all underground root vegetables</strong> — no potatoes, carrots, or radishes. Raw banana, pumpkin, and tomato-based gravies replace root vegetables entirely.</p>
+        </div>
+        <div class="jain-card">
+          <h3>Kitchen protocol</h3>
+          <p>Root-veg dishes and Jain-prep dishes receive <strong>separate handling</strong> in our kitchen to avoid cross-contact. Please let our staff know when ordering so we can take extra care.</p>
+        </div>
+        <div class="jain-card">
+          <h3>Pure dairy &amp; vegan</h3>
+          <p>All our ghee, paneer, and milk is <strong>100% pure vegetarian</strong> — no animal rennet or non-veg processing aids. Vegan alternatives are available on request for dairy-free guests.</p>
+        </div>
+        <div class="jain-card">
+          <h3>Labeling</h3>
+          <p>On our menu you will find:</p>
+          <ul>
+            <li><strong>Naturally Jain</strong> — regular menu items that are already free of onion, garlic, mushroom, and root vegetables</li>
+            <li><strong>Jain on Request</strong> — customizable dishes we can prepare without root vegetables on request</li>
+          </ul>
+        </div>
+        <div class="jain-card">
+          <h3>Why we avoid root vegetables</h3>
+          <p>In Jain tradition, harvesting root vegetables kills the plant and destroys tiny living organisms in the soil. We respect this principle by keeping Jain-prep dishes completely free of potatoes, carrots, radishes, onion, and garlic.</p>
+        </div>
+      </div>
+      <div class="jain-notice">
+        <strong>Our core menu is 100% Sattvic</strong> — No Onion, Garlic, or Mushrooms. For our Jain guests, we offer dedicated Jain-Prep Options made with Raw Banana (instead of Potato) and strictly free of all underground root vegetables (no potatoes, carrots, radishes, onion, or garlic).
+      </div>
     </div>
   </section>
 
@@ -328,15 +465,10 @@
           Order online now, pay by UPI, and pick up at the counter &mdash; book a time up to 7 days ahead.</p>
         <a class="cta" href="order.html">Order online now</a>
         <p style="margin:1.2rem 0 .35rem"><b style="color:var(--gold-soft)">2 &middot; Home delivery</b><br>
-          Order through our delivery partners:</p>
-        <p style="margin:0">
-          <!-- EDIT: paste your real restaurant page links -->
-          <a href="https://www.zomato.com" target="_blank" rel="noopener" style="color:var(--gold-soft);font-weight:600">Zomato</a> &nbsp;&middot;&nbsp;
-          <a href="https://www.swiggy.com" target="_blank" rel="noopener" style="color:var(--gold-soft);font-weight:600">Swiggy</a> &nbsp;&middot;&nbsp;
-          <a href="https://www.rapido.bike" target="_blank" rel="noopener" style="color:var(--gold-soft);font-weight:600">Rapido</a></p>
-        <p style="margin:1.2rem 0 0"><b style="color:var(--gold-soft)">3 &middot; Reserve a table</b><br>
-          Book your table &mdash; and even your dishes &mdash; in advance.
-          <i>Coming soon; for now, call us to reserve.</i></p>
+          Delivery partners coming soon.</p>
+        <p style="margin:1.2rem 0 .35rem"><b style="color:var(--gold-soft)">3 &middot; Reserve a table</b><br>
+          Book a table for your day, time and party size &mdash; we hold it for you.</p>
+        <a class="cta ghost" href="reserve.html">Reserve a table</a>
       </aside>
     </div>
   </section>
@@ -349,7 +481,7 @@
       <img src="logo.png" alt="" aria-hidden="true"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
-    <div class="fine">&#169; 2026 Cafe Gopala &#183; Malleshwaram, Bengaluru &#183; <a href="order.html">Order online &amp; collect</a></div>
+    <div class="fine">&#169; 2026 Cafe Gopala &#183; Bengaluru &#183; <a href="order.html">Order online &amp; collect</a></div>
   </div>
 </footer>
 
@@ -433,7 +565,75 @@
       if (cards && html) cards.innerHTML = html;   /* swap only now, all-or-nothing */
     })
     .catch(function () { /* static menu stays — never blank */ });
-})();
+  })();
+
+  /* Prabhupada sattvic food quotes — slow fade with portrait per quote */
+  (function () {
+    var quotes = [
+      {
+        text: "Foodstuffs in the mode of goodness—such as milk products, grains, fruits, and vegetables—increase the duration of life, purify existence, and give health, happiness, and satisfaction.",
+        ref: "Srila Prabhupada (Bhagavad-gita 17.8 Purport)",
+        img: "pics/prabhupad-pics/Prabhupada-observing-devotee-cook-in-kitchen-620x350.jpg",
+        rectangular: true
+      },
+      {
+        text: "If you eat sattvic food in the mode of goodness, then your mind becomes calm and quiet. A peaceful mind can easily understand higher spiritual values.",
+        ref: "Srila Prabhupada (Lecture on Bg 17.8-10, Honolulu, May 24, 1975)",
+        img: "pics/prabhupad-small/prabhupa-face2.jpeg"
+      },
+      {
+        text: "The purpose of food is to increase the duration of life, purify the mind, and aid physical strength.",
+        ref: "Srila Prabhupada (Bhagavad-gita As It Is, 17.8)",
+        img: "pics/prabhupad-small/prab-face-4.jpg"
+      },
+      {
+        text: "Vegetables, grain, fruits, milk, and water—these are the proper foods to be offered to the Lord. Cleanliness is essential. If one prepares food with devotion, cleanliness, and pure intention, Krishna accepts it.",
+        ref: "Srila Prabhupada (Srimad-Bhagavatam, 4.29.53 Purport)",
+        img: "pics/prabhupad-small/prabhupad-face-3.webp"
+      },
+      {
+        text: "By accepting sattvic prasadam, fine brain tissues develop, enabling one to understand subtle spiritual truths.",
+        ref: "Srila Prabhupada (Light of the Bhagavata, Purport 29)",
+        img: "pics/prabhupad-pics/srila-prabhupad1.webp"
+      }
+    ];
+    var container = document.getElementById("quotesGrid");
+    if (!container) return;
+    var slides = quotes.map(function (q, i) {
+      var faceClass = "quote-face" + (q.rectangular ? " rectangular" : "");
+      return "<div class=\"quote-slide" + (i === 0 ? " active" : "") + "\">" +
+             "<div class=\"" + faceClass + "\" aria-hidden=\"true\"><img src=\"" + q.img + "\" alt=\"Srila Prabhupada\" loading=\"lazy\"/></div>" +
+             "<div><div class=\"quote-text\">&ldquo;" + q.text + "&rdquo;</div>" +
+             "<div class=\"quote-ref\">&mdash; " + q.ref + "</div></div></div>";
+    }).join("");
+    container.innerHTML = slides;
+    var idx = 0;
+    var items = container.querySelectorAll(".quote-slide");
+    setInterval(function () {
+      items[idx].classList.remove("active");
+      idx = (idx + 1) % items.length;
+      items[idx].classList.add("active");
+    }, 18000);
+  })();
+
+  /* Mobile nav toggle */
+  (function () {
+    var toggle = document.getElementById("navToggle");
+    var nav = document.getElementById("navLinks");
+    if (!toggle || !nav) return;
+    toggle.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+    nav.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Open menu");
+      });
+    });
+  })();
 </script>
 </body>
 </html>
