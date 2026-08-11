@@ -172,6 +172,13 @@
   .visit-card h3{color:var(--gold-soft);font-size:1.9rem;margin-bottom:.4rem}
   .visit-card p{color:rgba(252,244,226,.8);margin:.2rem 0 1.4rem}
   .visit-card .cta{width:100%;text-align:center}
+  /* The ghost button is designed for the CREAM page: maroon text on a gold
+     outline. Inside this card the background IS maroon, so that button was
+     maroon-on-maroon — a button you could only find by hovering. On dark, the
+     outline and the label both have to be light. */
+  .visit-card .cta.ghost{color:var(--cream);border-color:var(--gold);
+    background:rgba(224,160,41,.12)}
+  .visit-card .cta.ghost:hover{background:rgba(224,160,41,.26);border-color:var(--gold-soft)}
 
   .jain{padding:4.2rem 0;background:linear-gradient(180deg,#fff,var(--cream));color:var(--ink);border-top:1px solid var(--line)}
   .jain-head{text-align:center;margin-bottom:2rem}

@@ -245,7 +245,7 @@
         <div class="cfoot">
           <div id="cart-foot-side"></div>
           <div class="center" style="margin-top:.6rem">
-            <button class="btn" id="side-continue" disabled onclick="show('slot');loadDays()">Proceed to checkout &rarr;</button>
+            <button class="btn" id="side-continue" disabled onclick="proceed()">Proceed to checkout &rarr;</button>
           </div>
         </div>
       </aside>
@@ -260,7 +260,7 @@
     <div class="cfoot">
       <div id="cart-foot-sheet"></div>
       <div class="center" style="margin-top:.6rem">
-        <button class="btn" onclick="toggleSheet(false);show('slot');loadDays()">Proceed to checkout &rarr;</button>
+        <button class="btn" onclick="toggleSheet(false);proceed()">Proceed to checkout &rarr;</button>
       </div>
     </div>
   </div>
@@ -359,7 +359,7 @@
   <span id="cart-n"></span> · <b id="cart-total"></b>
   <button class="btn ghost small viewcart" style="background:transparent;color:var(--gold-soft);border-color:var(--gold-soft)"
     onclick="toggleSheet(true)">View / edit ▴</button>
-  <button class="btn" onclick="show('slot');loadDays()">Proceed &rarr;</button>
+  <button class="btn" id="preorder-btn" onclick="proceed()">Proceed &rarr;</button>
 </div>
 
 <script>
@@ -393,10 +393,22 @@ var SLOT = null;                       // chosen slot iso
 var EMAIL_TOKEN = localStorage.getItem("cg_email_token") || "";
 var EMAIL_FOR = localStorage.getItem("cg_email_for") || "";
 var ORDER_TOKEN = null;                // magic-link token of the placed order
+/* RESERVATION PRE-ORDER MODE.
+   Set when this page is opened as order.html?reserve=<booking-token>. The guest
+   has already booked a table; they are here only to choose dishes. Rather than
+   building a second cart on the booking page, we bring them to THIS cart — the
+   one that is already proven — and change what the last step does. Everything
+   between (menu, search, categories, quantities, date-aware availability) is
+   shared by construction, not by copy-paste. */
+var RESERVE_TOKEN = null;
+var RESERVE = null;                    // the booking, once fetched
 var LAST = null;                       // last status payload
 var pollTimer = null;
 
 function show(name) {
+  // In pre-order mode the pickup time and the contact details already came
+  // from the booking, so those two steps do not exist.
+  if (RESERVE_TOKEN && (name === "slot" || name === "contact")) name = "menu";
   ["menu", "slot", "contact", "pay", "status", "orders"].forEach(function (s) {
     document.getElementById("sec-" + s).classList.toggle("hide", s !== name);
   });
@@ -409,6 +421,12 @@ function show(name) {
   });
   window.scrollTo(0, 0);
 }
+function proceed() {
+  if (RESERVE_TOKEN) { preorderSubmit(); return; }
+  show("slot");
+  loadDays();
+}
+
 function cartClick() {
   var onMenu = !document.getElementById("sec-menu").classList.contains("hide");
   if (!onMenu) { show("menu"); return; }
@@ -513,6 +531,23 @@ function cartLinesHtml() {
       '<span class="lt">₹' + rupees(parseFloat(e.item.price) * e.qty) + '</span>' +
       '<button class="rm" title="Remove" onclick=\'bump(' + k + ',-999)\'>✕</button></div>';
   }).join("");
+}
+
+function preorderSubmit() {
+  var lines = Object.keys(CART).map(function (k) { return { item_id: Number(k), qty: CART[k].qty }; });
+  if (!lines.length) { alert("Choose at least one dish."); return; }
+  var btn = document.getElementById("preorder-btn");
+  if (btn) btn.disabled = true;
+  req("/reserve/" + RESERVE_TOKEN + "/preorder/", "POST", { lines: lines })
+    .then(function (r) {
+      if (btn) btn.disabled = false;
+      if (!r.ok) { alert(r.j.detail || "Could not save your dishes."); return; }
+      // hand them back to the booking page, which owns the pay step
+      location.href = "reserve.html?booking=" + RESERVE_TOKEN;
+    }).catch(function () {
+      if (btn) btn.disabled = false;
+      alert("Network problem — your dishes were NOT saved. Please try again.");
+    });
 }
 
 function cartFootHtml() {
@@ -927,6 +962,37 @@ function showOrders() {
 
 /* ================= entry: magic link? ================= */
 (function () {
+  var rm = location.search.match(/reserve=([0-9a-f-]{20,})/i);
+  if (rm) {
+    RESERVE_TOKEN = rm[1];
+    document.getElementById("steps").classList.add("hide");
+    req("/reserve/" + RESERVE_TOKEN + "/").then(function (r) {
+      if (!r.ok) {
+        alert("We could not find that booking.");
+        location.href = "reserve.html";
+        return;
+      }
+      RESERVE = r.j;
+      var b = document.createElement("div");
+      b.className = "wrap";
+      b.style.cssText = "margin:1rem auto 0";
+      b.innerHTML = '<div style="background:var(--cream);border:1px solid var(--gold);'
+        + 'border-radius:12px;padding:.9rem 1rem">'
+        + '<b>Pre-ordering for your table</b><br>' + RESERVE.when + ' &middot; party of '
+        + RESERVE.party_size
+        + '<p class="note" style="margin:.4rem 0 0">Your dishes are paid when you book and '
+        + 'replace the per-person deposit. <a href="reserve.html?booking=' + RESERVE_TOKEN
+        + '">Back to my booking</a></p></div>';
+      var sec = document.getElementById("sec-menu");
+      sec.parentNode.insertBefore(b, sec);
+      // Existing dishes come back as a starting cart, so "change my dishes"
+      // does not mean "start again".
+      (RESERVE.preorder || []).forEach(function () { /* names only; cart rebuilt by choice */ });
+      show("menu");
+      renderCart();
+    });
+    return;
+  }
   var m = location.search.match(/token=([0-9a-f-]{20,})/i);
   if (m) {
     ORDER_TOKEN = m[1];

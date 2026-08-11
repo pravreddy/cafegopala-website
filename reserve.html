@@ -365,9 +365,23 @@ function renderResult(r) {
         ? '<div class="kv"><span class="k">Deposit</span><span class="v">&#8377;' + r.deposit + "</span></div>"
         : "")
     + (r.occasion ? '<div class="kv"><span class="k">Occasion</span><span class="v">' + r.occasion + "</span></div>" : "")
+    + ((r.preorder || []).length
+        ? '<div style="margin-top:.6rem;font-weight:700;color:var(--maroon)">Your dishes</div>'
+          + r.preorder.map(function (l) {
+              return '<div class="kv"><span class="k">' + l.qty + " &times; " + l.name
+                + '</span><span class="v">&#8377;' + l.line_total + "</span></div>"; }).join("")
+        : "")
     + pay
     + (r.status === "confirmed"
         ? '<p class="hint">Please arrive on time — we can only hold the table a short while past the booked time.</p>'
+        : "")
+    + (["cancelled", "released", "expired", "no_show", "seated"].indexOf(r.status) < 0
+        ? '<div class="deposit"><b>Would you like your food ready when you sit down?</b>'
+          + '<p style="margin:.4rem 0 .7rem">Choose your dishes now and pay once — nothing to '
+          + 'order at the table, and your dishes replace the per-person deposit.</p>'
+          + '<a class="cta" href="order.html?reserve=' + r.token + '">'
+          + ((r.preorder || []).length ? 'Change my dishes' : 'Choose my dishes') + '</a>'
+          + '<p class="hint">Or skip this and order at the table as usual.</p></div>'
         : "")
     + (["cancelled", "released", "expired", "no_show", "seated"].indexOf(r.status) < 0
         ? '<p style="margin-top:1rem"><button class="cta ghost" id="cancel">Cancel this booking</button></p>'
