@@ -3,7 +3,8 @@
   Cafe Gopala — public website (repo: cafegopala-website, domain: cafegopal.co.in)
   ──────────────────────────────────────────────────────────────────────────────
   Self-contained single page. Brand logos are separate files kept in this folder:
-  logo.png (coloured — header, favicon, hero poster/fallback).
+  logo.png (coloured, 1123x1401) is the master artwork; the pages load resized
+  copies of it (see IMAGES below).
   The hero shows an animated logo video (webm + mp4 fallback) with a static poster.
 
   CURRENT MENU: North Indian vegetarian only (as of now).
@@ -12,8 +13,16 @@
 
   BEFORE YOU PUBLISH, EDIT:
    1. Address, hours, phone in the "Visit" section (search: EDIT).
-   2. Prices in the menu are examples — set your real ones.
-   3. "Order online" buttons already point to your POS: https://pos.cafegopal.co.in/
+   2. "Order online" buttons already point to your POS: https://pos.cafegopal.co.in/
+
+  The menu is NOT hardcoded any more — it is fetched live from the POS, so
+  prices and availability follow whatever the cafe sets there. Editing dish
+  prices in this file would do nothing.
+
+  IMAGES: logo.png / logo2.png (3.3 MB each) are the ORIGINALS and are kept.
+  The pages load resized copies instead — logo.webp (hero), logo-badge.webp
+  (header/footer), icon-192/512.png (favicon + PWA), og-cover.jpg (social).
+  Regenerate those from the originals if the artwork ever changes.
 -->
 <html lang="en">
 <head>
@@ -23,8 +32,18 @@
 <meta name="description" content="Cafe Gopala, Malleshwaram — warm saatvik vegetarian food. Chaat, paneer, dal, hot naan and masala chai. No onion, no garlic. Dine in or order online." />
 <meta property="og:title" content="Cafe Gopala — The Flavor of Krishna's Grace" />
 <meta property="og:description" content="Saatvik vegetarian food in Malleshwaram. Chaat, paneer, dal &amp; masala chai. No onion, no garlic. Dine in or order online." />
-<meta property="og:image" content="https://cafegopal.co.in/logo.png" />
-<link rel="icon" href="logo.png" />
+<meta property="og:image" content="https://cafegopal.co.in/og-cover.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:type" content="restaurant.restaurant" />
+<meta name="twitter:card" content="summary_large_image" />
+<!-- Icons are the small square copies, not the 3.3 MB poster. The original
+     logo.png is still in this folder, untouched, and is what the resized files
+     were made from. -->
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#3E1206" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mukta:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -219,7 +238,7 @@
 <header>
   <div class="wrap nav">
     <a class="brand" href="#top">
-      <img src="logo.png" alt="Cafe Gopala — Krishna playing the flute beside a cow"/>
+      <img src="logo-badge.webp" alt="Cafe Gopala — Krishna playing the flute beside a cow" width="46" height="46"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
     <nav class="nav-links" id="navLinks">
@@ -246,8 +265,8 @@
         <circle cx="180" cy="10" r="4" fill="var(--gold)"/>
       </svg>
       <div class="hero-logo-wrap">
-        <img class="hero-logo-static" src="logo.png" alt="Cafe Gopala logo: Gopala Krishna playing his flute beside a resting cow"/>
-        <video class="hero-logo" autoplay muted loop playsinline poster="logo.png" aria-label="Cafe Gopala animated logo">
+        <img class="hero-logo-static" src="logo.webp" alt="Cafe Gopala logo: Gopala Krishna playing his flute beside a resting cow"/>
+        <video class="hero-logo" autoplay muted loop playsinline poster="logo.webp" aria-label="Cafe Gopala animated logo">
           <source src="cafe_gopala_animated_logo_clean_optimized.webm" type="video/webm">
           <source src="cafe_gopala_animated_logo_clean_optimized.mp4" type="video/mp4">
         </video>
@@ -485,7 +504,7 @@
 <footer>
   <div class="wrap">
     <a class="brand" href="#top" style="text-decoration:none">
-      <img src="logo.png" alt="" aria-hidden="true"/>
+      <img src="logo-badge.webp" alt="" aria-hidden="true" width="46" height="46"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
     <div class="fine">&#169; 2026 Cafe Gopala &#183; Bengaluru &#183; <a href="order.html">Order online &amp; collect</a></div>

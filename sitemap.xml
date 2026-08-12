@@ -1,9 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  NOTE: the host below is whatever the repo has always used. The domain is not
+  bought yet and its spelling is still open (cafegopal vs cafegopala) — when
+  that is settled it needs changing HERE, in robots.txt, in the og:image URL in
+  index.html, in nginx-cafegopala.conf and in .github/workflows/deploy.yml.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://cafegopal.co.in/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://cafegopal.co.in/order.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://cafegopal.co.in/reserve.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cafegopal.co.in/story.html</loc>
+    <lastmod>2026-08-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

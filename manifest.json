@@ -1,11 +1,19 @@
 {
   "name": "Cafe Gopala",
   "short_name": "Cafe Gopala",
+  "description": "Saatvik vegetarian food in Malleshwaram, Bengaluru. Order and collect, or reserve a table.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#3E1206",
-  "theme_color": "#E4611C",
+  "theme_color": "#3E1206",
   "icons": [
-    { "src": "./logo.png", "sizes": "1283x1600", "type": "image/png" }
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Order & collect", "url": "./order.html" },
+    { "name": "Reserve a table", "url": "./reserve.html" }
   ]
 }
