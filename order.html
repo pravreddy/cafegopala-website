@@ -314,6 +314,15 @@
       </div>
       <div class="okmsg hide" id="promo-ok"></div>
       <div class="errmsg" id="promo-err"></div>
+      <!-- store credit: only appears when this verified customer actually has
+           some. Nobody should have to remember a code they were emailed. -->
+      <div id="credit-block" class="hide">
+        <div class="check">
+          <input type="checkbox" id="f-credit" checked onchange="renderCredit()">
+          <label for="f-credit" style="margin:0" id="credit-label"></label>
+        </div>
+        <p class="note" id="credit-note"></p>
+      </div>
       <!-- honeypot: humans never see it -->
       <input type="text" id="f-website" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
       <div class="errmsg" id="err-contact"></div>
@@ -802,6 +811,41 @@ function applyPromo() {
   });
 }
 
+/* ---- store credit -----------------------------------------------------
+   Money the cafe already owes this customer — from an order they cancelled,
+   or a booking. It is OFFERED, not typed: they were emailed a code, and
+   asking someone to dig that out of their inbox to spend money that is
+   already theirs is how credit quietly goes unused. Ticked by default for
+   the same reason, and untickable because saving it for a bigger order is a
+   perfectly sensible thing to want. */
+var CREDIT = null;              /* { code, remaining, expires_on } */
+
+function creditWanted() {
+  var box = document.getElementById("f-credit");
+  return CREDIT && box && box.checked ? CREDIT.code : "";
+}
+
+function renderCredit() {
+  var block = document.getElementById("credit-block");
+  if (!CREDIT) { block.className = "hide"; return; }
+  block.className = "";
+  var d = CREDIT.expires_on ? new Date(CREDIT.expires_on) : null;
+  document.getElementById("credit-label").textContent =
+    "Use my ₹" + rupees(CREDIT.remaining) + " credit";
+  document.getElementById("credit-note").textContent =
+    "Code " + CREDIT.code
+    + (d ? " · expires " + d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "")
+    + (creditWanted() ? " · comes off this order" : " · saved for another time");
+}
+
+function loadCredit() {
+  fetchMe(function (me) {
+    var list = (me && me.credits) || [];
+    CREDIT = list.length ? list[0] : null;     /* soonest to expire, spend that first */
+    renderCredit();
+  });
+}
+
 function placeOrder() {
   var err = document.getElementById("err-contact");
   err.textContent = "";
@@ -823,6 +867,7 @@ function placeOrder() {
     telegram: document.getElementById("f-tg").value.trim(),
     website: document.getElementById("f-website").value,   /* honeypot */
     promo_code: PROMO,
+    credit_code: creditWanted(),
   }).catch(function () {
     btn.disabled = false;
     err.textContent = "Network problem — your order was NOT placed. Please try again.";
@@ -834,6 +879,16 @@ function placeOrder() {
     saveOrderToken(ORDER_TOKEN);
     history.replaceState(null, "", "order.html?token=" + ORDER_TOKEN);
     LAST = r.j;
+    /* Credit (or a 100% promo) can cover the whole bill. There is then nothing
+       to pay and nothing for the cafe to verify, so sending the customer to a
+       payment screen for ₹0 would be asking them to prove a payment that will
+       never exist. Straight to the confirmed order. */
+    if (Number(LAST.amount_due || 0) <= 0) {
+      renderStatus();
+      show("status");
+      startPoll();
+      return;
+    }
     renderPay();
     show("pay");
   });
@@ -841,7 +896,11 @@ function placeOrder() {
 
 /* ================= step 4: pay ================= */
 function renderPay() {
-  document.getElementById("pay-amount").textContent = "₹" + rupees(LAST.total);
+  /* what is still OWED, not the bill total — store credit may already have
+     paid part of it, and the UPI link asks for the remainder. Showing the
+     total here would have the customer pay twice for the same food. */
+  var due = LAST.amount_due != null ? LAST.amount_due : LAST.total;
+  document.getElementById("pay-amount").textContent = "₹" + rupees(due);
   var dl = LAST.expires_at ? new Date(LAST.expires_at) : null;
   /* say what the discount did, on the screen where they part with money.
      renderPay runs again on every status refresh, so the line is created once
@@ -854,9 +913,15 @@ function renderPay() {
     note.className = "note center";
     d.parentNode.insertBefore(note, d.nextSibling);
   }
-  note.textContent = Number(LAST.discount || 0) > 0
-    ? "Promo " + (LAST.promo_code || "") + " applied — ₹" + rupees(LAST.discount) + " off."
-    : "";
+  var bits = [];
+  if (Number(LAST.discount || 0) > 0) {
+    bits.push("Promo " + (LAST.promo_code || "") + " — ₹" + rupees(LAST.discount) + " off");
+  }
+  if (Number(LAST.credit_used || 0) > 0) {
+    bits.push("₹" + rupees(LAST.credit_used) + " credit used");
+  }
+  note.textContent = bits.length
+    ? "Bill ₹" + rupees(LAST.total) + " · " + bits.join(" · ") : "";
   document.getElementById("pay-deadline").textContent = dl
     ? "Pay before " + dl.toLocaleString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" }) + " or the order is cancelled."
     : "";
@@ -922,7 +987,17 @@ function renderStatus() {
   if (LAST.counter_no) html += "<b>Counter number:</b> " + esc(LAST.counter_no) + "<br>";
   html += (LAST.lines || []).map(function (l) { return l.qty + " × " + esc(l.name); }).join(" · ");
   if (parseFloat(LAST.packaging) > 0) html += "<br>Packaging: ₹" + rupees(LAST.packaging);
-  html += "<br><b>Total: ₹" + rupees(LAST.total) + "</b></div>";
+  if (parseFloat(LAST.discount) > 0) {
+    html += "<br>Promo " + esc(LAST.promo_code || "") + ": −₹" + rupees(LAST.discount);
+  }
+  html += "<br><b>Total: ₹" + rupees(LAST.total) + "</b>";
+  /* Say where the money came from. A customer who spent credit must be able to
+     see it on the slip, or the only record of it is an email they may delete. */
+  if (parseFloat(LAST.credit_used) > 0) {
+    html += "<br>Credit used: ₹" + rupees(LAST.credit_used);
+    html += "<br><b>Still to pay: ₹" + rupees(LAST.amount_due) + "</b>";
+  }
+  html += "</div>";
   if (LAST.status === "placed") {
     html += '<div class="center" style="margin-top:.8rem"><button class="btn" onclick="renderPay();show(\'pay\')">Pay now</button></div>';
   }
@@ -957,6 +1032,7 @@ function prefillContact() {
     if (p.has_whatsapp) document.getElementById("f-wa").checked = true;
     refreshEmailUI();
   });
+  loadCredit();                /* offer any credit this customer is owed */
 }
 
 /* ================= my orders (this device) ================= */
