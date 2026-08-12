@@ -307,6 +307,13 @@
       <input type="text" id="f-tg" placeholder="@name">
       <label>Note for the kitchen (optional)</label>
       <textarea id="f-notes" rows="2"></textarea>
+      <label>Promo code (optional)</label>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <input type="text" id="f-promo" placeholder="e.g. CG7K4M2P" style="text-transform:uppercase;flex:1">
+        <button class="btn ghost small" id="promo-btn" onclick="applyPromo()">Apply</button>
+      </div>
+      <div class="okmsg hide" id="promo-ok"></div>
+      <div class="errmsg" id="promo-err"></div>
       <!-- honeypot: humans never see it -->
       <input type="text" id="f-website" name="website" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off">
       <div class="errmsg" id="err-contact"></div>
@@ -751,6 +758,50 @@ function verifyCode() {
     });
 }
 
+/* ---- promo code ------------------------------------------------------
+   Checked BEFORE the order is placed, so the discount is visible while the
+   customer is still deciding. Nothing is spent by checking: the coupon is
+   only used up once the payment is confirmed, so an order that is never
+   paid for leaves the code in their pocket. */
+var PROMO = "";                 /* the accepted code, sent with the order */
+
+function clearPromo() {
+  PROMO = "";
+  document.getElementById("promo-ok").className = "okmsg hide";
+  document.getElementById("promo-err").textContent = "";
+}
+
+function applyPromo() {
+  var code = document.getElementById("f-promo").value.trim().toUpperCase();
+  var ok = document.getElementById("promo-ok");
+  var err = document.getElementById("promo-err");
+  ok.className = "okmsg hide"; err.textContent = "";
+  if (!code) { clearPromo(); return; }
+  var email = emailNow();
+  if (!(EMAIL_TOKEN && EMAIL_FOR === email)) {
+    err.textContent = "Verify your email first — the code is checked against you.";
+    return;
+  }
+  var btn = document.getElementById("promo-btn");
+  btn.disabled = true;
+  req("/pickup/promo/", "POST", {
+    code: code,
+    phone: document.getElementById("f-phone").value.trim(),
+    email: email, email_token: EMAIL_TOKEN,
+    pickup_date: SLOT ? SLOT.slice(0, 10) : "",
+  }).catch(function () {
+    btn.disabled = false;
+    err.textContent = "Network problem — could not check that code.";
+  }).then(function (r) {
+    if (!r) return;
+    btn.disabled = false;
+    if (!r.ok) { clearPromo(); err.textContent = r.j.detail || "That code cannot be used."; return; }
+    PROMO = r.j.code;
+    ok.textContent = r.j.label + " applied ✓";
+    ok.className = "okmsg";
+  });
+}
+
 function placeOrder() {
   var err = document.getElementById("err-contact");
   err.textContent = "";
@@ -771,6 +822,7 @@ function placeOrder() {
     has_whatsapp: document.getElementById("f-wa").checked,       /* real fields now */
     telegram: document.getElementById("f-tg").value.trim(),
     website: document.getElementById("f-website").value,   /* honeypot */
+    promo_code: PROMO,
   }).catch(function () {
     btn.disabled = false;
     err.textContent = "Network problem — your order was NOT placed. Please try again.";
@@ -791,6 +843,20 @@ function placeOrder() {
 function renderPay() {
   document.getElementById("pay-amount").textContent = "₹" + rupees(LAST.total);
   var dl = LAST.expires_at ? new Date(LAST.expires_at) : null;
+  /* say what the discount did, on the screen where they part with money.
+     renderPay runs again on every status refresh, so the line is created once
+     and then only updated. */
+  var note = document.getElementById("pay-promo");
+  if (!note) {
+    var d = document.getElementById("pay-amount");
+    note = document.createElement("p");
+    note.id = "pay-promo";
+    note.className = "note center";
+    d.parentNode.insertBefore(note, d.nextSibling);
+  }
+  note.textContent = Number(LAST.discount || 0) > 0
+    ? "Promo " + (LAST.promo_code || "") + " applied — ₹" + rupees(LAST.discount) + " off."
+    : "";
   document.getElementById("pay-deadline").textContent = dl
     ? "Pay before " + dl.toLocaleString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" }) + " or the order is cancelled."
     : "";
