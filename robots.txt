@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cafegopal.co.in/sitemap.xml
+Sitemap: https://cafegopala.in/sitemap.xml

@@ -185,9 +185,16 @@
    The share key is PUBLISHABLE (it ships in this file): it identifies the
    restaurant and can be revoked from POS Settings. It is not a secret.
    ─────────────────────────────────────────────────────────────────────────── */
-var POS_BASE  = "https://app.fastpos.in";
-var SLUG      = "cafe-gopala";
-var SHARE_KEY = "pub_898a1d4c99270a973da57277d368fabe";
+/* CONFIG OVERRIDE. The three values below are the live Cafe Gopala POS. A test
+   harness (or a staging copy of this site) can point them somewhere else by
+   setting window.CG_CONFIG before this script runs — Playwright does exactly
+   that when recording the how-to videos against a throwaway demo server, so the
+   recordings never touch real orders or mail a real customer. Nothing reads
+   CG_CONFIG in production, where it simply does not exist. */
+var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
+var POS_BASE  = CGC.base || "https://app.fastpos.in";
+var SLUG      = CGC.slug || "cafe-gopala";
+var SHARE_KEY = CGC.key  || "pub_898a1d4c99270a973da57277d368fabe";
 
 var API = POS_BASE + "/api/public/" + SLUG;
 function headers(json) {

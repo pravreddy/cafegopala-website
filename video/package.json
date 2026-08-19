@@ -1,0 +1,15 @@
+{
+  "name": "cafegopala-howto-videos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Narrated how-to recordings of the Cafe Gopala website (order & collect, reserve a table, promo codes and credit).",
+  "scripts": {
+    "record": "./make-videos.sh",
+    "test": "playwright test",
+    "headed": "HOWTO=1 SLOWMO=600 playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}

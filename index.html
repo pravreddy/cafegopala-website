@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Cafe Gopala — public website (repo: cafegopala-website, domain: cafegopal.co.in)
+  Cafe Gopala — public website (repo: cafegopala-website, domain: cafegopala.in)
   ──────────────────────────────────────────────────────────────────────────────
   Self-contained single page. Brand logos are separate files kept in this folder:
   logo.png (coloured, 1123x1401) is the master artwork; the pages load resized
@@ -13,7 +13,7 @@
 
   BEFORE YOU PUBLISH, EDIT:
    1. Address, hours, phone in the "Visit" section (search: EDIT).
-   2. "Order online" buttons already point to your POS: https://pos.cafegopal.co.in/
+   2. "Order online" buttons already point to your POS: https://app.fastpos.in/
 
   The menu is NOT hardcoded any more — it is fetched live from the POS, so
   prices and availability follow whatever the cafe sets there. Editing dish
@@ -28,11 +28,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cafe Gopala — Malleshwaram | Saatvik vegetarian caf&eacute;</title>
-<meta name="description" content="Cafe Gopala, Malleshwaram — warm saatvik vegetarian food. Chaat, paneer, dal, hot naan and masala chai. No onion, no garlic. Dine in or order online." />
+<title>Cafe Gopala — New BEL Road, Bengaluru | Saatvik vegetarian caf&eacute;</title>
+<meta name="description" content="Cafe Gopala on New BEL Road, R.M.V. 2nd Stage, Bengaluru — warm saatvik vegetarian food. Chaat, paneer, dal, hot naan and masala chai. No onion, no garlic. Dine in, order and collect, or reserve a table." />
 <meta property="og:title" content="Cafe Gopala — The Flavor of Krishna's Grace" />
-<meta property="og:description" content="Saatvik vegetarian food in Malleshwaram. Chaat, paneer, dal &amp; masala chai. No onion, no garlic. Dine in or order online." />
-<meta property="og:image" content="https://cafegopal.co.in/og-cover.jpg" />
+<meta property="og:description" content="Saatvik vegetarian food on New BEL Road, Bengaluru. Chaat, paneer, dal &amp; masala chai. No onion, no garlic. Dine in or order online." />
+<meta property="og:image" content="https://cafegopala.in/og-cover.jpg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:type" content="restaurant.restaurant" />
@@ -479,8 +479,13 @@
       <div>
         <span class="eyebrow">Come by</span>
         <h2>Visit Cafe Gopala</h2>
-        <!-- EDIT real address, hours, phone -->
-        <div class="info-row"><div class="k">Where</div><div class="v">[Add your full street address],<br>Malleshwaram, Bengaluru<br><a href="https://maps.google.com/?q=Cafe+Gopala+Malleshwaram+Bengaluru" target="_blank" rel="noopener">Open in Maps &#8594;</a></div></div>
+        <!-- EDIT hours and phone (address confirmed 15 Jul 2026).
+             The Maps pin is the exact building. Its LABEL still reads "SRS Boys
+             PG and Guest House" — the previous occupant — until a Google
+             Business Profile for Cafe Gopala is created and verified. The link
+             below is the short link to the pin itself, so it lands in the right
+             place whatever name Google is currently showing. -->
+        <div class="info-row"><div class="k">Where</div><div class="v">Behind Casino Restaurant, New BEL Road,<br>KGE Layout, R.M.V. 2nd Stage,<br>Bengaluru, Karnataka 560094<br><span style="opacity:.8">Next to MS Ramaiah Memorial Hospital</span><br><a href="https://maps.app.goo.gl/HC79is59MXEL1y4w5" target="_blank" rel="noopener">Open in Maps &#8594;</a></div></div>
         <div class="info-row"><div class="k">Hours</div><div class="v">[e.g. 8:00 AM – 10:00 PM, every day]</div></div>
         <div class="info-row"><div class="k">Phone</div><div class="v"><a href="tel:+910000000000">[Add phone number]</a></div></div>
         <div class="info-row"><div class="k">Dining</div><div class="v">Dine-in &#183; Takeaway &#183; Delivery</div></div>
@@ -513,7 +518,7 @@
 
 <script>
 /* ============================================================
-   LIVE MENU from FastPOS (pos.cafegopal.co.in)
+   LIVE MENU from FastPOS (app.fastpos.in)
    ------------------------------------------------------------
    Fetches the live public menu and REPLACES the hardcoded cards
    above. If anything fails (key not set, POS down, sharing off,
@@ -532,9 +537,16 @@
    Settings. Remove it again when done.
    ============================================================ */
 (function () {
-  var POS_BASE  = "https://app.fastpos.in";      /* final website domain TBD — this is where the POS API lives */
-  var SLUG      = "cafe-gopala";
-  var SHARE_KEY = "pub_898a1d4c99270a973da57277d368fabe";
+/* CONFIG OVERRIDE. The three values below are the live Cafe Gopala POS. A test
+   harness (or a staging copy of this site) can point them somewhere else by
+   setting window.CG_CONFIG before this script runs — Playwright does exactly
+   that when recording the how-to videos against a throwaway demo server, so the
+   recordings never touch real orders or mail a real customer. Nothing reads
+   CG_CONFIG in production, where it simply does not exist. */
+var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
+  var POS_BASE  = CGC.base || "https://app.fastpos.in";   /* where the POS API lives */
+  var SLUG      = CGC.slug || "cafe-gopala";
+  var SHARE_KEY = CGC.key  || "pub_898a1d4c99270a973da57277d368fabe";
 
   if (!SHARE_KEY || SHARE_KEY.indexOf("PASTE_") === 0) return;  /* not configured yet */
 

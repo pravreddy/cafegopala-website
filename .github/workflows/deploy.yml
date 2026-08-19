@@ -6,8 +6,8 @@ name: Deploy Cafe Gopala Website
 # Add these under: GitHub repo -> Settings -> Secrets and variables -> Actions.
 #
 # One-time prerequisite (done once, see DEPLOY-cafegopala.md):
-#   - cafegopal.co.in DNS points at the server
-#   - /home/deploy/careai/sites/cafegopal.co.in exists
+#   - cafegopala.in DNS points at the server
+#   - /home/deploy/careai/sites/cafegopala.in exists (created by avyangah-infra server/add-site.sh)
 #   - nginx-cafegopala.conf is wired into nginx + a TLS cert is in place
 
 on:
@@ -28,8 +28,8 @@ jobs:
           host: ${{ secrets.UK_SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "index.html,logo.png,logo2.png,manifest.json,robots.txt,sitemap.xml"
-          target: "/home/deploy/careai/sites/cafegopal.co.in"
+          source: "index.html,order.html,reserve.html,story.html,404.html,manifest.json,robots.txt,sitemap.xml,logo.png,logo2.png,logo.webp,logo-badge.webp,logo-side.webp,logo2-side.webp,icon-192.png,icon-512.png,og-cover.jpg,cafe_gopala_animated_logo_clean_optimized.webm,cafe_gopala_animated_logo_clean_optimized.mp4,pics"
+          target: "/home/deploy/careai/sites/cafegopala.in"
           overwrite: true
 
       - name: Reload nginx
