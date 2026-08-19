@@ -92,7 +92,7 @@ test.describe('Order and collect', () => {
 
     await test.step('Finding it again', async () => {
       await caption(page, 'My orders shows everything you have ordered, on any phone, as long as you use the same email.');
-      await page.locator('.hcart').click();
+      await page.getByRole('button', { name: 'My orders' }).click();
       await expect(page.locator('#sec-orders')).toBeVisible();
     });
   });
