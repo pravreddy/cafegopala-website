@@ -128,6 +128,11 @@
   .statusline{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px dashed var(--line)}
   .dot{width:12px;height:12px;border-radius:50%;background:var(--line)}
   .dot.on{background:var(--ok)}
+  .menu-fulfillment-banner{display:flex;gap:.6rem .9rem;flex-wrap:wrap;align-items:center;
+    font-size:.85rem;font-weight:600;margin:.2rem 0 .8rem;padding:.5rem .8rem;border-radius:12px;
+    background:rgba(224,160,41,.12);border:1px solid var(--line)}
+  .menu-fulfillment-banner a{color:inherit}
+  .menu-fulfillment-banner .soon{opacity:.65}
   .chip{display:inline-block;border-radius:999px;padding:.15rem .8rem;font-size:.85rem;font-weight:700}
   .hide{display:none!important}
   .center{text-align:center}
@@ -228,10 +233,14 @@
 
   <!-- ================= STEP 1: MENU / CART ================= -->
   <section id="sec-menu">
-    <h1>Order online, collect at the counter</h1>
-    <p class="note">Pay by UPI straight to the cafe — no delivery apps, no commission.
-      Pick your dishes, choose a pickup time (up to 7 days ahead), and your food is
-      ready when you arrive.</p>
+    <h1>The full menu</h1>
+    <p class="note">Browse all 200+ dishes — every one saatvik, no onion, no garlic.
+      Pay by UPI straight to the cafe — no delivery apps, no commission.</p>
+    <div class="menu-fulfillment-banner">
+      <span>&#128717;&#65039; Order ahead, collect at the counter</span>
+      <a href="reserve.html">&#129681; Pre-order for your table</a>
+      <span class="soon">&#128757; Delivery coming soon</span>
+    </div>
     <input class="search" id="menu-search" type="text" placeholder="🔍  Search the menu (dosa, paratha, lassi…)"
       oninput="SEARCH=this.value;renderMenu()">
     <div class="hs-wrap" id="chips-wrap">
@@ -655,6 +664,18 @@ req("/menu/").then(function (r) {
   if (MENU.length) MENU[0]._open = true;
   renderChips();
   renderMenu();
+  /* deep link: order.html?cat=chaat opens the closest-matching live category.
+     Fuzzy on purpose — category names come from the POS and may change; an
+     unknown value just shows the normal menu. */
+  var qc = new URLSearchParams(location.search).get("cat");
+  if (qc) {
+    qc = qc.toLowerCase();
+    var hit = -1;
+    MENU.forEach(function (c, i) {
+      if (hit < 0 && (c.name || "").toLowerCase().indexOf(qc) >= 0) hit = i;
+    });
+    if (hit >= 0) setTimeout(function () { jumpCat(hit); }, 150);
+  }
 });
 
 /* ================= step 2: slots ================= */

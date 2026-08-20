@@ -96,7 +96,28 @@
   .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
   a:focus-visible,.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
-  .hero{padding:3rem 0 3.4rem;text-align:center;position:relative;overflow:hidden}
+  .hero{padding:4.5rem 0 3.4rem;text-align:center;position:relative;overflow:hidden}
+  .hero-pathways{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.4rem}
+  .path-card{flex:1 1 140px;max-width:190px;display:flex;flex-direction:column;gap:.15rem;align-items:center;
+    text-decoration:none;padding:.8rem .6rem;border-radius:14px;border:1.5px solid var(--gold);
+    background:rgba(255,252,245,.75);color:var(--maroon);transition:transform .18s,box-shadow .18s}
+  .path-card b{font-size:.98rem}
+  .path-card span{font-size:.78rem;opacity:.85}
+  .path-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(190,62,12,.18)}
+  .path-card.primary{background:linear-gradient(180deg,var(--saffron),var(--ember));color:#fff;border-color:transparent;
+    box-shadow:0 6px 18px rgba(190,62,12,.32)}
+  .path-card.primary span{opacity:.92}
+  .path-card.disabled{opacity:.55;cursor:default}
+  .path-card.disabled:hover{transform:none;box-shadow:none}
+  .hero-menu-link{margin-top:.9rem;font-size:.9rem}
+  .hero-menu-link a{color:var(--maroon);font-weight:600}
+  .menu-quick-cats{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:1rem 0 .9rem}
+  .cat-pill{text-decoration:none;font-weight:600;font-size:.85rem;color:var(--maroon);
+    border:1.5px solid var(--gold);border-radius:999px;padding:.35rem .95rem;background:rgba(255,252,245,.75);
+    transition:transform .18s,background .18s}
+  .cat-pill:hover{transform:translateY(-2px);background:rgba(224,160,41,.14)}
+  .menu-cta-hint{margin:.5rem 0 0;font-size:.85rem;opacity:.8}
+  .menu-cta-hint a{color:var(--maroon);font-weight:600}
   .arch{display:block;width:min(360px,80vw);margin:0 auto -8px;color:var(--maroon);opacity:.9}
   .hero-logo-wrap{position:relative;width:clamp(340px, 44vw, 560px);max-width:88vw;aspect-ratio:820/1024;margin:0 auto 1.5rem;
     animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
@@ -251,7 +272,7 @@
     <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <a class="cta" href="#order-options">Order online</a>
+    <a class="cta" href="order.html">Order &amp; collect</a>
   </div>
 </header>
 
@@ -273,11 +294,22 @@
       </div>
       <h1>Cafe Gopala</h1>
       <div class="tagline">The Flavor of Krishna's Grace</div>
-      <p class="lede">Warm, homemade saatvik vegetarian food — pure vegetarian, with no onion and no garlic in every dish. Chaat and snacks, hearty mains with hot breads, and sweets with masala chai. Dine in, or have it sent over.</p>
-      <div class="hero-actions">
-        <a class="cta" href="#order-options">Order online</a>
-        <a class="cta ghost" href="#menu">See the menu</a>
+      <p class="lede">Warm, homemade saatvik vegetarian food — pure vegetarian, with no onion and no garlic in every dish. Chaat and snacks, hearty mains with hot breads, and sweets with masala chai. Dine in, or order ahead and collect.</p>
+      <div class="hero-pathways">
+        <a class="path-card" href="reserve.html">
+          <b>&#129681; Dine in</b>
+          <span>Reserve a table</span>
+        </a>
+        <a class="path-card primary" href="order.html">
+          <b>&#128717;&#65039; Takeaway</b>
+          <span>Order &amp; collect</span>
+        </a>
+        <span class="path-card disabled" aria-disabled="true">
+          <b>&#128757; Delivery</b>
+          <span>Coming soon</span>
+        </span>
       </div>
+      <div class="hero-menu-link"><a href="#menu">See the menu &darr;</a></div>
       <div class="garland" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </div>
    </section>
@@ -400,7 +432,16 @@
       </div>
            ============================================================ -->
 
-      <div class="menu-cta"><a class="cta" href="#order-options">See the full menu (200+ dishes) &amp; order &rarr;</a></div>
+      <div class="menu-quick-cats">
+        <a class="cat-pill" href="order.html?cat=chaat">Chaat &amp; snacks</a>
+        <a class="cat-pill" href="order.html?cat=starter">Starters</a>
+        <a class="cat-pill" href="order.html?cat=main">Mains &amp; breads</a>
+        <a class="cat-pill" href="order.html?cat=sweet">Sweets &amp; chai</a>
+      </div>
+      <div class="menu-cta">
+        <a class="cta" href="order.html">See the full menu (200+ dishes) &rarr;</a>
+        <p class="menu-cta-hint">Order &amp; collect from the menu page &middot; Dining in? <a href="reserve.html">Book a table</a> &middot; Delivery coming soon</p>
+      </div>
     </div>
   </section>
 
