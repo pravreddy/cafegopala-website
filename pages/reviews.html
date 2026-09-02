@@ -63,6 +63,25 @@
 
   .reviews-hero{padding:3.4rem 0 2.4rem;text-align:center}
 
+  .live{padding:0 0 3rem;text-align:center}
+  .live[hidden]{display:none}
+  .live-score{display:inline-flex;align-items:baseline;gap:.55rem}
+  .live-score b{font-family:"Cormorant Garamond",serif;font-size:clamp(2.4rem,6vw,3.2rem);
+    font-weight:700;color:var(--maroon);line-height:1}
+  .live-stars{color:var(--gold);font-size:1.15rem;letter-spacing:.1em}
+  .live-count{color:var(--muted);font-size:.95rem;margin:.3rem 0 2rem}
+  .live-count a{color:var(--ember);font-weight:600;text-decoration:none}
+  .live-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:1.4rem;text-align:left}
+  .live-item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.4rem 1.5rem;
+    box-shadow:0 8px 24px rgba(62,18,6,.05)}
+  .live-item .rt{color:var(--gold);letter-spacing:.08em;font-size:.95rem}
+  .live-item p{margin:.6rem 0 .9rem;font-size:.98rem;line-height:1.6;color:var(--ink)}
+  .live-item .who{font-size:.88rem;color:var(--muted)}
+  .live-item .who b{color:var(--ember);font-weight:600}
+  .live-attr{margin-top:1.6rem;font-size:.8rem;color:var(--muted)}
+  .live-attr a{color:var(--muted)}
+
   .composer{padding:0 0 3.6rem}
   .composer-card{background:#fff;border:1px solid var(--line);border-radius:18px;
     padding:2rem 1.8rem;box-shadow:0 10px 30px rgba(62,18,6,.06)}
@@ -149,6 +168,15 @@
     </div>
   </section>
 
+  <section class="live" id="liveReviews" hidden>
+    <div class="wrap">
+      <div class="live-score"><b id="lvRating"></b><span class="live-stars" id="lvStars"></span></div>
+      <div class="live-count" id="lvCount"></div>
+      <div class="live-list" id="lvList"></div>
+      <div class="live-attr">Reviews from <a id="lvLink" href="https://maps.google.com/?cid=13790260493356233256" target="_blank" rel="noopener">Google</a>, refreshed daily.</div>
+    </div>
+  </section>
+
   <section class="reviews">
     <div class="wrap reviews-grid">
       <div class="qr-card">
@@ -232,6 +260,42 @@
         toggle.setAttribute("aria-label", "Open menu");
       });
     });
+  })();
+
+  /* Live Google reviews. Same data file the homepage strip uses; see
+     .github/workflows/fetch-reviews.yml. Hidden until it has real content. */
+  (function () {
+    var sec = document.getElementById("liveReviews");
+    if (!sec || !window.fetch) return;
+    function stars(n) {
+      var f = Math.round(n);
+      return "\u2605".repeat(f) + "\u2606".repeat(Math.max(0, 5 - f));
+    }
+    function esc(t) {
+      return String(t).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+    fetch("/data/reviews.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.reviews || !d.reviews.length || typeof d.rating !== "number") return;
+        var link = d.mapsUri || "https://maps.google.com/?cid=13790260493356233256";
+        document.getElementById("lvRating").textContent = d.rating.toFixed(1);
+        document.getElementById("lvStars").textContent = stars(d.rating);
+        document.getElementById("lvLink").href = link;
+        document.getElementById("lvCount").innerHTML =
+          "from " + (d.count || d.reviews.length) + " Google ratings &middot; " +
+          '<a href="' + esc(link) + '" target="_blank" rel="noopener">read them all &rarr;</a>';
+        document.getElementById("lvList").innerHTML = d.reviews.map(function (r) {
+          return '<div class="live-item"><div class="rt">' + stars(r.rating) + "</div>" +
+                 "<p>" + esc(r.text) + "</p>" +
+                 '<div class="who"><b>' + esc(r.author) + "</b>" +
+                 (r.when ? " &middot; " + esc(r.when) : "") + "</div></div>";
+        }).join("");
+        sec.hidden = false;
+      })
+      .catch(function () {});
   })();
 
   /* Review composer.

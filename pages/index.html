@@ -198,6 +198,29 @@
   @media(max-width:760px){.quote-slide{grid-template-columns:1fr;text-align:center;gap:1.2rem}.quote-face img{width:160px;height:160px}.quote-face.rectangular img{width:100%;height:auto;max-width:320px;border-radius:12px}}
   @media(prefers-reduced-motion:reduce){.quote-slide{transition:none}}
 
+  /* Google reviews strip — same rhythm as the quote rotator above it. */
+  .gr{background:linear-gradient(180deg,var(--cream),#fff);padding:3.6rem 0;
+    border-bottom:1px solid var(--line);text-align:center}
+  .gr[hidden]{display:none}
+  .gr-score{display:inline-flex;align-items:baseline;gap:.55rem;margin-bottom:.2rem}
+  .gr-score b{font-family:"Cormorant Garamond",serif;font-size:clamp(2.4rem,6vw,3.2rem);
+    font-weight:700;color:var(--maroon);line-height:1}
+  .gr-stars{color:var(--gold);font-size:1.15rem;letter-spacing:.1em}
+  .gr-count{color:var(--muted);font-size:.95rem;margin-bottom:2rem}
+  .gr-count a{color:var(--ember);font-weight:600;text-decoration:none}
+  .gr-count a:hover{text-decoration:underline}
+  .gr-stage{position:relative;max-width:760px;margin:0 auto;min-height:160px}
+  .gr-slide{opacity:0;transition:opacity 1.4s ease-in-out;position:absolute;inset:0}
+  .gr-slide.active{opacity:1;position:relative}
+  .gr-text{font-family:"Cormorant Garamond",serif;font-style:italic;
+    font-size:clamp(1.15rem,2.4vw,1.5rem);line-height:1.5;color:var(--maroon)}
+  .gr-who{margin-top:1rem;font-size:.95rem;color:var(--muted)}
+  .gr-who b{color:var(--ember);font-weight:600}
+  .gr-who .gr-mini{color:var(--gold);letter-spacing:.08em;margin-right:.4rem}
+  .gr-attr{margin-top:2rem;font-size:.8rem;color:var(--muted)}
+  .gr-attr a{color:var(--muted);text-decoration:underline}
+  @media(prefers-reduced-motion:reduce){.gr-slide{transition:none}}
+
   .visit{padding:4.2rem 0}
   .visit-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:2.6rem;align-items:start}
   .visit h2{font-size:clamp(2.1rem,5vw,3rem);color:var(--maroon);margin:.6rem 0 1.2rem}
@@ -473,6 +496,15 @@
      <div class="wrap quotes-grid" id="quotesGrid"></div>
    </section>
 
+   <section class="gr" id="googleReviews" aria-label="What our guests say on Google" hidden>
+     <div class="wrap">
+       <div class="gr-score"><b id="grRating"></b><span class="gr-stars" id="grStars"></span></div>
+       <div class="gr-count" id="grCount"></div>
+       <div class="gr-stage" id="grStage"></div>
+       <div class="gr-attr">Reviews from <a id="grLink" href="https://maps.google.com/?cid=13790260493356233256" target="_blank" rel="noopener">Google</a></div>
+     </div>
+   </section>
+
    <section class="jain" id="jain">
     <div class="wrap">
       <div class="jain-head">
@@ -695,6 +727,66 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
       idx = (idx + 1) % items.length;
       items[idx].classList.add("active");
     }, 18000);
+  })();
+
+  /* Google reviews strip.
+     data/reviews.json is refreshed daily by .github/workflows/fetch-reviews.yml
+     — the Places API key stays a repo secret and never reaches this page. The
+     whole section starts hidden and only appears if the file has real content,
+     so a failed fetch or a first deploy degrades to nothing rather than to an
+     empty box. Google requires the reviewer's name and attribution, which is
+     why both are rendered. */
+  (function () {
+    var sec = document.getElementById("googleReviews");
+    if (!sec || !window.fetch) return;
+
+    function stars(n) {
+      var full = Math.round(n);
+      return "\u2605".repeat(full) + "\u2606".repeat(Math.max(0, 5 - full));
+    }
+    function esc(t) {
+      return String(t).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
+    }
+
+    fetch("/data/reviews.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.reviews || !d.reviews.length || typeof d.rating !== "number") return;
+
+        document.getElementById("grRating").textContent = d.rating.toFixed(1);
+        document.getElementById("grStars").textContent = stars(d.rating);
+        var link = d.mapsUri || "https://maps.google.com/?cid=13790260493356233256";
+        document.getElementById("grLink").href = link;
+        document.getElementById("grCount").innerHTML =
+          "from " + (d.count || d.reviews.length) + " Google ratings &middot; " +
+          '<a href="' + esc(link) + '" target="_blank" rel="noopener">read them all &rarr;</a>';
+
+        var stage = document.getElementById("grStage");
+        stage.innerHTML = d.reviews.map(function (r, i) {
+          /* Long reviews are trimmed for the strip only; the full text is one
+             click away on Google, which the link above makes clear. */
+          var t = r.text.length > 320 ? r.text.slice(0, 317).trim() + "\u2026" : r.text;
+          return '<div class="gr-slide' + (i === 0 ? " active" : "") + '">' +
+                 '<div class="gr-text">&ldquo;' + esc(t) + '&rdquo;</div>' +
+                 '<div class="gr-who"><span class="gr-mini">' + stars(r.rating) + "</span>" +
+                 "<b>" + esc(r.author) + "</b>" +
+                 (r.when ? " &middot; " + esc(r.when) : "") + "</div></div>";
+        }).join("");
+
+        sec.hidden = false;
+
+        var items = stage.querySelectorAll(".gr-slide");
+        if (items.length < 2) return;
+        var idx = 0;
+        setInterval(function () {
+          items[idx].classList.remove("active");
+          idx = (idx + 1) % items.length;
+          items[idx].classList.add("active");
+        }, 12000);
+      })
+      .catch(function () { /* leave the section hidden */ });
   })();
 
   /* Mobile nav toggle */

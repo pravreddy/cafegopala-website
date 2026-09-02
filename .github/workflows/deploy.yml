@@ -45,7 +45,7 @@ jobs:
           host: ${{ secrets.UK_SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "images/,videos/,manifest.json,robots.txt,sitemap.xml"
+          source: "images/,videos/,data/,manifest.json,robots.txt,sitemap.xml"
           target: "/home/deploy/careai/sites/cafegopala.in"
           overwrite: true
 

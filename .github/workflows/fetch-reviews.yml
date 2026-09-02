@@ -1,0 +1,67 @@
+name: Refresh Google reviews
+
+# Pulls the live rating + latest reviews from the Places API into
+# data/reviews.json and commits it. The site serves that file statically, so the
+# API key never reaches the browser and the pages stay pure HTML.
+#
+# Runs daily: Google's Places policy forbids caching most place fields for more
+# than 30 days, and a daily refresh keeps us comfortably inside that.
+#
+# SETUP (once):
+#   1. Google Cloud console -> enable "Places API (New)" -> create an API key.
+#   2. Restrict the key to the Places API. It is server-side only, so also
+#      restrict it by IP if you like — it is never used from a browser.
+#   3. Repo -> Settings -> Secrets and variables -> Actions:
+#        secret   GOOGLE_PLACES_API_KEY = the key
+#        variable PLACE_ID              = ChIJgwhbtuMXrjsRKPKZ0trYYL8  (optional)
+#        variable MIN_RATING            = 0   (optional, see below)
+#
+# MIN_RATING: 0 means show every review Google returns, which is the honest and
+# safest option — the true overall rating is displayed next to the quotes either
+# way. Setting it to 4 features only higher-rated reviews. That is a normal
+# thing to do with testimonials, but it is displaying a filtered subset of
+# Places data, which sits less squarely inside Google's terms than showing it
+# whole. Your call; the aggregate rating is never hidden.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"      # daily, 03:17 UTC — off the hour to avoid the stampede
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    name: Fetch and commit reviews
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch from the Places API
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          PLACE_ID: ${{ vars.PLACE_ID }}
+          MIN_RATING: ${{ vars.MIN_RATING }}
+        run: node scripts/fetch-google-reviews.mjs
+
+      - name: Commit if anything changed
+        run: |
+          set -e
+          # The 'fetched' timestamp changes on every run, so comparing the whole
+          # file would commit noise daily. Compare only the content that matters.
+          if git diff --quiet -- data/reviews.json; then
+            echo "No change."; exit 0
+          fi
+          before="$(git show HEAD:data/reviews.json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);delete j.fetched;console.log(JSON.stringify(j))})')"
+          after="$(node -e 'const j=require("./data/reviews.json");delete j.fetched;console.log(JSON.stringify(j))')"
+          if [ "$before" = "$after" ]; then
+            echo "Only the timestamp moved — not committing."
+            git checkout -- data/reviews.json
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/reviews.json
+          git commit -m "Refresh Google reviews"
+          git push
