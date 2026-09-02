@@ -8,7 +8,8 @@ pattern care-ai and guhya-website use, with no Docker build (the site is static)
 ### 1. Make sure the server side is ready (one time)
 Follow `DEPLOY-cafegopala.md` once so that on the server:
 - `/home/deploy/careai/sites/cafegopal.co.in/` exists
-- `nginx-cafegopala.conf` is wired into nginx and a TLS cert is in place
+- the nginx block for the site is live and a TLS cert is in place
+  (owned by avyangah-infra: `apps/cafegopala.in.app`, deployed with `bin/deploy.sh`)
 - `cafegopal.co.in` DNS points at the server
 
 ### 2. Put this folder on GitHub

@@ -8,7 +8,9 @@ name: Deploy Cafe Gopala Website
 # One-time prerequisite (done once, see DEPLOY-cafegopala.md):
 #   - cafegopala.in DNS points at the server
 #   - /home/deploy/careai/sites/cafegopala.in exists (created by avyangah-infra server/add-site.sh)
-#   - nginx-cafegopala.conf is wired into nginx + a TLS cert is in place
+#   - the nginx block for cafegopala.in is live + a TLS cert is in place
+#     (owned by the avyangah-infra repo: apps/cafegopala.in.app, rendered by
+#      bin/render.sh and deployed with bin/deploy.sh. No nginx config lives here.)
 
 on:
   push:
@@ -22,13 +24,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Upload static files to server
+      # The repo keeps the HTML in pages/ for tidiness, but the site is served
+      # FLAT: pages/index.html -> <root>/index.html. strip_components: 1 drops the
+      # leading "pages/" so the live URLs stay /, /order.html, ... and no nginx
+      # change is needed. Everything else keeps its path.
+      - name: Upload pages (flattened to site root)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.UK_SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "index.html,order.html,reserve.html,story.html,404.html,manifest.json,robots.txt,sitemap.xml,logo.png,logo2.png,logo.webp,logo-badge.webp,logo-side.webp,logo2-side.webp,icon-192.png,icon-512.png,og-cover.jpg,cafe_gopala_animated_logo_clean_optimized.webm,cafe_gopala_animated_logo_clean_optimized.mp4,pics"
+          source: "pages/*"
+          strip_components: 1
+          target: "/home/deploy/careai/sites/cafegopala.in"
+          overwrite: true
+
+      - name: Upload assets and site metadata
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.UK_SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "images/,videos/,manifest.json,robots.txt,sitemap.xml"
           target: "/home/deploy/careai/sites/cafegopala.in"
           overwrite: true
 

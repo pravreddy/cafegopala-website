@@ -1,5 +1,13 @@
 # Deploy cafegopal.co.in on the existing Hetzner server
 
+> **HISTORICAL — the nginx side of this document is superseded (Sep 2026).**
+> The nginx server block for `cafegopala.in` is now owned by the
+> **avyangah-infra** repo: `apps/cafegopala.in.app` (rendered by `bin/render.sh`,
+> deployed by `bin/deploy.sh` -> `bin/publish.sh` with validation and rollback).
+> There is no nginx config in this repo any more — do not scp or hand-edit one.
+> Also note the domain is `cafegopala.in`; `cafegopal.co.in` below is the old name.
+
+
 Adds the Cafe Gopala static site next to Care AI + SignSimple + Guhya, behind
 the same `careai-nginx` container. Additive only — does not change the other
 sites. The POS at `pos.cafegopal.co.in` is served separately by the guhya-pos

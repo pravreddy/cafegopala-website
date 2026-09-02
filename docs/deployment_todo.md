@@ -1,5 +1,13 @@
 # Cafe Gopala — Deployment TODO
 
+> **HISTORICAL — the nginx side of this document is superseded (Sep 2026).**
+> The nginx server block for `cafegopala.in` is now owned by the
+> **avyangah-infra** repo: `apps/cafegopala.in.app` (rendered by `bin/render.sh`,
+> deployed by `bin/deploy.sh` -> `bin/publish.sh` with validation and rollback).
+> There is no nginx config in this repo any more — do not scp or hand-edit one.
+> Also note the domain is `cafegopala.in`; `cafegopal.co.in` below is the old name.
+
+
 A single checklist to get **cafegopal.co.in** live on the existing Hetzner
 `careai-nginx` box and on auto-deploy. Detailed commands live in
 `DEPLOY-cafegopala.md` and `CICD.md`; this is the running task list.
