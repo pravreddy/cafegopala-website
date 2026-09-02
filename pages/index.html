@@ -217,6 +217,7 @@
   .gr-who{margin-top:1rem;font-size:.95rem;color:var(--muted)}
   .gr-who b{color:var(--ember);font-weight:600}
   .gr-who .gr-mini{color:var(--gold);letter-spacing:.08em;margin-right:.4rem}
+  .gr-who .gr-when{font-size:.82rem;color:var(--muted)}
   .gr-attr{margin-top:2rem;font-size:.8rem;color:var(--muted)}
   .gr-attr a{color:var(--muted);text-decoration:underline}
   @media(prefers-reduced-motion:reduce){.gr-slide{transition:none}}
@@ -781,9 +782,10 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
           /* Long reviews are trimmed for the strip only; the full text is one
              click away on Google, which the link above makes clear. */
           var t = r.text.length > 320 ? r.text.slice(0, 317).trim() + "\u2026" : r.text;
+          var when = r.when ? '<span class="gr-when">' + esc(r.when) + "</span> &middot; " : "";
           return '<div class="gr-slide' + (i === 0 ? " active" : "") + '">' +
                  '<div class="gr-text">&ldquo;' + esc(t) + '&rdquo;</div>' +
-                 '<div class="gr-who"><span class="gr-mini">' + stars(r.rating) + "</span>" +
+                 '<div class="gr-who">' + when + '<span class="gr-mini">' + stars(r.rating) + "</span>" +
                  "<b>" + esc(r.author) + "</b></div></div>";
         }).join("");
 

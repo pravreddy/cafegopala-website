@@ -65,6 +65,7 @@
 
   .live{padding:0 0 3rem;text-align:center}
   .live[hidden]{display:none}
+  .live-loading{color:var(--muted);font-size:.95rem;padding:2rem 0}
   .live-score{display:inline-flex;align-items:baseline;gap:.55rem}
   .live-score b{font-family:"Cormorant Garamond",serif;font-size:clamp(2.4rem,6vw,3.2rem);
     font-weight:700;color:var(--maroon);line-height:1}
@@ -77,10 +78,14 @@
     box-shadow:0 8px 24px rgba(62,18,6,.05)}
   .live-item .rt{color:var(--gold);letter-spacing:.08em;font-size:.95rem}
   .live-item p{margin:.6rem 0 .9rem;font-size:.98rem;line-height:1.6;color:var(--ink)}
+  .live-item .when{font-size:.82rem;color:var(--muted);margin-bottom:.4rem}
   .live-item .who{font-size:.88rem;color:var(--muted)}
   .live-item .who b{color:var(--ember);font-weight:600}
   .live-attr{margin-top:1.6rem;font-size:.8rem;color:var(--muted)}
   .live-attr a{color:var(--muted)}
+  @media(max-width:760px){
+    .live-list{grid-template-columns:1fr;max-width:38rem;margin:0 auto}
+  }
 
   .composer{padding:0 0 3.6rem}
   .composer-card{background:#fff;border:1px solid var(--line);border-radius:18px;
@@ -170,7 +175,8 @@
 
   <section class="live" id="liveReviews" hidden>
     <div class="wrap">
-      <div class="live-score"><b id="lvRating"></b><span class="live-stars" id="lvStars"></span></div>
+      <div class="live-loading" id="liveLoading">Loading reviews&hellip;</div>
+      <div class="live-score" id="liveScore" hidden><b id="lvRating"></b><span class="live-stars" id="lvStars"></span></div>
       <div class="live-count" id="lvCount"></div>
       <div class="live-list" id="lvList"></div>
       <div class="live-attr">Reviews from <a id="lvLink" href="https://maps.google.com/?cid=13790260493356233256" target="_blank" rel="noopener">Google</a>, refreshed daily.</div>
@@ -267,6 +273,8 @@
   (function () {
     var sec = document.getElementById("liveReviews");
     if (!sec || !window.fetch) return;
+    var loading = document.getElementById("liveLoading");
+    var scoreEl = document.getElementById("liveScore");
     function stars(n) {
       var f = Math.round(n);
       return "\u2605".repeat(f) + "\u2606".repeat(Math.max(0, 5 - f));
@@ -293,6 +301,8 @@
       .then(function (d) { return usable(d) ? d : grab("/data/reviews-fallback.json"); })
       .then(function (d) {
         if (!usable(d)) return;
+        if (loading) loading.hidden = true;
+        if (scoreEl) scoreEl.hidden = false;
         var link = d.mapsUri || "https://maps.google.com/?cid=13790260493356233256";
         document.getElementById("lvRating").textContent = d.rating.toFixed(1);
         document.getElementById("lvStars").textContent = stars(d.rating);
@@ -301,13 +311,14 @@
           "from " + (d.count || d.reviews.length) + " Google ratings &middot; " +
           '<a href="' + esc(link) + '" target="_blank" rel="noopener">read them all &rarr;</a>';
         document.getElementById("lvList").innerHTML = d.reviews.map(function (r) {
+          var when = r.when ? '<div class="when">' + esc(r.when) + "</div>" : "";
           return '<div class="live-item"><div class="rt">' + stars(r.rating) + "</div>" +
-                 "<p>" + esc(r.text) + "</p>" +
+                 when + "<p>" + esc(r.text) + "</p>" +
                  '<div class="who"><b>' + esc(r.author) + "</b></div></div>";
         }).join("");
         sec.hidden = false;
       })
-      .catch(function () {});
+      .catch(function () { if (loading) loading.textContent = "Reviews are unavailable right now."; });
   })();
 
   /* Review composer.
@@ -328,6 +339,7 @@
     function updateCount() {
       var n = draft.value.trim().length;
       count.textContent = n === 1 ? "1 character" : n + " characters";
+      copyOpen.disabled = n === 0;
     }
     draft.addEventListener("input", function () { updateCount(); state.textContent = ""; });
     updateCount();
