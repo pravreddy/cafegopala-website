@@ -750,10 +750,23 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
       });
     }
 
-    fetch("/data/reviews.json", { cache: "no-cache" })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    function usable(d) {
+      return d && d.reviews && d.reviews.length && typeof d.rating === "number";
+    }
+    function grab(url) {
+      return fetch(url, { cache: "no-cache" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    }
+    /* Live file first — written nightly on the server by the cafegopala-reviews
+       cron job (avyangah-infra). The committed fallback covers only the case
+       where the live file does not exist yet: fresh server, wiped directory,
+       cron not yet run. The two are deliberately different filenames so a site
+       deploy can never overwrite the live one with a stale committed copy. */
+    grab("/data/reviews.json")
+      .then(function (d) { return usable(d) ? d : grab("/data/reviews-fallback.json"); })
       .then(function (d) {
-        if (!d || !d.reviews || !d.reviews.length || typeof d.rating !== "number") return;
+        if (!usable(d)) return;
 
         document.getElementById("grRating").textContent = d.rating.toFixed(1);
         document.getElementById("grStars").textContent = stars(d.rating);
@@ -771,8 +784,7 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
           return '<div class="gr-slide' + (i === 0 ? " active" : "") + '">' +
                  '<div class="gr-text">&ldquo;' + esc(t) + '&rdquo;</div>' +
                  '<div class="gr-who"><span class="gr-mini">' + stars(r.rating) + "</span>" +
-                 "<b>" + esc(r.author) + "</b>" +
-                 (r.when ? " &middot; " + esc(r.when) : "") + "</div></div>";
+                 "<b>" + esc(r.author) + "</b></div></div>";
         }).join("");
 
         sec.hidden = false;

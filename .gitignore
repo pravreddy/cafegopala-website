@@ -17,3 +17,8 @@ index_backup.html
 # Cost of that choice: ~21MB in the repo, and git keeps every future version of
 # a binary forever — so re-export rather than re-commit variants of the same
 # clip, and if the repo ever feels slow, that is the thing to revisit.
+
+# The live reviews file is written on the server by the cafegopala-reviews cron
+# job (avyangah-infra). Committing it here would let the deploy overwrite the
+# live copy with a stale one. The fallback lives at data/reviews-fallback.json.
+data/reviews.json
