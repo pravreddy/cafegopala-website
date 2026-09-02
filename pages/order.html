@@ -1032,6 +1032,16 @@ function renderStatus() {
   if (LAST.status === "placed") {
     html += '<div class="center" style="margin-top:.8rem"><button class="btn" onclick="renderPay();show(\'pay\')">Pay now</button></div>';
   }
+  /* Ask for the review only once the food has actually been collected. Asking at
+     "placed" would be asking someone to review a meal they have not eaten. Every
+     collected order gets the same prompt — no filtering by who seems happy. */
+  if (LAST.status === "collected") {
+    html += '<div class="center" style="margin-top:1.2rem;padding-top:1.1rem;border-top:1px solid rgba(62,18,6,.14)">' +
+            '<div style="font-weight:600;margin-bottom:.35rem">Hope you enjoyed it.</div>' +
+            '<div style="font-size:.92rem;color:#835435;margin-bottom:.8rem">A few words on Google helps someone else find us.</div>' +
+            '<a class="btn" href="reviews.html" style="display:inline-block;text-decoration:none">Leave a review</a>' +
+            '</div>';
+  }
   document.getElementById("status-card").innerHTML = html;
 }
 function poll() {

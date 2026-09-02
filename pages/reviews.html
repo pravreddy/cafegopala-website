@@ -30,6 +30,8 @@
   h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;line-height:1.08;margin:0}
   a{color:inherit} img{max-width:100%;display:block}
   .wrap{width:min(1080px,92vw);margin-inline:auto}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
   header{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
     background:linear-gradient(180deg,rgba(252,244,226,.94),rgba(252,244,226,.78));
@@ -54,7 +56,36 @@
   .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
   a:focus-visible,.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
+  .eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-weight:600;font-size:.72rem;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--ember)}
+  .eyebrow::before,.eyebrow::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+  .eyebrow::after{background:linear-gradient(90deg,var(--gold),transparent)}
+
   .reviews-hero{padding:3.4rem 0 2.4rem;text-align:center}
+
+  .composer{padding:0 0 3.6rem}
+  .composer-card{background:#fff;border:1px solid var(--line);border-radius:18px;
+    padding:2rem 1.8rem;box-shadow:0 10px 30px rgba(62,18,6,.06)}
+  .composer-card h2{font-size:1.8rem;color:var(--maroon);margin:0 0 .5rem;text-align:center}
+  .composer-card .lede{color:var(--muted);text-align:center;margin:0 auto 1.6rem;max-width:34rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.2rem}
+  .chip-btn{font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;
+    padding:.45rem .95rem;border-radius:999px;border:1.5px solid var(--gold);
+    background:rgba(224,160,41,.10);color:var(--maroon);transition:background .18s,transform .18s}
+  .chip-btn:hover{background:rgba(224,160,41,.24);transform:translateY(-1px)}
+  .chip-btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .composer textarea{width:100%;min-height:150px;resize:vertical;font:inherit;font-size:1rem;
+    line-height:1.6;color:var(--ink);background:var(--cream);padding:.9rem 1rem;
+    border:1.5px solid var(--line);border-radius:12px}
+  .composer textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(224,160,41,.22)}
+  .composer-meta{display:flex;justify-content:space-between;align-items:center;gap:1rem;
+    flex-wrap:wrap;margin:.6rem 0 1.2rem;font-size:.85rem;color:var(--muted)}
+  .composer-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+  .composer .note{margin:1.4rem auto 0;max-width:34rem;text-align:center;
+    font-size:.85rem;color:var(--muted);line-height:1.55}
+  .composer .cta[disabled]{opacity:.5;pointer-events:none}
+  #copyState{min-height:1.3rem;text-align:center;margin-top:.9rem;
+    font-size:.92rem;font-weight:600;color:var(--veg)}
   .reviews-hero h1{font-size:clamp(2.2rem,6vw,3.4rem);color:var(--maroon);margin:.4rem 0 .6rem}
   .reviews-hero p{color:var(--muted);max-width:38rem;margin:0 auto;font-size:1.05rem}
 
@@ -134,6 +165,43 @@
       </div>
     </div>
   </section>
+
+  <section class="composer">
+    <div class="wrap composer-card">
+      <h2>Not sure what to say?</h2>
+      <p class="lede">Jot it down here first. Tap a prompt if you need a nudge, then
+         we will copy your words and open Google so you can paste and post.</p>
+
+      <div class="chips" id="chips">
+        <button type="button" class="chip-btn" data-add="The chaat was the best I have had in a while.">The chaat</button>
+        <button type="button" class="chip-btn" data-add="The paneer dishes were rich and properly spiced.">The paneer</button>
+        <button type="button" class="chip-btn" data-add="Hot naan straight from the kitchen, and the masala chai is worth the trip on its own.">Naan &amp; chai</button>
+        <button type="button" class="chip-btn" data-add="No onion, no garlic, and you do not miss them for a second.">Saatvik cooking</button>
+        <button type="button" class="chip-btn" data-add="The staff were warm and looked after us well.">The staff</button>
+        <button type="button" class="chip-btn" data-add="A calm, clean place to sit and eat.">The atmosphere</button>
+        <button type="button" class="chip-btn" data-add="Ordering ahead and collecting was quick and easy.">Order &amp; collect</button>
+      </div>
+
+      <label class="sr-only" for="draft">Your review</label>
+      <textarea id="draft" placeholder="What did you eat, and how was it? A sentence or two is plenty."></textarea>
+
+      <div class="composer-meta">
+        <span id="count">0 characters</span>
+        <span>Nothing is sent to us &mdash; this stays in your browser.</span>
+      </div>
+
+      <div class="composer-actions">
+        <a class="cta" id="copyOpen" href="#">Copy &amp; open Google &rarr;</a>
+        <a class="cta ghost" id="justOpen" href="https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8" target="_blank" rel="noopener">Skip &mdash; write it on Google</a>
+      </div>
+
+      <div id="copyState" role="status" aria-live="polite"></div>
+
+      <p class="note">Google reviews have to be posted from your own Google account,
+         so the last step happens on their site. Please write only what you actually
+         think &mdash; an honest three lines is worth more to us than a perfect one.</p>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -163,6 +231,86 @@
         toggle.setAttribute("aria-expanded", "false");
         toggle.setAttribute("aria-label", "Open menu");
       });
+    });
+  })();
+
+  /* Review composer.
+     Google has no API for posting a review — one has to be written by a signed-in
+     Google account on their own site. So all this does is help someone get the
+     words out, copy them, and open Google's write-review page to paste into.
+     Nothing leaves the browser; there is no rating step and no filtering by
+     sentiment, which would be review gating and against Google's policy. */
+  (function () {
+    var REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8";
+    var draft = document.getElementById("draft");
+    var count = document.getElementById("count");
+    var state = document.getElementById("copyState");
+    var chips = document.getElementById("chips");
+    var copyOpen = document.getElementById("copyOpen");
+    if (!draft || !copyOpen) return;
+
+    function updateCount() {
+      var n = draft.value.trim().length;
+      count.textContent = n === 1 ? "1 character" : n + " characters";
+    }
+    draft.addEventListener("input", function () { updateCount(); state.textContent = ""; });
+    updateCount();
+
+    if (chips) {
+      chips.addEventListener("click", function (e) {
+        var btn = e.target.closest(".chip-btn");
+        if (!btn) return;
+        var add = btn.getAttribute("data-add") || "";
+        var cur = draft.value.trim();
+        if (cur.indexOf(add) >= 0) return;          /* don't add the same line twice */
+        draft.value = cur ? cur + " " + add : add;
+        updateCount();
+        state.textContent = "";
+        draft.focus();
+        draft.setSelectionRange(draft.value.length, draft.value.length);
+      });
+    }
+
+    /* Synchronous copy. execCommand is deprecated but is the only path that
+       reliably works inside a click handler right before window.open — the async
+       clipboard API can reject once the new tab takes focus. We try the modern
+       API too, and simply carry on if both fail: the text is still on screen. */
+    function copyText(text) {
+      var ok = false;
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-1000px";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch (err) { ok = false; }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try { navigator.clipboard.writeText(text).then(function () {}, function () {}); } catch (e2) {}
+      }
+      return ok;
+    }
+
+    copyOpen.addEventListener("click", function (e) {
+      e.preventDefault();
+      var text = draft.value.trim();
+      if (!text) {
+        state.style.color = "var(--ember)";
+        state.textContent = "Write a line or two first, then we will copy it for you.";
+        draft.focus();
+        return;
+      }
+      var copied = copyText(text);
+      state.style.color = "var(--veg)";
+      state.textContent = copied
+        ? "Copied. Paste it into the box on Google \u2014 thank you."
+        : "Google is opening \u2014 copy your words above and paste them in.";
+      window.open(REVIEW_URL, "_blank", "noopener");
     });
   })();
 </script>
