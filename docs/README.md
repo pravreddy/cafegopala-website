@@ -15,6 +15,10 @@ Mukta type, with a temple-arch and marigold-garland motif.
   `/`, `/order.html`, ... — there is no `/pages/` prefix on the live site.
 - `images/`, `videos/` — assets, referenced from pages as `../images/...`
 - `docs/` — documentation and archive (never deployed)
+- `data/reviews.json` — NOT in this repo. The live Google rating and reviews are
+  written nightly into the site directory on the server by the `cafegopala-reviews`
+  cron job in the **avyangah-infra** repo (`jobs/cafegopala-reviews/`). Do not add
+  `data/` back to the deploy upload list — it would overwrite the live file.
 - `tests/` — Playwright video/QA tooling (never deployed)
 - `images/logo.png` — the brand logo, used by the hero + header + favicon
 - `manifest.json`, `robots.txt`, `sitemap.xml` — PWA + SEO

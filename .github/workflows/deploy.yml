@@ -15,6 +15,17 @@ name: Deploy Cafe Gopala Website
 on:
   push:
     branches: [main]
+    # Only deploy when something the SITE serves has changed. docs/ and tests/
+    # are not uploaded, so a docs edit used to re-push ~34MB of images and video
+    # and reload nginx for nothing.
+    paths:
+      - 'pages/**'
+      - 'images/**'
+      - 'videos/**'
+      - 'manifest.json'
+      - 'robots.txt'
+      - 'sitemap.xml'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:   # lets you trigger a deploy manually from the Actions tab
 
 jobs:
@@ -23,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2      # so the videos-changed check can diff HEAD^..HEAD
 
       # The repo keeps the HTML in pages/ for tidiness, but the site is served
       # FLAT: pages/index.html -> <root>/index.html. strip_components: 1 drops the
@@ -39,13 +52,38 @@ jobs:
           target: "/home/deploy/careai/sites/cafegopala.in"
           overwrite: true
 
-      - name: Upload assets and site metadata
+      # videos/ is ~14MB and changes almost never, so it is uploaded only when it
+      # actually changed. On a manual dispatch we cannot diff, so we send it.
+      - name: Did videos change?
+        id: vid
+        run: |
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git rev-parse HEAD^ >/dev/null 2>&1 &&
+               git diff --quiet HEAD^ HEAD -- videos/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload images and site metadata
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.UK_SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "images/,videos/,data/,manifest.json,robots.txt,sitemap.xml"
+          source: "images/,manifest.json,robots.txt,sitemap.xml"
+          target: "/home/deploy/careai/sites/cafegopala.in"
+          overwrite: true
+
+      - name: Upload videos
+        if: steps.vid.outputs.changed == 'true'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.UK_SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "videos/"
           target: "/home/deploy/careai/sites/cafegopala.in"
           overwrite: true
 
