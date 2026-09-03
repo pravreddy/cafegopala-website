@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Join our kitchen — Careers at Cafe Gopala</title>
+<meta name="description" content="We're a small saatvik kitchen on New BEL Road, Bengaluru. Tell us a little about yourself — we read every email." />
+<link rel="icon" href="../images/icon-192.png" />
+<link rel="apple-touch-icon" href="../images/icon-192.png" />
+<meta name="theme-color" content="#3E1206" />
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mukta:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Design tokens and shell styles copied from index.html and story.html.
+     This site is plain static HTML with no build step, so duplicating ~120
+     lines of CSS is the smaller risk until a third page needs them. */
+  :root{
+    --saffron:#E4611C; --ember:#BE3E0C; --gold:#E0A029; --gold-soft:#F3C766;
+    --maroon:#3E1206; --maroon-2:#571C0A; --cream:#FCF4E2; --ink:#2A130A;
+    --muted:#835435; --veg:#1a7d3a; --line:rgba(62,18,6,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;background:var(--cream)}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
+  body{margin:0;color:var(--ink);background:var(--cream);
+    font-family:"Mukta",system-ui,-apple-system,sans-serif;font-weight:400;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(120% 70% at 50% -10%, rgba(228,97,28,.16), transparent 60%),
+      radial-gradient(80% 50% at 90% 8%, rgba(224,160,41,.12), transparent 60%);
+    background-attachment:fixed;}
+  h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;line-height:1.08;margin:0}
+  a{color:inherit} img{max-width:100%;display:block}
+  .wrap{width:min(680px,92vw);margin-inline:auto}
+  .eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-weight:600;font-size:.72rem;
+    letter-spacing:.28em;text-transform:uppercase;color:var(--ember)}
+  .eyebrow::before,.eyebrow::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+  .eyebrow::after{background:linear-gradient(90deg,var(--gold),transparent)}
+
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+    background:linear-gradient(180deg,rgba(252,244,226,.94),rgba(252,244,226,.78));
+    border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:1rem;padding:.6rem 0;width:min(1080px,92vw);margin-inline:auto}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;margin-right:auto}
+  .brand img{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:50% 30%;
+    border:2px solid var(--gold);box-shadow:0 2px 10px rgba(62,18,6,.25)}
+  .brand b{font-family:"Cormorant Garamond",serif;font-size:1.35rem;font-weight:700;color:var(--maroon);line-height:1}
+  .brand small{display:block;font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ember);font-weight:600}
+  .nav-links{display:flex;gap:1.6rem;font-weight:500;font-size:.95rem}
+  .nav-links a{text-decoration:none;color:var(--maroon);opacity:.85;transition:opacity .2s}
+  .nav-links a:hover{opacity:1;color:var(--ember)}
+  .nav-links a[aria-current]{opacity:1;color:var(--ember);font-weight:600}
+  .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer}
+  .nav-toggle span{display:block;width:24px;height:2px;background:var(--maroon);border-radius:2px;transition:transform .2s,opacity .2s}
+  .cta{display:inline-block;text-decoration:none;font-weight:600;font-size:.92rem;border:none;cursor:pointer;font:inherit;
+    padding:.7rem 1.3rem;border-radius:999px;background:linear-gradient(180deg,var(--saffron),var(--ember));
+    color:#fff;box-shadow:0 6px 18px rgba(190,62,12,.32);transition:transform .18s,box-shadow .18s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(190,62,12,.4)}
+  .cta.ghost{background:transparent;color:var(--maroon);box-shadow:none;border:1.5px solid var(--gold)}
+  .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
+  .cta[disabled]{opacity:.55;cursor:not-allowed;box-shadow:none;transform:none}
+  a:focus-visible,.cta:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  footer{background:var(--maroon);color:rgba(252,244,226,.75);padding:2.2rem 0;text-align:center;margin-top:3rem}
+  footer a{color:var(--gold-soft);text-decoration:none;font-weight:600}
+  footer .fine{font-size:.85rem}
+  footer .fine a{text-decoration:none}
+
+  /* ---- page-specific ---- */
+  .careers-hero{padding:2.6rem 0 .6rem;text-align:center}
+  .careers-hero h1{font-size:clamp(2.2rem,6vw,3.2rem);color:var(--maroon);margin:.5rem 0 .6rem}
+  .careers-hero p{max-width:34rem;margin:.5rem auto 0;color:var(--muted);font-size:1.05rem}
+
+  .intro{background:linear-gradient(180deg,#fff,var(--cream));border:1px solid var(--line);
+    border-radius:16px;padding:1.2rem 1.3rem;margin:1.4rem 0;color:var(--muted);font-size:1rem;line-height:1.7}
+  .intro strong{color:var(--ink)}
+  .intro ul{margin:.5rem 0 .2rem;padding-left:1.2rem}
+  .intro li{margin:.2rem 0}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.2rem;margin:1rem 0;
+    box-shadow:0 6px 20px rgba(62,18,6,.06)}
+  .step{display:flex;align-items:center;gap:.6rem;margin:0 0 .8rem}
+  .step i{width:26px;height:26px;border-radius:50%;background:var(--maroon);color:#fff;font-style:normal;
+    font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex:none}
+  .step h2{font-size:1.3rem;color:var(--maroon)}
+
+  label{display:block;font-size:.85rem;color:var(--ink);font-weight:600;margin:.7rem 0 .3rem}
+  .req::after{content:" *";color:var(--ember)}
+  input,select,textarea{width:100%;padding:.7rem .8rem;border:1px solid var(--line);border-radius:10px;
+    font:inherit;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+  .row{display:flex;gap:.7rem;flex-wrap:wrap}
+  .row > *{flex:1;min-width:150px}
+  .hint{font-size:.8rem;color:var(--muted);margin:.3rem 0 0}
+  .char-count{font-size:.78rem;color:var(--muted);text-align:right;margin:.2rem 0 0}
+
+  .role{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
+  .role button{type:button;border:1px solid var(--line);background:#fff;border-radius:10px;
+    padding:.55rem .9rem;font-weight:600;cursor:pointer;color:var(--ink);font:inherit}
+  .role button[aria-pressed="true"]{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+
+  .msg{border-radius:10px;padding:.8rem 1rem;margin:.8rem 0;font-size:.95rem}
+  .msg.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+  .msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+
+  .submit-row{margin:1.2rem 0 .4rem;text-align:center}
+  .alt{text-align:center;margin:.4rem 0 0;font-size:.85rem;color:var(--muted)}
+  .alt a{color:var(--ember);text-decoration:underline}
+
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  @media (max-width:760px){
+    .nav-toggle{display:flex}
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(252,244,226,.98);backdrop-filter:blur(10px);flex-direction:column;gap:0;padding:0;border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(62,18,6,.1)}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:.9rem 1.2rem;border-top:1px solid var(--line);font-size:1rem;opacity:1}
+    .nav-links a:hover{background:rgba(224,160,41,.1)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+    .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+  }
+</style>
+</head>
+<body id="top">
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img src="../images/logo-badge.webp" alt="Cafe Gopala — Krishna playing the flute beside a cow" width="46" height="46"/>
+      <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#saatvik">Saatvik</a>
+      <a href="index.html#menu">Menu</a>
+      <a href="story.html">Our story</a>
+      <a href="index.html#jain">Jain</a>
+      <a href="index.html#visit">Visit</a>
+      <a href="reviews.html">Reviews</a>
+      <a href="careers.html" aria-current="page">Careers</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <a class="cta" href="order.html">Order online</a>
+  </div>
+</header>
+
+<section class="careers-hero">
+  <div class="wrap">
+    <span class="eyebrow">We're hiring</span>
+    <h1>Join our kitchen</h1>
+    <p>Cafe Gopala is a small saatvik kitchen on New BEL Road. When we hire, we hire for attitude first and skill second.</p>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <div class="intro">
+    <p><strong>A humble cook who will show up on time and listen is worth more than a brilliant one who won't.</strong>
+       If that sounds like you, tell us a little about yourself. We read every email.</p>
+    <p style="margin:.6rem 0 .2rem"><strong>What we look for</strong></p>
+    <ul>
+      <li>Reliable — shows up on time, every shift</li>
+      <li>Calm under pressure — a busy Saturday is a normal Saturday</li>
+      <li>Respectful — to the food, to the team, to the guests</li>
+      <li>Comfortable with a <strong>no onion, no garlic</strong> kitchen</li>
+    </ul>
+    <p style="margin:.8rem 0 .2rem"><strong>Please note</strong></p>
+    <ul>
+      <li>We respect your time. Please keep your message short.</li>
+      <li>This is a working kitchen — experience helps, attitude matters more.</li>
+      <li>If you're a cook, you will be asked to do a trial shift before an offer.</li>
+    </ul>
+  </div>
+
+  <!-- honeypot: real applicants never see or fill this -->
+  <form id="careers" autocomplete="on" novalidate>
+    <input id="website" class="sr" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+    <div class="card">
+      <div class="step"><i>1</i><h2>About you</h2></div>
+
+      <div class="row">
+        <div>
+          <label class="req" for="name">Full name</label>
+          <input id="name" name="name" autocomplete="name" required maxlength="80" />
+        </div>
+        <div>
+          <label class="req" for="phone">Mobile number</label>
+          <input id="phone" name="phone" inputmode="numeric" autocomplete="tel" pattern="[0-9]{10,15}" placeholder="10 digits" required maxlength="15" />
+        </div>
+      </div>
+
+      <label class="req" for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required maxlength="120" />
+    </div>
+
+    <div class="card">
+      <div class="step"><i>2</i><h2>The role</h2></div>
+
+      <label class="req" id="roleLabel">What role are you applying for?</label>
+      <div class="role" id="role" role="radiogroup" aria-labelledby="roleLabel">
+        <button type="button" data-v="Cook" aria-pressed="false">Cook</button>
+        <button type="button" data-v="Service / Front of house" aria-pressed="false">Service / Front of house</button>
+        <button type="button" data-v="Helper / Kitchen support" aria-pressed="false">Helper / Kitchen support</button>
+        <button type="button" data-v="Other" aria-pressed="false">Other</button>
+      </div>
+      <input type="hidden" id="roleValue" name="role" value="" required />
+
+      <div class="row">
+        <div>
+          <label for="experience" class="req">Years of experience</label>
+          <select id="experience" name="experience" required>
+            <option value="" disabled selected>Choose one</option>
+            <option value="None / fresher">None / fresher</option>
+            <option value="Less than 1 year">Less than 1 year</option>
+            <option value="1–3 years">1–3 years</option>
+            <option value="3–6 years">3–6 years</option>
+            <option value="6+ years">6+ years</option>
+          </select>
+        </div>
+        <div>
+          <label for="start" class="req">When can you start?</label>
+          <select id="start" name="start" required>
+            <option value="" disabled selected>Choose one</option>
+            <option value="Immediately">Immediately</option>
+            <option value="Within 1 week">Within 1 week</option>
+            <option value="Within 2 weeks">Within 2 weeks</option>
+            <option value="Within a month">Within a month</option>
+            <option value="Just exploring">Just exploring</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="step"><i>3</i><h2>A few words about you</h2></div>
+
+      <label class="req" for="message">Short message (max 400 characters)</label>
+      <textarea id="message" name="message" rows="5" maxlength="400" required
+        placeholder="A line or two about yourself, what you've cooked or served, and why Cafe Gopala."></textarea>
+      <p class="char-count"><span id="chLeft">400</span> / 400</p>
+
+      <p class="hint">Tip: attach your CV or resume to the email before sending — we will read it.</p>
+    </div>
+
+    <div id="msg"></div>
+
+    <div class="submit-row">
+      <button class="cta" type="submit" id="send">Send application &rarr;</button>
+    </div>
+    <p class="alt">Or email us directly at <a id="emailFallback" href="mailto:careers@cafegopala.in">careers@cafegopala.in</a></p>
+  </form>
+
+  <p class="alt" style="margin:1.6rem 0 .4rem">
+    Want to know more about us first? <a href="story.html">Read our story &rarr;</a>
+  </p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>&copy; 2026 Cafe Gopala &middot; Bengaluru</div>
+    <div style="margin-top:.35rem;font-size:.85em;opacity:.75">Website design &amp; development &#169; 2026 <a href="https://guhya.co.in" target="_blank" rel="noopener">Guhya Software Solutions Private Limited</a> &middot; Online ordering &amp; table reservations powered by <a href="https://fastpos.in" target="_blank" rel="noopener">FastPOS</a></div>
+    <div style="margin-top:.4rem">
+      <a href="index.html">Home</a> &middot;
+      <a href="order.html">Order &amp; collect</a> &middot;
+      <a href="story.html">Our story</a> &middot;
+      <a href="reviews.html">Reviews</a> &middot;
+      <a href="careers.html">Careers</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ───────────────────────────────────────────────────────────────────────────
+   Careers intake — opens the user's mail client with a clean, pre-filled
+   email to careers@cafegopala.in.
+
+   Why mailto: no backend, no third party, no extra service to run, nothing
+   to leak data to. Volume is low. If it ever grows we can swap this script
+   for a server-side handler without touching the form.
+
+   mailto: cannot attach files cross-browser, so the form does NOT try. The
+   CV hint tells the applicant to attach the file to the email that opens.
+   ─────────────────────────────────────────────────────────────────────────── */
+(function () {
+  var APPLY_TO = "careers@cafegopala.in";
+  var SUBJECT  = "Application — Cafe Gopala";
+
+  var $ = function (id) { return document.getElementById(id); };
+  function show(kind, text) {
+    $("msg").innerHTML = text ? '<div class="msg ' + kind + '">' + text + "</div>" : "";
+  }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* role radio buttons → hidden field */
+  var roleBtns = document.querySelectorAll("#role button");
+  var roleVal  = $("roleValue");
+  roleBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      roleBtns.forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true");
+      roleVal.value = b.dataset.v;
+    });
+  });
+
+  /* character counter */
+  var msg = $("message"), ch = $("chLeft");
+  msg.addEventListener("input", function () {
+    var left = 400 - msg.value.length;
+    ch.textContent = left < 0 ? 0 : left;
+  });
+
+  /* email-fallback link mirrors APPLY_TO */
+  var fb = $("emailFallback");
+  fb.href = "mailto:" + APPLY_TO;
+  fb.textContent = APPLY_TO;
+
+  /* basic field check, then compose and open mail client */
+  $("careers").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if ($("website").value) return;     /* bot */
+
+    var name        = $("name").value.trim();
+    var phone       = $("phone").value.trim();
+    var email       = $("email").value.trim();
+    var role        = roleVal.value;
+    var experience  = $("experience").value;
+    var start       = $("start").value;
+    var message     = msg.value.trim();
+
+    if (!name || !phone || !email || !role || !experience || !start || !message) {
+      show("err", "Please fill in every field before sending.");
+      return;
+    }
+    if (!/^[0-9]{10,15}$/.test(phone.replace(/[\s\-+()]/g, ""))) {
+      show("err", "That mobile number doesn't look right. Please check it.");
+      $("phone").focus();
+      return;
+    }
+    if (message.length > 400) {
+      show("err", "Please keep your message under 400 characters.");
+      msg.focus();
+      return;
+    }
+
+    var body =
+      "Name: " + name + "\n" +
+      "Mobile: " + phone + "\n" +
+      "Email: " + email + "\n" +
+      "Role: " + role + "\n" +
+      "Experience: " + experience + "\n" +
+      "Available from: " + start + "\n" +
+      "\n" +
+      "Message:\n" + message + "\n" +
+      "\n" +
+      "----\n" +
+      "Tip: please attach your CV or resume to this email before sending.\n" +
+      "Sent from the careers form on cafegopala.in.";
+
+    var href =
+      "mailto:" + encodeURIComponent(APPLY_TO) +
+      "?subject=" + encodeURIComponent(SUBJECT + " — " + role + " — " + name) +
+      "&body="    + encodeURIComponent(body);
+
+    show("ok", "Opening your mail app… if nothing happens, the link below will do the same.");
+    /* small delay so the user sees the message before the mail client steals focus */
+    setTimeout(function () { window.location.href = href; }, 250);
+  });
+
+  /* Mobile nav toggle — same as the other pages */
+  (function () {
+    var toggle = document.getElementById("navToggle");
+    var nav = document.getElementById("navLinks");
+    if (!toggle || !nav) return;
+    toggle.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+    nav.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        nav.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Open menu");
+      });
+    });
+  })();
+})();
+</script>
+</body>
+</html>

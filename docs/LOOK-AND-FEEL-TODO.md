@@ -278,6 +278,27 @@
 
 ---
 
+#### A7. Careers page — placement & copy draft (added 2026-09-03)
+- [x] Don't clutter top nav; add as small unobtrusive link in the **footer** of every page ✅
+- [x] Standalone `careers.html` with a structured intake form
+- [x] **Delivery: `mailto:` (no backend, no third party)** — opens the user's mail client with a pre-filled, well-formatted email. Simple, immediate, no extra service to run. CV file is mentioned in the field hint ("attach your CV/resume to the email before sending") because `mailto:` can't attach files cross-browser.
+- [x] Form fields: **Name, Mobile, Email, Role (Cook / Service / Other), Years of experience, When can you start, Short message (≤ 400 chars).** No upload field.
+- [x] Tone: respectful but firm — "We respect your time. Please keep your message short." Acknowledges the volume of CVs and the importance of showing up with the right attitude.
+- [x] Pain points acknowledged: many emails with CVs, arrogant/difficult cook applicants, need a structured intake form to filter and standardise
+- [x] Replace `careers@cafegopala.co.in` placeholder with the real email when known
+
+**Draft copy (starting point — edit freely):**
+> **Join our kitchen**  
+> Cafe Gopala is a small saatvik kitchen on New BEL Road. When we hire, we hire for attitude first and skill second — a humble cook who will show up on time and listen is worth more than a brilliant one who won't. If that sounds like you, tell us a little about yourself. We read every email. We respect your time, so please keep it short.
+
+**TODO (later, not in this pass):**
+- [ ] Mirror Careers footer link in `order.html`, `reserve.html`, `story.html`, `reviews.html`, `404.html` (one-line edit each)
+- [ ] Replace placeholder email `careers@cafegopala.co.in` with the real one
+- [ ] Optionally: forward `mailto:` body through a server-side script when volume grows
+- [ ] `jain-menu.html` (deferred until cafe is ready to publish the Jain menu details)
+
+---
+
 ## Open decisions (answer whenever — not blocking Task 1)
 
 - [x] **Owner name** — use **Cafe Gopala** only (no personal name) ✅ 2026-08-08
