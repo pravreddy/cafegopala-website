@@ -78,7 +78,6 @@
     box-shadow:0 8px 24px rgba(62,18,6,.05)}
   .live-item .rt{color:var(--gold);letter-spacing:.08em;font-size:.95rem}
   .live-item p{margin:.6rem 0 .9rem;font-size:.98rem;line-height:1.6;color:var(--ink)}
-  .live-item .when{font-size:.82rem;color:var(--muted);margin-bottom:.4rem}
   .live-item .who{font-size:.88rem;color:var(--muted)}
   .live-item .who b{color:var(--ember);font-weight:600}
   .live-attr{margin-top:1.6rem;font-size:.8rem;color:var(--muted)}
@@ -311,9 +310,8 @@
           "from " + (d.count || d.reviews.length) + " Google ratings &middot; " +
           '<a href="' + esc(link) + '" target="_blank" rel="noopener">read them all &rarr;</a>';
         document.getElementById("lvList").innerHTML = d.reviews.map(function (r) {
-          var when = r.when ? '<div class="when">' + esc(r.when) + "</div>" : "";
           return '<div class="live-item"><div class="rt">' + stars(r.rating) + "</div>" +
-                 when + "<p>" + esc(r.text) + "</p>" +
+                 "<p>" + esc(r.text) + "</p>" +
                  '<div class="who"><b>' + esc(r.author) + "</b></div></div>";
         }).join("");
         sec.hidden = false;
