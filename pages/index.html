@@ -87,7 +87,8 @@
     border:2px solid var(--gold);box-shadow:0 2px 10px rgba(62,18,6,.25)}
   .brand b{font-family:"Cormorant Garamond",serif;font-size:1.5rem;font-weight:700;color:var(--maroon);line-height:1}
   .brand small{display:block;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ember);font-weight:600}
-  .nav-links{display:flex;gap:1.6rem;font-weight:500;font-size:.95rem}
+  .nav-links{display:flex;gap:1.15rem;font-weight:500;font-size:.93rem}
+  .nav-links a,.nav .cta,.brand small{white-space:nowrap}
   .nav-links a{text-decoration:none;color:var(--maroon);opacity:.85;transition:opacity .2s}
   .nav-links a:hover{opacity:1;color:var(--ember)}
   .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer}
@@ -185,6 +186,31 @@
   .card li span{color:var(--saffron);font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
   .veg{display:inline-block;width:12px;height:12px;border:1.5px solid var(--veg);border-radius:2px;position:relative;margin-right:.55rem;flex:0 0 auto}
   .veg::after{content:"";position:absolute;inset:2px;background:var(--veg);border-radius:50%}
+  /* Jain mark — saffron square with a "J", the convention Swiggy and Zomato
+     already taught customers, sized to sit beside the FSSAI green mark rather
+     than replace it (a Jain dish is still vegetarian and keeps its green mark).
+     The letter carries the meaning, not the colour, so it survives greyscale
+     printing and red-green colour blindness. Solid = already Jain; hollow =
+     the kitchen can make it Jain if you ask. */
+  .diet-mark{display:inline-flex;align-items:center;justify-content:center;
+    width:12px;height:12px;border-radius:2px;font-size:8px;font-weight:800;
+    line-height:1;margin-right:.55rem;flex:0 0 auto}
+  /* NB the modifier is dm-jain, NOT jain: `.jain` is already the class on the
+     whole Jain <section>, and its 4.2rem padding stretched this 12px mark into
+     a bar. Namespaced modifiers, always. */
+  .diet-mark.dm-jain{border:1.5px solid var(--saffron);color:var(--saffron)}
+  .diet-mark.dm-jain.solid{background:var(--saffron);color:#fff}
+  .diet-mark.dm-ekadashi{border:1.5px solid #6b4fa8;color:#6b4fa8}
+  .diet-mark.dm-ekadashi.solid{background:#6b4fa8;color:#fff}
+  /* Vegan — shown IN ADDITION to the green mark, never instead of it: a vegan
+     dish is still vegetarian and keeps its FSSAI symbol. "VG" rather than a
+     leaf so it survives greyscale, same reasoning as the Jain "J". */
+  .vegan-mark{display:inline-flex;align-items:center;justify-content:center;
+    height:12px;padding:0 2px;border-radius:2px;background:#17795e;color:#fff;
+    font-size:7px;font-weight:800;line-height:1;margin-right:.55rem;flex:0 0 auto}
+  .menu-legend{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;
+    margin-top:1rem;font-size:.85rem;color:var(--muted)}
+  .menu-legend span{display:inline-flex;align-items:center}
   .menu-cta{text-align:center;margin-top:2rem}
 
   .verse{background:linear-gradient(180deg,var(--gold),#d4901f);color:var(--maroon);text-align:center;padding:3rem 0}
@@ -328,6 +354,39 @@
   }
   .jain-notice strong{color:var(--veg);font-weight:700}
 
+  /* ---- Ekadashi / fasting section ---- */
+  /* Sits next to the jain section but with a deliberately different rhythm:
+     indigo (Ekadashi) instead of green (Jain-friendly), and a "fasting"
+     eyebrow instead of "hospitality for all". The two sections are siblings,
+     not the same thing. */
+  .ekadashi{padding:4.2rem 0;background:linear-gradient(180deg,var(--cream),#f6eef9);color:var(--ink);border-top:1px solid var(--line)}
+  .ekadashi-head{text-align:center;margin-bottom:2.2rem}
+  .ekadashi-head h2{font-size:clamp(2rem,5vw,2.8rem);color:var(--maroon);margin:.4rem 0 .6rem}
+  .ekadashi-head .sub{color:#4a2a8a;font-size:1.1rem;max-width:38rem;margin:0 auto;font-weight:600}
+  .ekadashi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem}
+  /* 1 lead + 2 + the comparison spanning both columns: no orphan cell. */
+  .ekadashi-card.compare{grid-column:1 / -1}
+  .ekadashi-card{background:#ffffff;border:1.5px solid rgba(75,42,138,.18);border-radius:16px;padding:1.6rem 1.7rem;box-shadow:0 6px 18px rgba(62,18,6,.04)}
+  .ekadashi-card h3{font-size:1.35rem;color:#4a2a8a;font-weight:700;margin:0 0 .7rem;line-height:1.25}
+  .ekadashi-card p{color:var(--ink);font-size:1rem;line-height:1.7;margin:.4rem 0}
+  .ekadashi-card p strong{color:#4a2a8a;font-weight:700}
+  .ekadashi-card ul{margin:.6rem 0;padding-left:1.2rem;color:var(--ink);font-size:1rem;line-height:1.7}
+  .ekadashi-card li{margin:.35rem 0}
+  .ekadashi-card .jain-key{background:rgba(75,42,138,.16);color:#4a2a8a}
+  /* Lead card on top, indigo top border to match the Ekadashi mark colour. */
+  .ekadashi-card.lead{border-top:4px solid #6b4fa8;grid-column:1 / -1;background:#fbf7ff}
+  .ekadashi-card.lead h3{color:#4a2a8a;font-size:1.5rem}
+  /* Tiny inline J mark used inside the "Jain vs Ekadashi" card so the
+     comparison is concrete. */
+  .ekadashi-inline{display:inline-flex;vertical-align:middle;line-height:1}
+  .ekadashi-notice{background:rgba(75,42,138,.10);border:2px solid rgba(75,42,138,.28);border-radius:14px;padding:1.4rem 1.6rem;margin-top:2.2rem;color:var(--ink);font-size:1.08rem;line-height:1.7;text-align:center;max-width:44rem;margin-inline:auto;font-weight:500}
+  .ekadashi-notice strong{color:#4a2a8a;font-weight:700}
+  @media(max-width:760px){
+    .ekadashi-grid{grid-template-columns:1fr}
+    .ekadashi-card.compare{grid-column:auto}
+    .ekadashi-card.lead{grid-column:auto}
+  }
+
   @media(max-width:760px){
     .jain-grid{grid-template-columns:1fr}
     .jain-card.lead{grid-column:auto}
@@ -366,6 +425,7 @@
       <a href="#menu">Menu</a>
       <a href="story.html">Our story</a>
       <a href="#jain">Jain</a>
+      <a href="#ekadashi">Ekadashi</a>
       <a href="#visit">Visit</a>
       <a href="reviews.html">Reviews</a>
       <a href="careers.html">Careers</a>
@@ -420,13 +480,15 @@
        <span class="eyebrow">Our promise</span>
        <h2>Fully saatvik — every dish, every day</h2>
        <p>At <strong>Cafe Gopala</strong>, <strong>every dish</strong> is <strong>100% vegetarian</strong> and strictly prepared <strong>without onion or garlic</strong> — no exceptions. We cook fresh daily with whole grains, seasonal vegetables, legumes, pure dairy, and aromatic spices like cumin, coriander, turmeric, and hing.</p>
-       <div class="saatvik-badges">
-         <span class="badge">Pure vegetarian</span>
-         <span class="badge">No onion</span>
-         <span class="badge">No garlic</span>
-         <span class="badge">No mushroom</span>
-         <span class="badge">Fresh daily</span>
-       </div>
+        <div class="saatvik-badges">
+          <span class="badge">Pure vegetarian</span>
+          <span class="badge">No onion</span>
+          <span class="badge">No garlic</span>
+          <span class="badge">No mushroom</span>
+          <span class="badge">Fresh daily</span>
+         <span class="badge">Ekadashi &amp; vrat on request</span>
+          <span class="badge">Ekadashi &amp; Vrat on request</span>
+        </div>
        <p class="saatvik-note">Saatvik food — in the mode of goodness — is pure, fresh, and nourishing. It supports a calm mind and healthy body, the way scripture and tradition teach us to honour what we eat.</p>
      </div>
    </section>
@@ -437,6 +499,14 @@
         <span class="eyebrow">On the table</span>
         <h2>The menu</h2>
         <p>Everything freshly made and <strong>fully saatvik</strong> — pure vegetarian, with <strong>no onion and no garlic</strong> in any dish. The green mark is the FSSAI vegetarian symbol.</p>
+        <div class="menu-legend">
+          <span><i class="veg"></i>Vegetarian</span>
+          <span><i class="vegan-mark">VG</i>Vegan</span>
+          <span><i class="diet-mark dm-jain solid">J</i>Jain &mdash; no root vegetables</span>
+          <span><i class="diet-mark dm-jain">J</i>Jain on request</span>
+          <span><i class="diet-mark dm-ekadashi solid">E</i>Ekadashi &mdash; no grains or lentils</span>
+          <span><i class="diet-mark dm-ekadashi">E</i>Ekadashi on request</span>
+        </div>
       </div>
 
       <!-- ============================================================
@@ -630,6 +700,48 @@
     </div>
   </section>
 
+  <section class="ekadashi" id="ekadashi">
+    <div class="wrap">
+      <div class="ekadashi-head">
+        <span class="eyebrow">For our fasting days</span>
+        <h2>Ekadashi &amp; Vrat (Fasting) on Request</h2>
+        <p class="sub">Strictly grain-free prasadam, prepared on advance notice</p>
+      </div>
+      <div class="ekadashi-grid">
+        <div class="ekadashi-card lead">
+          <h3>What is Ekadashi food?</h3>
+          <p>Ekadashi is the eleventh day of each lunar fortnight &mdash; a day of fasting observed by many Vaishnavas. The rules are <strong>different from a Jain meal</strong>: grains, lentils, and regular salt are avoided, but root vegetables and dairy are welcome.</p>
+          <p>We prepare <span class="jain-key">strictly grain-free Ekadashi prasadam</span> on request &mdash; cooked without grains, lentils or beans, and with <strong>sendha namak</strong> (rock salt) in place of table salt, using <strong>sabudana, samak rice, kuttu, singhara</strong>, fresh fruit, and pure dairy.</p>
+        </div>
+        <div class="ekadashi-card">
+          <h3>When &amp; how to order</h3>
+          <p>Ekadashi falls <strong>twice each lunar month</strong>. The kitchen prepares fasting dishes on request &mdash; not as standing menu items.</p>
+          <p><strong>Please tell us when you order, or a day ahead for a full fasting meal</strong>, so our chefs can prepare it separately with clean utensils.</p>
+        </div>
+        <div class="ekadashi-card">
+          <h3>How we label the menu</h3>
+          <p>On our menu you will find two fasting marks:</p>
+          <ul>
+            <li><strong>Ekadashi</strong> &mdash; already free of grains and lentils, suitable for a fast.</li>
+            <li><strong>Ekadashi on Request</strong> &mdash; we can cook it fasting-style with sendha namak if you ask.</li>
+          </ul>
+        </div>
+        <div class="ekadashi-card compare">
+          <h3>Jain vs. Ekadashi &mdash; why the marks are different</h3>
+          <p>These are <strong>different rules</strong>:</p>
+          <ul>
+            <li><strong>Jain</strong> preparations avoid <em>root vegetables</em> (potato, carrot, radish) but grains and dairy are fine.</li>
+            <li><strong>Ekadashi</strong> preparations avoid <em>grains, lentils and regular salt</em> but potato and dairy are welcome.</li>
+          </ul>
+          <p>A dish can follow one without the other, which is why they carry <strong>separate marks on the menu</strong> &mdash; a <span class="ekadashi-inline"><i class="diet-mark dm-jain">J</i></span> mark does not mean the dish is also Ekadashi-friendly, and vice versa.</p>
+        </div>
+      </div>
+      <div class="ekadashi-notice">
+        <strong>Observing Ekadashi or a vrat?</strong> Call us a day ahead or mention it while ordering &mdash; we will keep the kitchen ready.
+      </div>
+    </div>
+  </section>
+
   <section class="visit" id="visit">
     <div class="wrap visit-grid">
       <div>
@@ -749,7 +861,21 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
       });
       var html = picked.map(function (cat) {
         var lis = cat.items.map(function (it) {
-          var mark  = it.food_type === "veg" ? '<i class="veg"></i>' : "";
+          /* vegan counts as veg: the FSSAI green mark stays, and the VG badge
+             is added beside it. Never `=== "veg"` — that would silently strip
+             the green mark from every vegan dish. */
+          var isVeg = it.food_type === "veg" || it.food_type === "vegan";
+          var mark  = isVeg ? '<i class="veg"></i>' : "";
+          if (it.food_type === "vegan") mark += '<i class="vegan-mark">VG</i>';
+          /* The POS sends only the two confirmed states; anything unreviewed
+             arrives as "" and shows nothing. Never guess a dish is Jain — a
+             wrong mark makes a guest break a vow they trusted us with. */
+          /* Jain and Ekadashi forbid opposite things — root vegetables vs grains
+             and lentils — so a dish can carry either mark, both, or neither. */
+          if (it.jain === "jain")            mark += '<i class="diet-mark dm-jain solid">J</i>';
+          else if (it.jain === "on_request") mark += '<i class="diet-mark dm-jain">J</i>';
+          if (it.ekadashi === "ekadashi")     mark += '<i class="diet-mark dm-ekadashi solid">E</i>';
+          else if (it.ekadashi === "on_request") mark += '<i class="diet-mark dm-ekadashi">E</i>';
           var price = "&#8377;" + rupees(it.price) +
                       (it.half_price ? ' <small style="color:var(--muted);font-weight:500">&middot; half &#8377;' + rupees(it.half_price) + "</small>" : "");
           return "<li><b>" + mark + esc(it.name) + "</b><span>" + price + "</span></li>";
