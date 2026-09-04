@@ -55,7 +55,11 @@
     --muted:#835435; --veg:#1a7d3a; --line:rgba(62,18,6,.14);
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth;background:var(--cream)}
+  html{scroll-behavior:smooth;background:var(--cream);scroll-padding-top:80px}
+  /* scroll-margin-top on every anchored section so the sticky header doesn't
+     cover the heading when the URL has a #hash. Same value for all sections
+     so the rhythm is consistent. */
+  section[id], main > [id]{scroll-margin-top:80px}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
   @media (prefers-reduced-motion:reduce){.hero-logo{display:none}}  /* show static poster only */
   body{margin:0;color:var(--ink);background:var(--cream);
@@ -244,18 +248,90 @@
   .visit-card .cta.ghost:hover{background:rgba(224,160,41,.26);border-color:var(--gold-soft)}
 
   .jain{padding:4.2rem 0;background:linear-gradient(180deg,#fff,var(--cream));color:var(--ink);border-top:1px solid var(--line)}
-  .jain-head{text-align:center;margin-bottom:2rem}
+  .jain-head{text-align:center;margin-bottom:2.2rem}
   .jain-head h2{font-size:clamp(2rem,5vw,2.8rem);color:var(--maroon);margin:.4rem 0 .6rem}
-  .jain-head .sub{color:var(--muted);font-size:1.05rem;max-width:38rem;margin:0 auto}
+  .jain-head .sub{color:var(--muted);font-size:1.1rem;max-width:38rem;margin:0 auto;font-weight:600}
+
+  /* 2-column clean grid: 1 lead card on top + 6 standard cards in 3 pairs.
+     The lead spans both columns; the six below form an even 3x2 grid so no
+     empty cell at the bottom on desktop. */
   .jain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem}
-  .jain-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.6rem;box-shadow:0 8px 22px rgba(62,18,6,.05)}
-  .jain-card h3{font-size:1.25rem;color:var(--ember);margin:0 0 .6rem}
-  .jain-card p{color:var(--muted);font-size:.98rem;line-height:1.6;margin:.3rem 0}
-  .jain-card ul{margin:.3rem 0;padding-left:1.2rem;color:var(--muted);font-size:.98rem}
-  .jain-card li{margin:.25rem 0}
-  .jain-notice{background:rgba(30,125,58,.06);border:1.5px solid rgba(30,125,58,.18);border-radius:14px;padding:1.2rem 1.4rem;margin-top:1.6rem;color:var(--ink);font-size:1.02rem;line-height:1.6;text-align:center;max-width:38rem;margin-left:auto;margin-right:auto}
-  .jain-notice strong{color:var(--maroon)}
-  @media(max-width:760px){.jain-grid{grid-template-columns:1fr}.jain-notice{font-size:.95rem}}
+
+  .jain-card{
+    background:#ffffff;
+    border:1.5px solid rgba(62,18,6,.12);
+    border-radius:16px;
+    padding:1.6rem 1.7rem;
+    box-shadow:0 6px 18px rgba(62,18,6,.04);
+  }
+  .jain-card h3{
+    font-size:1.35rem;
+    color:var(--maroon);
+    font-weight:700;
+    margin:0 0 .7rem;
+    line-height:1.25;
+  }
+  .jain-card p{
+    color:var(--ink);
+    font-size:1rem;
+    line-height:1.7;
+    margin:.4rem 0;
+  }
+  .jain-card p strong{
+    color:var(--maroon);
+    font-weight:700;
+  }
+  .jain-card ul{
+    margin:.6rem 0;
+    padding-left:1.2rem;
+    color:var(--ink);
+    font-size:1rem;
+    line-height:1.7;
+  }
+  .jain-card li{margin:.35rem 0}
+
+  /* High-contrast readable highlight badge — soft amber pill so the eye
+     lands on the key fact (e.g. "raw banana instead of potato") without
+     making the surrounding text harder to read. */
+  .jain-card .jain-key{
+    display:inline;
+    background:rgba(224,160,41,.18);
+    color:var(--maroon);
+    padding:0.15rem 0.4rem;
+    border-radius:4px;
+    font-weight:600;
+  }
+
+  /* Full-width top card — the headline answer ("yes, our kitchen is already
+     Jain-friendly") so it lands first. Gold top border ties it visually to
+     the hero arch. */
+  .jain-card.lead{
+    border-top:4px solid var(--gold);
+    grid-column:1 / -1;
+    background:#fffdfa;
+  }
+  .jain-card.lead h3{color:var(--ember);font-size:1.5rem}
+
+  /* Bottom banner: a single, generous, centred recap. */
+  .jain-notice{
+    background:rgba(30,125,58,.08);
+    border:2px solid rgba(30,125,58,.25);
+    border-radius:14px;
+    padding:1.4rem 1.6rem;
+    margin-top:2.2rem;
+    color:var(--ink);
+    font-size:1.08rem;
+    line-height:1.7;
+    text-align:center;
+    max-width:44rem;
+    margin-inline:auto;
+  }
+  .jain-notice strong{color:var(--veg);font-weight:700}
+
+  @media(max-width:760px){
+    .jain-grid{grid-template-columns:1fr}
+    .jain-card.lead{grid-column:auto}
+  }
 
   footer{background:var(--maroon);color:rgba(252,244,226,.75);padding:2.2rem 0;text-align:center}
   footer .brand{justify-content:center;margin:0 0 .8rem}
@@ -514,37 +590,42 @@
         <p class="sub">Prepared in strict harmony with Ahimsa &amp; Satya</p>
       </div>
       <div class="jain-grid">
-        <div class="jain-card">
+        <div class="jain-card lead">
           <h3>Our core kitchen is already Jain-friendly</h3>
-          <p>Every regular dish at Cafe Gopala is <strong>100% vegetarian</strong> and prepared <strong>without onion or garlic</strong>. That means most of our menu is already suitable for Jain guests.</p>
+          <p>Every regular dish at Cafe Gopala is <strong>100% vegetarian</strong> and prepared <strong>without onion or garlic</strong>. That means <strong>most of our menu is already suitable for Jain guests</strong> &mdash; including the chaat, the paneer dishes, the dals, the breads, and the chai.</p>
         </div>
         <div class="jain-card">
           <h3>Dedicated Jain-prep options</h3>
-          <p>For our Jain guests, we offer dishes prepared <strong>strictly free of all underground root vegetables</strong> — no potatoes, carrots, or radishes. Raw banana, pumpkin, and tomato-based gravies replace root vegetables entirely.</p>
+          <p>For our Jain guests, we prepare dishes <span class="jain-key">strictly free of all underground root vegetables</span> &mdash; no potatoes, carrots, or radishes. <strong>Raw banana replaces potato</strong> in our samosas, tikkis, and cutlets; pumpkin, bottle gourd, and tomato-based gravies do the rest of the work.</p>
         </div>
         <div class="jain-card">
           <h3>Kitchen protocol</h3>
-          <p>Root-veg dishes and Jain-prep dishes receive <strong>separate handling</strong> in our kitchen to avoid cross-contact. Please let our staff know when ordering so we can take extra care.</p>
+          <p>Root-veg dishes and Jain-prep dishes receive <strong>separate handling</strong> in our kitchen to avoid cross-contact. <strong>Please tell our staff when you order</strong> so we can take extra care with your plate.</p>
+        </div>
+        <div class="jain-card">
+          <h3>Advance &amp; Custom Jain Requests</h3>
+          <p>Craving a specific dish made Jain-style? <span class="jain-key">We are happy to prepare custom dishes</span> if you inform us in advance.</p>
+          <p>Whether you are planning a family gathering, hosting guests, or want a favourite from our menu made strictly root-free, just call us ahead or mention it while booking &mdash; our chefs will prepare it with care.</p>
         </div>
         <div class="jain-card">
           <h3>Pure dairy &amp; vegan</h3>
-          <p>All our ghee, paneer, and milk is <strong>100% pure vegetarian</strong> — no animal rennet or non-veg processing aids. Vegan alternatives are available on request for dairy-free guests.</p>
+          <p>All our ghee, paneer, and milk is <strong>100% pure vegetarian</strong> &mdash; no animal rennet or non-veg processing aids. <strong>Vegan alternatives are available on request</strong> for dairy-free guests.</p>
         </div>
         <div class="jain-card">
-          <h3>Labeling</h3>
-          <p>On our menu you will find:</p>
+          <h3>How we label the menu</h3>
+          <p>On our menu you will find two marks:</p>
           <ul>
-            <li><strong>Naturally Jain</strong> — regular menu items that are already free of onion, garlic, mushroom, and root vegetables</li>
-            <li><strong>Jain on Request</strong> — customizable dishes we can prepare without root vegetables on request</li>
+            <li><strong>Naturally Jain</strong> &mdash; regular menu items that are already free of onion, garlic, mushroom, and root vegetables.</li>
+            <li><strong>Jain on Request</strong> &mdash; customizable dishes we can prepare without root vegetables on request.</li>
           </ul>
         </div>
         <div class="jain-card">
           <h3>Why we avoid root vegetables</h3>
-          <p>In Jain tradition, harvesting root vegetables kills the plant and destroys tiny living organisms in the soil. We respect this principle by keeping Jain-prep dishes completely free of potatoes, carrots, radishes, onion, and garlic.</p>
+          <p>In Jain tradition, harvesting root vegetables <strong>uproots the plant</strong> and destroys tiny living organisms in the soil. We respect this principle by keeping Jain-prep dishes completely free of <strong>potatoes, carrots, radishes, onion, and garlic</strong>.</p>
         </div>
       </div>
       <div class="jain-notice">
-        <strong>Our core menu is 100% Sattvic</strong> — No Onion or Garlic. For our Jain guests, we offer dedicated Jain-Prep Options made with Raw Banana (instead of Potato) and strictly free of all underground root vegetables (no potatoes, carrots, radishes, onion, or garlic).
+        <strong>Our core menu is 100% Sattvic</strong> &mdash; no onion, no garlic, no mushroom. For our Jain guests, we offer dedicated <strong>Jain-Prep Options</strong> made with <strong>raw banana instead of potato</strong>, and strictly free of all underground root vegetables.
       </div>
     </div>
   </section>
