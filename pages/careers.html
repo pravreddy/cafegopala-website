@@ -105,6 +105,11 @@
   .msg.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
   .msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
 
+  input[type=file]{padding:.55rem .6rem;background:#fff;cursor:pointer}
+  input[type=file]::file-selector-button{font:inherit;font-weight:600;cursor:pointer;
+    margin-right:.8rem;padding:.45rem .9rem;border-radius:8px;border:1.5px solid var(--gold);
+    background:rgba(224,160,41,.14);color:var(--maroon)}
+  .opt{font-weight:400;color:var(--muted);font-size:.85em}
   .submit-row{margin:1.2rem 0 .4rem;text-align:center}
   .alt{text-align:center;margin:.4rem 0 0;font-size:.85rem;color:var(--muted)}
   .alt a{color:var(--ember);text-decoration:underline}
@@ -243,7 +248,11 @@
         placeholder="A line or two about yourself, what you've cooked or served, and why Cafe Gopala."></textarea>
       <p class="char-count"><span id="chLeft">400</span> / 400</p>
 
-      <p class="hint">Tip: attach your CV or resume to the email before sending — we will read it.</p>
+      <label for="cv" style="margin-top:1.2rem">CV or resume <span class="opt">(optional)</span></label>
+      <input id="cv" name="cv" type="file"
+             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" />
+      <p class="hint" id="cvHint">PDF, Word document, or a clear photo. Up to 5 MB.
+         No CV? That is fine — the message above is enough to start.</p>
     </div>
 
     <div id="msg"></div>
@@ -276,19 +285,27 @@
 
 <script>
 /* ───────────────────────────────────────────────────────────────────────────
-   Careers intake — opens the user's mail client with a clean, pre-filled
-   email to careers@cafegopala.in.
+   Careers intake — posts to the FastPOS public API, which mails the
+   application (with the CV attached) to the address the restaurant set in its
+   POS settings.
 
-   Why mailto: no backend, no third party, no extra service to run, nothing
-   to leak data to. Volume is low. If it ever grows we can swap this script
-   for a server-side handler without touching the form.
+   It used to open the visitor's mail client with a mailto: link. That worked
+   on a laptop with Outlook configured and did nothing useful on a phone, and
+   it could not carry a CV. The API path sends through the same mailcow server
+   the POS already uses; nothing goes through a third party.
 
-   mailto: cannot attach files cross-browser, so the form does NOT try. The
-   CV hint tells the applicant to attach the file to the email that opens.
+   The mailto: link under the form stays as the fallback — used if the API is
+   unreachable, or if the daily cap has been hit. An applicant is never left
+   with no way to reach the cafe.
    ─────────────────────────────────────────────────────────────────────────── */
 (function () {
   var APPLY_TO = "careers@cafegopala.in";
-  var SUBJECT  = "Application — Cafe Gopala";
+  /* Same POS_BASE / SLUG as index.html and order.html — one API, one config. */
+  var CGC      = window.CAFEGOPALA_CONFIG || {};
+  var POS_BASE = CGC.base || "https://app.fastpos.in";
+  var SLUG     = CGC.slug || "cafe-gopala";
+  var API      = POS_BASE + "/api/public/" + SLUG;
+  var LOADED_AT = Date.now();          /* feeds the server-side time trap */
 
   var $ = function (id) { return document.getElementById(id); };
   function show(kind, text) {
@@ -351,49 +368,60 @@
       return;
     }
 
-    var body =
-      "Name: " + name + "\n" +
-      "Mobile: " + phone + "\n" +
-      "Email: " + email + "\n" +
-      "Role: " + role + "\n" +
-      "Experience: " + experience + "\n" +
-      "Available from: " + start + "\n" +
-      "\n" +
-      "Message:\n" + message + "\n" +
-      "\n" +
-      "----\n" +
-      "Tip: please attach your CV or resume to this email before sending.\n" +
-      "Sent from the careers form on cafegopala.in.";
+    var fd = new FormData();
+    fd.append("name", name);
+    fd.append("phone", phone);
+    fd.append("email", email);
+    fd.append("role", role);
+    fd.append("experience", experience);
+    fd.append("start", start);
+    fd.append("message", message);
+    fd.append("website", $("website").value);     /* honeypot, re-checked server-side */
+    fd.append("elapsed_ms", String(Date.now() - LOADED_AT));
+    var cvEl = $("cv");
+    if (cvEl && cvEl.files && cvEl.files[0]) {
+      /* Fail fast on the client too. The server enforces this again — the check
+         that matters is the one the browser cannot skip — but without it the
+         applicant waits out a doomed 20MB upload on cafe wifi first. */
+      if (cvEl.files[0].size > 5 * 1024 * 1024) {
+        show("err", "That file is larger than 5 MB. Please attach a smaller PDF.");
+        return;
+      }
+      fd.append("cv", cvEl.files[0]);
+    }
 
-    var href =
-      "mailto:" + encodeURIComponent(APPLY_TO) +
-      "?subject=" + encodeURIComponent(SUBJECT + " — " + role + " — " + name) +
-      "&body="    + encodeURIComponent(body);
+    var btn = $("send");
+    btn.disabled = true;
+    show("", "");
+    show("ok", "Sending your application…");
 
-    show("ok", "Opening your mail app… if nothing happens, the link below will do the same.");
-    /* small delay so the user sees the message before the mail client steals focus */
-    setTimeout(function () { window.location.href = href; }, 250);
+    fetch(API + "/careers/", { method: "POST", body: fd })
+      .then(function (r) {
+        return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; });
+      })
+      .then(function (res) {
+        if (res.ok) {
+          $("careers").reset();
+          roleBtns.forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+          roleVal.value = "";
+          ch.textContent = "400";
+          show("ok", "Thank you — your application is on its way. We read every one.");
+          return;
+        }
+        /* 429 carries a human message telling them to email directly. Anything
+           else, fall back to the same advice rather than a status code. */
+        var m = (res.j && res.j.detail) ||
+                ("Something went wrong. Please email " + APPLY_TO + " directly.");
+        show("err", esc(m));
+      })
+      .catch(function () {
+        show("err", "We could not reach the server. Please email " + APPLY_TO +
+                    " directly, or try again in a moment.");
+      })
+      .then(function () { btn.disabled = false; });
   });
-
-  /* Mobile nav toggle — same as the other pages */
-  (function () {
-    var toggle = document.getElementById("navToggle");
-    var nav = document.getElementById("navLinks");
-    if (!toggle || !nav) return;
-    toggle.addEventListener("click", function () {
-      var open = nav.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-    });
-    nav.querySelectorAll("a").forEach(function (a) {
-      a.addEventListener("click", function () {
-        nav.classList.remove("open");
-        toggle.setAttribute("aria-expanded", "false");
-        toggle.setAttribute("aria-label", "Open menu");
-      });
-    });
-  })();
 })();
 </script>
+
 </body>
 </html>
