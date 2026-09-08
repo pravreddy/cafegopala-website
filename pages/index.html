@@ -101,6 +101,14 @@
   .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
   a:focus-visible,.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 
+  .fast-strip{display:flex;align-items:center;justify-content:center;gap:.7rem;flex-wrap:wrap;text-decoration:none;
+    padding:.6rem 1rem;background:linear-gradient(90deg,#4a2a8a,#6b4fa8);color:#fff;font-size:.95rem;line-height:1.3}
+  .fast-strip[hidden]{display:none}
+  .fast-strip-label{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;opacity:.85}
+  .fast-strip strong{font-size:1.05rem;font-weight:700}
+  .fast-strip-more{margin-left:.4rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;opacity:.9}
+  .fast-strip:hover .fast-strip-more{opacity:1}
+  @media(max-width:640px){.fast-strip{font-size:.88rem;gap:.45rem}.fast-strip-more{flex-basis:100%;text-align:center;margin:0}}
   .hero{padding:4.5rem 0 3.4rem;text-align:center;position:relative;overflow:hidden}
   .hero-pathways{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.4rem}
   .path-card{flex:1 1 140px;max-width:190px;display:flex;flex-direction:column;gap:.15rem;align-items:center;
@@ -451,6 +459,16 @@
     <a class="cta" href="order.html">Order &amp; collect</a>
   </div>
 </header>
+
+<!-- "When is the next Ekadashi?" — answered before anyone scrolls. Filled from
+     the POS calendar feed by the script at the bottom; stays hidden until it
+     answers, so a feed outage costs nothing visible. -->
+<a class="fast-strip" id="fastStrip" href="calendar.html" hidden>
+  <span class="fast-strip-label">Next Ekadashi</span>
+  <strong id="fastStripDate"></strong>
+  <span id="fastStripName"></span>
+  <span class="fast-strip-more">All fasting days &amp; festivals &rarr;</span>
+</a>
 
 <main id="top">
 
@@ -1055,6 +1073,20 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d || !d.days || !d.days.length) return;
+        // The strip under the header: the first Ekadashi in the feed.
+        var strip = document.getElementById("fastStrip");
+        var ek = null;
+        for (var i = 0; i < d.days.length; i++) { if (d.days[i].kind === "ekadashi") { ek = d.days[i]; break; } }
+        if (strip && ek) {
+          var edt = new Date(ek.date + "T00:00:00");
+          var days = Math.round((edt - new Date(d.today + "T00:00:00")) / 86400000);
+          document.getElementById("fastStripDate").textContent =
+            edt.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }) +
+            (days === 0 ? " — today" : days === 1 ? " — tomorrow" : " — in " + days + " days");
+          document.getElementById("fastStripName").textContent =
+            ek.name.replace(/^Fasting for /i, "") + (ek.fast_break ? " · " + ek.fast_break : "");
+          strip.hidden = false;
+        }
         var rows = d.days.slice(0, 8);
         list.innerHTML = rows.map(function (x) {
           var dt = new Date(x.date + "T00:00:00");
