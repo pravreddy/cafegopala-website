@@ -1061,7 +1061,7 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
           var when = dt.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
           var kind = x.effect === "demand" ? "demand" : x.kind;
           var label = x.effect === "demand" ? "Jain" : (KIND[x.kind] || "");
-          var note = x.fast_break ? "Break fast " + esc(x.fast_break) : "";
+          var note = x.fast_break ? esc(x.fast_break) : "";
           if (x.also && x.also.length) {
             note += (note ? " &middot; " : "") + x.also.map(function (a) {
               return esc(a.calendar) + " has " + new Date(a.date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
