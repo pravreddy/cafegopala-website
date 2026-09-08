@@ -68,29 +68,83 @@
   footer .fine a{text-decoration:none}
 
   /* ---- page-specific ---- */
-  .cal-hero{padding:2.6rem 0 .6rem;text-align:center}
+  .cal-hero{padding:2.4rem 0 .4rem;text-align:center}
   .cal-hero h1{font-size:clamp(2.2rem,6vw,3.2rem);color:var(--maroon);margin:.5rem 0 .6rem}
   .cal-hero p{max-width:36rem;margin:.5rem auto 0;color:var(--muted);font-size:1.05rem}
-  .wrap.cal{width:min(820px,92vw)}
-  .intro{background:linear-gradient(180deg,#fff,var(--cream));border:1px solid var(--line);
-    border-radius:16px;padding:1.2rem 1.3rem;margin:1.4rem 0;color:var(--muted);font-size:1rem;line-height:1.7}
-  .intro strong{color:var(--ink)}
-  .legend{display:flex;gap:.6rem;flex-wrap:wrap;margin:.6rem 0 0}
-  .day-kind{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:.15rem .5rem;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap}
+  .wrap.cal{width:min(1080px,94vw)}
+
+  /* toolbar */
+  .toolbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:1.2rem 0 .8rem}
+  .toolbar h2{font-size:1.6rem;color:#4a2a8a;min-width:13rem;margin:0}
+  .tb{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:.45rem .9rem;font:inherit;font-weight:600;
+    color:var(--maroon);cursor:pointer;line-height:1}
+  .tb:hover{border-color:var(--gold);background:rgba(224,160,41,.12)}
+  .tb[aria-pressed="true"]{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+  .tb[disabled]{opacity:.4;cursor:default}
+  .toolbar .spacer{flex:1}
+  .show select.tb{appearance:none;-webkit-appearance:none;padding-right:2rem;max-width:16rem;text-overflow:ellipsis;
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%233E1206' stroke-width='2'/%3E%3C/svg%3E") no-repeat right .8rem center}
+
+  /* legend = the calendars, each with its colour; click to hide/show */
+  .legend{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1rem}
+  .legend button{display:inline-flex;align-items:center;gap:.45rem;border:1.5px solid var(--line);background:#fff;border-radius:999px;
+    padding:.35rem .8rem .35rem .6rem;font:inherit;font-size:.86rem;font-weight:600;color:var(--ink);cursor:pointer}
+  .legend button i{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+  .legend button[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
+
+  /* month grid */
+  .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;background:transparent}
+  .dow{text-align:center;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:.3rem 0}
+  .cell{min-width:0;min-height:104px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.35rem .4rem;cursor:pointer;
+    display:flex;flex-direction:column;gap:2px;transition:box-shadow .15s,border-color .15s;text-align:left;font:inherit;color:inherit}
+  .cell:hover{border-color:var(--gold);box-shadow:0 4px 14px rgba(62,18,6,.08)}
+  .cell.out{background:transparent;border-color:transparent;cursor:default}
+  .cell.out .num{opacity:.35}
+  .cell.today{border-color:var(--saffron);box-shadow:inset 0 0 0 1px var(--saffron)}
+  .cell.sel{border-color:#4a2a8a;box-shadow:inset 0 0 0 2px #4a2a8a}
+  .cell .num{font-weight:700;font-size:.9rem;color:var(--maroon);display:flex;justify-content:space-between;align-items:center}
+  .cell.today .num::after{content:"today";font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--saffron)}
+  .chip{display:block;font-size:.74rem;line-height:1.25;padding:.15rem .4rem;border-radius:6px;background:var(--c);color:#fff;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chip.fast{font-weight:700}
+  .chip.fast::before{content:"E ";opacity:.85}
+  .more{font-size:.7rem;color:var(--muted);font-weight:600;padding-left:.2rem}
+  .dots{display:none;gap:3px;flex-wrap:wrap;margin-top:auto}
+  .dots i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+
+  /* day panel */
+  .day{margin-top:1rem;background:#fff;border:1.5px solid rgba(75,42,138,.22);border-radius:16px;padding:1.1rem 1.3rem;
+    box-shadow:0 8px 24px rgba(62,18,6,.06)}
+  .day[hidden]{display:none}
+  .day h3{font-size:1.35rem;color:#4a2a8a;margin:0 0 .6rem}
+  .day ul{list-style:none;margin:0;padding:0}
+  .day li{display:flex;gap:.8rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px dashed var(--line)}
+  .day li:last-child{border-bottom:none}
+  .day li i.dot{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none;margin-top:.35rem}
+  .day .what{flex:1;line-height:1.45}
+  .day .what b{font-size:1.05rem}
+  .day small{display:block;color:var(--muted);font-size:.85rem;margin-top:.1rem}
+  .day .empty{color:var(--muted)}
+  .day .cta-row{margin-top:.9rem;display:flex;gap:.6rem;flex-wrap:wrap}
+  .day-kind{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:.15rem .5rem;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap;flex:none;margin-top:.3rem}
   .day-kind.ekadashi,.day-kind.vrat{color:#6b4fa8}
   .day-kind.festival{color:var(--saffron)}
   .day-kind.holiday{color:var(--muted)}
   .day-kind.demand{color:#b3631a}
+
+  /* list view (the old page) */
   .month{margin:1.6rem 0 0}
   .month h2{font-size:1.5rem;color:#4a2a8a;margin:0 0 .4rem;padding-bottom:.3rem;border-bottom:2px solid rgba(75,42,138,.18)}
   .month ul{list-style:none;margin:0;padding:0}
   .month li{display:flex;align-items:baseline;gap:.8rem;padding:.55rem 0;border-bottom:1px dashed var(--line);font-size:1rem}
-  .month li.today{background:rgba(224,160,41,.14);border-radius:8px;padding-inline:.5rem}
+  .month li i.dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none;position:relative;top:1px}
   .month time{flex:none;width:6.6rem;color:#4a2a8a;font-weight:700;font-variant-numeric:tabular-nums}
   .month .what{flex:1;line-height:1.45}
   .month small{display:block;color:var(--muted);font-size:.82rem}
-  .actions{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin:1.4rem 0 .4rem}
   .state{text-align:center;color:var(--muted);margin:2rem 0}
+  .intro{background:linear-gradient(180deg,#fff,var(--cream));border:1px solid var(--line);border-radius:16px;padding:1rem 1.2rem;margin:1rem 0 0;
+    color:var(--muted);font-size:.95rem;line-height:1.6}
+  .intro strong{color:var(--ink)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
   @media (max-width:760px){
@@ -102,6 +156,13 @@
     .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
     .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
     .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+    .toolbar h2{min-width:0;font-size:1.3rem}
+    .grid{gap:3px}
+    .cell{min-height:58px;padding:.25rem .3rem}
+    .cell .num{font-size:.8rem}
+    .cell.today .num::after{content:""}
+    .chip,.more{display:none}
+    .dots{display:flex}
     .month time{width:5.4rem}
   }
 </style>
@@ -141,28 +202,39 @@
 
 <main class="wrap cal">
 
-  <div class="intro">
-    <p><strong>Where these dates come from.</strong> They are the published dates of the Vaishnava calendar our kitchen
-       itself observes &mdash; we never work out a tithi ourselves. When two calendars we follow place the same
-       observance a day apart, we show the one our temple follows and note the other beside it.</p>
-    <p style="margin:.6rem 0 0"><strong>Ekadashi meals are cooked on request.</strong> Order online or call us a day
-       ahead and it will be ready &mdash; grain-free, with sendha namak, on clean utensils.</p>
-    <div class="legend" aria-label="Key">
-      <span class="day-kind ekadashi">Ekadashi</span>
-      <span class="day-kind vrat">Fasting</span>
-      <span class="day-kind festival">Festival</span>
-      <span class="day-kind demand">Jain</span>
-      <span class="day-kind holiday">Holiday</span>
-    </div>
+  <div class="toolbar">
+    <button class="tb" id="prev" aria-label="Previous month">&larr;</button>
+    <h2 id="monthTitle">&nbsp;</h2>
+    <button class="tb" id="next" aria-label="Next month">&rarr;</button>
+    <button class="tb" id="todayBtn">Today</button>
+    <span class="spacer"></span>
+    <label class="show"><span class="sr">Show</span>
+      <select id="calPick" class="tb" aria-label="Which calendar to show"><option value="">All calendars</option></select>
+    </label>
+    <button class="tb" id="viewMonth" aria-pressed="true">Month</button>
+    <button class="tb" id="viewList" aria-pressed="false">List</button>
+    <a class="tb" id="icsLink" href="#" rel="nofollow" style="text-decoration:none">+ Add to my calendar</a>
   </div>
 
-  <div class="actions">
-    <a class="cta" href="order.html">Order for a fasting day</a>
-    <a class="cta ghost" id="icsLink" href="#" rel="nofollow">Add to my calendar</a>
-  </div>
+  <div class="legend" id="legend" aria-label="Calendars — click to hide or show"></div>
 
-  <div id="months"></div>
+  <section id="monthView">
+    <div class="grid" id="grid" role="grid"></div>
+    <aside class="day" id="dayPanel" hidden></aside>
+  </section>
+
+  <section id="listView" hidden>
+    <div id="months"></div>
+  </section>
+
   <p class="state" id="state">Loading the calendar&hellip;</p>
+
+  <div class="intro">
+    <p><strong>Where these dates come from.</strong> Each colour is one published calendar our kitchen follows &mdash; the temple's own
+       list, the Vaishnava calendar for Bangalore, and so on. We never work out a tithi ourselves. When two calendars place the same
+       observance a day apart, we show the one our temple follows and note the other beside it.
+       <strong>Ekadashi meals are cooked on request</strong> &mdash; tap a day, then order or call a day ahead.</p>
+  </div>
 
 </main>
 
@@ -183,57 +255,190 @@
 
 <script>
 /* ───────────────────────────────────────────────────────────────────────────
-   The whole year from the POS calendar feed — the same public API and share
-   key the menu uses. The POS merges the calendars the cafe subscribes to
-   (temple list first, the city file behind it, any Jain or holiday calendar)
-   and tells us which one each date came from. This page only renders.
+   A month calendar, Google-style, from the POS calendar feed. Each day the POS
+   merged for us carries the CALENDAR it came from; that name picks the colour,
+   so the temple's list, the city file, a Jain or holiday calendar each read as
+   their own colour, and the legend hides/shows one at a time. Tap a day for
+   everything on it. Nothing here computes a date — it only draws what the
+   kitchen's calendars say.
    ─────────────────────────────────────────────────────────────────────────── */
 (function () {
   var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
   var POS_BASE  = CGC.base || "https://app.fastpos.in";
   var SLUG      = CGC.slug || "cafe-gopala";
   var SHARE_KEY = CGC.key  || "pub_898a1d4c99270a973da57277d368fabe";
-  var months = document.getElementById("months");
-  var state  = document.getElementById("state");
-  var ics    = document.getElementById("icsLink");
 
+  var $ = function (id) { return document.getElementById(id); };
   function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
   var KIND = { ekadashi: "Ekadashi", vrat: "Fasting", festival: "Festival", holiday: "Holiday", other: "" };
-  var todayIso = new Date().toISOString().slice(0, 10);
+  var PALETTE = ["#6b4fa8", "#E4611C", "#17795e", "#b3631a", "#2b6cb0", "#8a2a4a", "#5c6b73", "#a3741b"];
+  var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  var days = [], byDate = {}, colours = {}, calOrder = [], hidden = {};
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var todayIso = iso(today);
+  var cur = new Date(today.getFullYear(), today.getMonth(), 1);
+  var minMonth = new Date(cur), maxMonth = new Date(cur);
+  var selected = null;
+
+  function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function fmtLong(isoStr) { return new Date(isoStr + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); }
+  function fmtShort(isoStr) { return new Date(isoStr + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" }); }
+  function isFast(x) { return x.kind === "ekadashi" || x.kind === "vrat"; }
+  function visible(x) { return !hidden[x.calendar]; }
+  function label(x) { return x.effect === "demand" ? "Jain" : (KIND[x.kind] || ""); }
+  function kindClass(x) { return x.effect === "demand" ? "demand" : x.kind; }
+
+  // ---- legend -------------------------------------------------------------
+  function buildLegend() {
+    calOrder = [];
+    days.forEach(function (x) { if (calOrder.indexOf(x.calendar) < 0) calOrder.push(x.calendar); });
+    calOrder.forEach(function (c, i) { colours[c] = PALETTE[i % PALETTE.length]; });
+    $("legend").innerHTML = calOrder.map(function (c) {
+      return '<button type="button" data-cal="' + esc(c) + '" aria-pressed="' + (hidden[c] ? "false" : "true") +
+             '" style="--c:' + colours[c] + '"><i></i>' + esc(c) + '</button>';
+    }).join("");
+    $("legend").querySelectorAll("button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var c = b.getAttribute("data-cal");
+        hidden[c] = !hidden[c];
+        b.setAttribute("aria-pressed", hidden[c] ? "false" : "true");
+        syncPick();
+        render();
+      });
+    });
+    // The dropdown: one calendar at a time, or all. Only offered when there
+    // is more than one calendar to choose between.
+    var pick = $("calPick");
+    pick.innerHTML = '<option value="">All calendars</option>' +
+      calOrder.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join("");
+    pick.parentNode.style.display = calOrder.length > 1 ? "" : "none";
+    pick.addEventListener("change", function () {
+      calOrder.forEach(function (c) { hidden[c] = pick.value ? c !== pick.value : false; });
+      $("legend").querySelectorAll("button").forEach(function (b) {
+        b.setAttribute("aria-pressed", hidden[b.getAttribute("data-cal")] ? "false" : "true");
+      });
+      render();
+    });
+  }
+
+  // Keep the dropdown honest when chips are toggled by hand: exactly one
+  // visible → that one; otherwise "All calendars".
+  function syncPick() {
+    var on = calOrder.filter(function (c) { return !hidden[c]; });
+    $("calPick").value = on.length === 1 ? on[0] : "";
+  }
+
+  // ---- month grid ---------------------------------------------------------
+  function renderMonth() {
+    var y = cur.getFullYear(), m = cur.getMonth();
+    $("monthTitle").textContent = cur.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+    $("prev").disabled = cur <= minMonth;
+    $("next").disabled = cur >= maxMonth;
+    var first = new Date(y, m, 1), start = new Date(y, m, 1 - first.getDay());
+    var html = DOW.map(function (d) { return '<div class="dow">' + d + '</div>'; }).join("");
+    for (var i = 0; i < 42; i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var k = iso(d), out = d.getMonth() !== m;
+      var evs = (byDate[k] || []).filter(visible);
+      var cls = "cell" + (out ? " out" : "") + (k === todayIso ? " today" : "") + (k === selected ? " sel" : "");
+      var inner = '<span class="num"><span>' + d.getDate() + '</span></span>';
+      if (!out && evs.length) {
+        var show = evs.slice(0, 3);
+        inner += show.map(function (x) {
+          return '<span class="chip' + (isFast(x) ? " fast" : "") + '" style="--c:' + colours[x.calendar] + '" title="' + esc(x.name) + '">' +
+                 esc(x.name.replace(/^Fasting for /i, "")) + '</span>';
+        }).join("");
+        if (evs.length > 3) inner += '<span class="more">+' + (evs.length - 3) + ' more</span>';
+        inner += '<span class="dots">' + evs.map(function (x) { return '<i style="--c:' + colours[x.calendar] + '"></i>'; }).join("") + '</span>';
+      }
+      html += '<button type="button" class="' + cls + '" data-date="' + k + '"' + (out ? ' tabindex="-1"' : '') +
+              ' aria-label="' + esc(fmtLong(k)) + (evs.length ? ", " + evs.length + " event" + (evs.length > 1 ? "s" : "") : "") + '">' + inner + '</button>';
+      if (i >= 34 && d.getMonth() !== m && new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getDay() === 0) break;
+    }
+    $("grid").innerHTML = html;
+    $("grid").querySelectorAll(".cell:not(.out)").forEach(function (c) {
+      c.addEventListener("click", function () { selectDay(c.getAttribute("data-date")); });
+    });
+  }
+
+  function selectDay(k) {
+    selected = k;
+    var evs = (byDate[k] || []).filter(visible);
+    var p = $("dayPanel");
+    p.hidden = false;
+    p.innerHTML = '<h3>' + esc(fmtLong(k)) + '</h3>' +
+      (evs.length ? '<ul>' + evs.map(function (x) {
+        var notes = [];
+        if (x.fast_break) notes.push(esc(x.fast_break));
+        notes.push(esc(x.calendar));
+        if (x.also && x.also.length) notes.push(x.also.map(function (a) { return esc(a.calendar) + " has " + fmtShort(a.date); }).join("; "));
+        return '<li><i class="dot" style="--c:' + colours[x.calendar] + '"></i><span class="what"><b>' + esc(x.name) + '</b>' +
+               '<small>' + notes.join(' &middot; ') + '</small></span>' +
+               (label(x) ? '<span class="day-kind ' + esc(kindClass(x)) + '">' + label(x) + '</span>' : '') + '</li>';
+      }).join("") + '</ul>' : '<p class="empty">Nothing marked on this day.</p>') +
+      '<div class="cta-row">' +
+        (evs.some(isFast) ? '<a class="cta" href="order.html">Order a fasting meal for this day</a>' : '<a class="cta ghost" href="order.html">Order &amp; collect</a>') +
+      '</div>';
+    $("grid").querySelectorAll(".cell").forEach(function (c) { c.classList.toggle("sel", c.getAttribute("data-date") === k); });
+    if (window.innerWidth < 760) p.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  // ---- list view ----------------------------------------------------------
+  function renderList() {
+    var groups = {};
+    days.filter(visible).forEach(function (x) { var k = x.date.slice(0, 7); (groups[k] = groups[k] || []).push(x); });
+    $("months").innerHTML = Object.keys(groups).sort().map(function (k) {
+      var title = new Date(k + "-01T00:00:00").toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+      return '<section class="month"><h2>' + esc(title) + '</h2><ul>' + groups[k].map(function (x) {
+        var when = new Date(x.date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric" });
+        var notes = [];
+        if (x.fast_break) notes.push(esc(x.fast_break));
+        if (x.also && x.also.length) notes.push(x.also.map(function (a) { return esc(a.calendar) + " has " + fmtShort(a.date); }).join("; "));
+        return '<li' + (x.date === todayIso ? ' class="today"' : '') + '><i class="dot" style="--c:' + colours[x.calendar] + '"></i>' +
+               '<time datetime="' + esc(x.date) + '">' + esc(when) + '</time>' +
+               '<span class="what">' + esc(x.name) + (notes.length ? '<small>' + notes.join(' &middot; ') + '</small>' : '') + '</span>' +
+               (label(x) ? '<span class="day-kind ' + esc(kindClass(x)) + '">' + label(x) + '</span>' : '') + '</li>';
+      }).join("") + '</ul></section>';
+    }).join("") || '<p class="state">Nothing to show.</p>';
+  }
+
+  function render() { renderMonth(); renderList(); if (selected) selectDay(selected); }
+
+  // ---- controls -----------------------------------------------------------
+  $("prev").addEventListener("click", function () { cur = new Date(cur.getFullYear(), cur.getMonth() - 1, 1); selected = null; $("dayPanel").hidden = true; renderMonth(); });
+  $("next").addEventListener("click", function () { cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1); selected = null; $("dayPanel").hidden = true; renderMonth(); });
+  $("todayBtn").addEventListener("click", function () { cur = new Date(today.getFullYear(), today.getMonth(), 1); renderMonth(); selectDay(todayIso); });
+  function setView(v) {
+    $("viewMonth").setAttribute("aria-pressed", v === "month" ? "true" : "false");
+    $("viewList").setAttribute("aria-pressed", v === "list" ? "true" : "false");
+    $("monthView").hidden = v !== "month";
+    $("listView").hidden = v !== "list";
+    try { localStorage.setItem("cg-cal-view", v); } catch (e) {}
+  }
+  $("viewMonth").addEventListener("click", function () { setView("month"); });
+  $("viewList").addEventListener("click", function () { setView("list"); });
+  try { if (localStorage.getItem("cg-cal-view") === "list") setView("list"); } catch (e) {}
+
+  // ---- load ---------------------------------------------------------------
   fetch(POS_BASE + "/api/public/" + SLUG + "/calendar/?days=400", { headers: { "X-Share-Key": SHARE_KEY } })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function (d) {
-      if (!d.days || !d.days.length) { state.textContent = "The calendar for the coming months is not published yet — please call us for Ekadashi dates."; return; }
-      if (d.ics) ics.href = d.ics.replace(/^https?:/, "webcal:"); else ics.style.display = "none";
-      var groups = {};
-      d.days.forEach(function (x) {
-        var k = x.date.slice(0, 7);
-        (groups[k] = groups[k] || []).push(x);
-      });
-      months.innerHTML = Object.keys(groups).sort().map(function (k) {
-        var first = new Date(k + "-01T00:00:00");
-        var title = first.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
-        return '<section class="month"><h2>' + esc(title) + '</h2><ul>' + groups[k].map(function (x) {
-          var dt = new Date(x.date + "T00:00:00");
-          var when = dt.toLocaleDateString("en-IN", { weekday: "short", day: "numeric" });
-          var kind = x.effect === "demand" ? "demand" : x.kind;
-          var label = x.effect === "demand" ? "Jain" : (KIND[x.kind] || "");
-          var notes = [];
-          if (x.fast_break) notes.push(esc(x.fast_break));
-          if (x.also && x.also.length) notes.push(x.also.map(function (a) {
-            return esc(a.calendar) + " has " + new Date(a.date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-          }).join("; "));
-          return '<li' + (x.date === todayIso ? ' class="today"' : '') + '><time datetime="' + esc(x.date) + '">' + esc(when) + '</time>' +
-                 '<span class="what">' + esc(x.name) + (notes.length ? '<small>' + notes.join(' &middot; ') + '</small>' : '') + '</span>' +
-                 (label ? '<span class="day-kind ' + esc(kind) + '">' + label + '</span>' : '') + '</li>';
-        }).join("") + '</ul></section>';
-      }).join("");
-      state.textContent = "";
-      state.style.display = "none";
+      days = d.days || [];
+      if (!days.length) { $("state").textContent = "The calendar for the coming months is not published yet — please call us for Ekadashi dates."; return; }
+      if (d.ics) $("icsLink").href = d.ics.replace(/^https?:/, "webcal:"); else $("icsLink").style.display = "none";
+      days.forEach(function (x) { (byDate[x.date] = byDate[x.date] || []).push(x); });
+      var last = days[days.length - 1].date;
+      maxMonth = new Date(parseInt(last.slice(0, 4), 10), parseInt(last.slice(5, 7), 10) - 1, 1);
+      buildLegend();
+      render();
+      // Open today, or the first upcoming Ekadashi if today is quiet.
+      var firstFast = days.filter(function (x) { return isFast(x) && x.date >= todayIso; })[0];
+      selectDay(byDate[todayIso] ? todayIso : (firstFast ? firstFast.date : todayIso));
+      $("state").style.display = "none";
     })
     .catch(function () {
-      state.textContent = "We could not load the calendar just now. Please call us for the next Ekadashi date.";
+      $("state").textContent = "We could not load the calendar just now. Please call us for the next Ekadashi date.";
     });
 })();
 
