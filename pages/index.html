@@ -156,7 +156,7 @@
   .saatvik p{max-width:38rem;margin:.5rem auto;color:var(--muted);font-size:1.05rem;text-align:center}
   .saatvik p strong{color:var(--ink)}
   .saatvik-badges{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:1.2rem 0}
-  .saatvik-badges .badge{display:inline-block;padding:.35rem .8rem;border-radius:999px;background:rgba(30,125,58,.08);color:var(--veg);font-weight:600;font-size:.9rem;border:1px solid rgba(30,125,58,.2)}
+  .saatvik-badges .badge{display:inline-block;text-decoration:none;padding:.35rem .8rem;border-radius:999px;background:rgba(30,125,58,.08);color:var(--veg);font-weight:600;font-size:.9rem;border:1px solid rgba(30,125,58,.2)}
   .saatvik-note{font-style:italic;color:var(--muted);max-width:32rem;margin:1rem auto 0;font-size:1rem}
   @media(max-width:640px){.saatvik-badges{gap:.45rem}.saatvik-badges .badge{font-size:.82rem;padding:.3rem .65rem}}
 
@@ -381,6 +381,21 @@
   .ekadashi-inline{display:inline-flex;vertical-align:middle;line-height:1}
   .ekadashi-notice{background:rgba(75,42,138,.10);border:2px solid rgba(75,42,138,.28);border-radius:14px;padding:1.4rem 1.6rem;margin-top:2.2rem;color:var(--ink);font-size:1.08rem;line-height:1.7;text-align:center;max-width:44rem;margin-inline:auto;font-weight:500}
   .ekadashi-notice strong{color:#4a2a8a;font-weight:700}
+  /* Coming up — filled from the POS calendar feed; hidden until it answers */
+  .ekadashi-card.upcoming{grid-column:1 / -1;display:none}
+  .ekadashi-card.upcoming.show{display:block}
+  .upcoming-list{list-style:none;margin:.6rem 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.5rem .9rem}
+  .upcoming-list li{display:flex;align-items:baseline;gap:.6rem;padding:.45rem 0;border-bottom:1px dashed rgba(75,42,138,.18);font-size:.98rem}
+  .upcoming-list time{flex:none;width:6.2rem;color:#4a2a8a;font-weight:700;font-variant-numeric:tabular-nums}
+  .upcoming-list .what{flex:1;line-height:1.4}
+  .upcoming-list small{display:block;color:var(--muted);font-size:.8rem}
+  .day-kind{flex:none;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:.15rem .45rem;border-radius:999px;border:1.5px solid currentColor}
+  .day-kind.ekadashi,.day-kind.vrat{color:#6b4fa8}
+  .day-kind.festival{color:var(--saffron)}
+  .day-kind.holiday{color:var(--muted)}
+  .day-kind.demand{color:#b3631a}
+  .upcoming-foot{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem;font-size:.92rem}
+  .upcoming-foot a{color:#4a2a8a;font-weight:700}
   @media(max-width:760px){
     .ekadashi-grid{grid-template-columns:1fr}
     .ekadashi-card.compare{grid-column:auto}
@@ -486,8 +501,7 @@
           <span class="badge">No garlic</span>
           <span class="badge">No mushroom</span>
           <span class="badge">Fresh daily</span>
-         <span class="badge">Ekadashi &amp; vrat on request</span>
-          <span class="badge">Ekadashi &amp; Vrat on request</span>
+          <a href="#ekadashi" class="badge">Ekadashi &amp; vrat on request</a>
         </div>
        <p class="saatvik-note">Saatvik food — in the mode of goodness — is pure, fresh, and nourishing. It supports a calm mind and healthy body, the way scripture and tradition teach us to honour what we eat.</p>
      </div>
@@ -713,6 +727,19 @@
           <p>Ekadashi is the eleventh day of each lunar fortnight &mdash; a day of fasting observed by many Vaishnavas. The rules are <strong>different from a Jain meal</strong>: grains, lentils, and regular salt are avoided, but root vegetables and dairy are welcome.</p>
           <p>We prepare <span class="jain-key">strictly grain-free Ekadashi prasadam</span> on request &mdash; cooked without grains, lentils or beans, and with <strong>sendha namak</strong> (rock salt) in place of table salt, using <strong>sabudana, samak rice, kuttu, singhara</strong>, fresh fruit, and pure dairy.</p>
         </div>
+        <!-- Filled by the script at the bottom from the POS calendar feed
+             (/api/public/cafe-gopala/calendar/). The dates are the published
+             ISKCON / Vaisnava Calendar dates the kitchen itself follows — the
+             page never calculates a tithi. Stays hidden if the feed is off. -->
+        <div class="ekadashi-card upcoming" id="upcomingCard">
+          <h3>Coming up</h3>
+          <p>The next fasting days and festivals our kitchen is planning for. Tell us a day ahead and your Ekadashi meal will be ready.</p>
+          <ul class="upcoming-list" id="upcomingList"></ul>
+          <div class="upcoming-foot">
+            <a href="calendar.html">See the whole year &rarr;</a>
+            <a id="upcomingIcs" href="#" rel="nofollow">Add to your calendar</a>
+          </div>
+        </div>
         <div class="ekadashi-card">
           <h3>When &amp; how to order</h3>
           <p>Ekadashi falls <strong>twice each lunar month</strong>. The kitchen prepares fasting dishes on request &mdash; not as standing menu items.</p>
@@ -780,7 +807,7 @@
       <img src="../images/logo-badge.webp" alt="" aria-hidden="true" width="46" height="46"/>
       <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
     </a>
-    <div class="fine">&#169; 2026 Cafe Gopala &#183; Bengaluru &#183; <a href="order.html">Order online &amp; collect</a> &middot; <a href="reviews.html">Reviews</a> &middot; <a href="careers.html">Careers</a></div>
+    <div class="fine">&#169; 2026 Cafe Gopala &#183; Bengaluru &#183; <a href="order.html">Order online &amp; collect</a> &middot; <a href="reviews.html">Reviews</a> &middot; <a href="calendar.html">Fasting days</a> &middot; <a href="careers.html">Careers</a></div>
     <div class="fine" style="margin-top:.35rem;opacity:.75">Website design &amp; development &#169; 2026 <a href="https://guhya.co.in" target="_blank" rel="noopener">Guhya Software Solutions Private Limited</a> &#183; Online ordering &amp; table reservations powered by <a href="https://fastpos.in" target="_blank" rel="noopener">FastPOS</a></div>
   </div>
 </footer>
@@ -1007,6 +1034,47 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
         }, 12000);
       })
       .catch(function () { /* leave the section hidden */ });
+  })();
+
+  /* Coming up: fasting days & festivals from the POS calendar feed.
+     Same three config values as the menu above; same publishable share key.
+     Nothing on this page computes a date — it only shows what the kitchen's
+     own calendars say. If the feed is off or empty, the card stays hidden. */
+  (function () {
+    var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
+    var POS_BASE  = CGC.base || "https://app.fastpos.in";
+    var SLUG      = CGC.slug || "cafe-gopala";
+    var SHARE_KEY = CGC.key  || "pub_898a1d4c99270a973da57277d368fabe";
+    var card = document.getElementById("upcomingCard");
+    var list = document.getElementById("upcomingList");
+    var ics  = document.getElementById("upcomingIcs");
+    if (!card || !list || !SHARE_KEY) return;
+    function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+    var KIND = { ekadashi: "Ekadashi", vrat: "Fasting", festival: "Festival", holiday: "Holiday", other: "" };
+    fetch(POS_BASE + "/api/public/" + SLUG + "/calendar/?days=60", { headers: { "X-Share-Key": SHARE_KEY } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.days || !d.days.length) return;
+        var rows = d.days.slice(0, 8);
+        list.innerHTML = rows.map(function (x) {
+          var dt = new Date(x.date + "T00:00:00");
+          var when = dt.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
+          var kind = x.effect === "demand" ? "demand" : x.kind;
+          var label = x.effect === "demand" ? "Jain" : (KIND[x.kind] || "");
+          var note = x.fast_break ? "Break fast " + esc(x.fast_break) : "";
+          if (x.also && x.also.length) {
+            note += (note ? " &middot; " : "") + x.also.map(function (a) {
+              return esc(a.calendar) + " has " + new Date(a.date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+            }).join("; ");
+          }
+          return '<li><time datetime="' + esc(x.date) + '">' + esc(when) + '</time>' +
+                 '<span class="what">' + esc(x.name) + (note ? '<small>' + note + '</small>' : '') + '</span>' +
+                 (label ? '<span class="day-kind ' + esc(kind) + '">' + label + '</span>' : '') + '</li>';
+        }).join("");
+        if (d.ics) ics.href = d.ics.replace(/^https?:/, "webcal:");
+        card.classList.add("show");
+      })
+      .catch(function () { /* stay hidden */ });
   })();
 
   /* Mobile nav toggle */

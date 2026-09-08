@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fasting days &amp; festivals — Cafe Gopala</title>
+<meta name="description" content="Ekadashi, festivals and holidays our kitchen is planning for — from the published Vaishnava calendar Cafe Gopala follows. Order a day ahead for a grain-free Ekadashi meal." />
+<link rel="icon" href="../images/icon-192.png" />
+<link rel="apple-touch-icon" href="../images/icon-192.png" />
+<meta name="theme-color" content="#3E1206" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Mukta:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Design tokens and shell styles copied from index.html and story.html.
+     This site is plain static HTML with no build step, so duplicating ~120
+     lines of CSS is the smaller risk until a third page needs them. */
+  :root{
+    --saffron:#E4611C; --ember:#BE3E0C; --gold:#E0A029; --gold-soft:#F3C766;
+    --maroon:#3E1206; --maroon-2:#571C0A; --cream:#FCF4E2; --ink:#2A130A;
+    --muted:#835435; --veg:#1a7d3a; --line:rgba(62,18,6,.14);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;background:var(--cream)}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation:none!important;transition:none!important}}
+  body{margin:0;color:var(--ink);background:var(--cream);
+    font-family:"Mukta",system-ui,-apple-system,sans-serif;font-weight:400;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(120% 70% at 50% -10%, rgba(228,97,28,.16), transparent 60%),
+      radial-gradient(80% 50% at 90% 8%, rgba(224,160,41,.12), transparent 60%);
+    background-attachment:fixed;}
+  h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;line-height:1.08;margin:0}
+  a{color:inherit} img{max-width:100%;display:block}
+  .wrap{width:min(680px,92vw);margin-inline:auto}
+  .eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-weight:600;font-size:.72rem;
+    letter-spacing:.28em;text-transform:uppercase;color:var(--ember)}
+  .eyebrow::before,.eyebrow::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+  .eyebrow::after{background:linear-gradient(90deg,var(--gold),transparent)}
+
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+    background:linear-gradient(180deg,rgba(252,244,226,.94),rgba(252,244,226,.78));
+    border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:1rem;padding:.6rem 0;width:min(1080px,92vw);margin-inline:auto}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;margin-right:auto}
+  .brand img{width:42px;height:42px;border-radius:50%;object-fit:cover;object-position:50% 30%;
+    border:2px solid var(--gold);box-shadow:0 2px 10px rgba(62,18,6,.25)}
+  .brand b{font-family:"Cormorant Garamond",serif;font-size:1.35rem;font-weight:700;color:var(--maroon);line-height:1}
+  .brand small{display:block;font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ember);font-weight:600}
+  .nav-links{display:flex;gap:1.6rem;font-weight:500;font-size:.95rem}
+  .nav-links a{text-decoration:none;color:var(--maroon);opacity:.85;transition:opacity .2s}
+  .nav-links a:hover{opacity:1;color:var(--ember)}
+  .nav-links a[aria-current]{opacity:1;color:var(--ember);font-weight:600}
+  .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer}
+  .nav-toggle span{display:block;width:24px;height:2px;background:var(--maroon);border-radius:2px;transition:transform .2s,opacity .2s}
+  .cta{display:inline-block;text-decoration:none;font-weight:600;font-size:.92rem;border:none;cursor:pointer;font:inherit;
+    padding:.7rem 1.3rem;border-radius:999px;background:linear-gradient(180deg,var(--saffron),var(--ember));
+    color:#fff;box-shadow:0 6px 18px rgba(190,62,12,.32);transition:transform .18s,box-shadow .18s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(190,62,12,.4)}
+  .cta.ghost{background:transparent;color:var(--maroon);box-shadow:none;border:1.5px solid var(--gold)}
+  .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
+  .cta[disabled]{opacity:.55;cursor:not-allowed;box-shadow:none;transform:none}
+  a:focus-visible,.cta:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+  footer{background:var(--maroon);color:rgba(252,244,226,.75);padding:2.2rem 0;text-align:center;margin-top:3rem}
+  footer a{color:var(--gold-soft);text-decoration:none;font-weight:600}
+  footer .fine{font-size:.85rem}
+  footer .fine a{text-decoration:none}
+
+  /* ---- page-specific ---- */
+  .cal-hero{padding:2.6rem 0 .6rem;text-align:center}
+  .cal-hero h1{font-size:clamp(2.2rem,6vw,3.2rem);color:var(--maroon);margin:.5rem 0 .6rem}
+  .cal-hero p{max-width:36rem;margin:.5rem auto 0;color:var(--muted);font-size:1.05rem}
+  .wrap.cal{width:min(820px,92vw)}
+  .intro{background:linear-gradient(180deg,#fff,var(--cream));border:1px solid var(--line);
+    border-radius:16px;padding:1.2rem 1.3rem;margin:1.4rem 0;color:var(--muted);font-size:1rem;line-height:1.7}
+  .intro strong{color:var(--ink)}
+  .legend{display:flex;gap:.6rem;flex-wrap:wrap;margin:.6rem 0 0}
+  .day-kind{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:.15rem .5rem;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap}
+  .day-kind.ekadashi,.day-kind.vrat{color:#6b4fa8}
+  .day-kind.festival{color:var(--saffron)}
+  .day-kind.holiday{color:var(--muted)}
+  .day-kind.demand{color:#b3631a}
+  .month{margin:1.6rem 0 0}
+  .month h2{font-size:1.5rem;color:#4a2a8a;margin:0 0 .4rem;padding-bottom:.3rem;border-bottom:2px solid rgba(75,42,138,.18)}
+  .month ul{list-style:none;margin:0;padding:0}
+  .month li{display:flex;align-items:baseline;gap:.8rem;padding:.55rem 0;border-bottom:1px dashed var(--line);font-size:1rem}
+  .month li.today{background:rgba(224,160,41,.14);border-radius:8px;padding-inline:.5rem}
+  .month time{flex:none;width:6.6rem;color:#4a2a8a;font-weight:700;font-variant-numeric:tabular-nums}
+  .month .what{flex:1;line-height:1.45}
+  .month small{display:block;color:var(--muted);font-size:.82rem}
+  .actions{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin:1.4rem 0 .4rem}
+  .state{text-align:center;color:var(--muted);margin:2rem 0}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  @media (max-width:760px){
+    .nav-toggle{display:flex}
+    .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(252,244,226,.98);backdrop-filter:blur(10px);flex-direction:column;gap:0;padding:0;border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(62,18,6,.1)}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:.9rem 1.2rem;border-top:1px solid var(--line);font-size:1rem;opacity:1}
+    .nav-links a:hover{background:rgba(224,160,41,.1)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+    .nav-toggle[aria-expanded="true"] span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+    .month time{width:5.4rem}
+  }
+</style>
+</head>
+<body id="top">
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img src="../images/logo-badge.webp" alt="Cafe Gopala — Krishna playing the flute beside a cow" width="46" height="46"/>
+      <span><b>Cafe Gopala</b><small>The Flavor of Krishna's Grace</small></span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#saatvik">Saatvik</a>
+      <a href="index.html#menu">Menu</a>
+      <a href="story.html">Our story</a>
+      <a href="index.html#jain">Jain</a>
+      <a href="index.html#ekadashi" aria-current="page">Ekadashi</a>
+      <a href="index.html#visit">Visit</a>
+      <a href="reviews.html">Reviews</a>
+      <a href="careers.html">Careers</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <a class="cta" href="order.html">Order online</a>
+  </div>
+</header>
+
+<section class="cal-hero">
+  <div class="wrap">
+    <span class="eyebrow">Plan your fasting meal</span>
+    <h1>Fasting days &amp; festivals</h1>
+    <p>The Ekadashi, vrat and festival dates our kitchen follows, so you can order your grain-free meal a day ahead.</p>
+  </div>
+</section>
+
+<main class="wrap cal">
+
+  <div class="intro">
+    <p><strong>Where these dates come from.</strong> They are the published dates of the Vaishnava calendar our kitchen
+       itself observes &mdash; we never work out a tithi ourselves. When two calendars we follow place the same
+       observance a day apart, we show the one our temple follows and note the other beside it.</p>
+    <p style="margin:.6rem 0 0"><strong>Ekadashi meals are cooked on request.</strong> Order online or call us a day
+       ahead and it will be ready &mdash; grain-free, with sendha namak, on clean utensils.</p>
+    <div class="legend" aria-label="Key">
+      <span class="day-kind ekadashi">Ekadashi</span>
+      <span class="day-kind vrat">Fasting</span>
+      <span class="day-kind festival">Festival</span>
+      <span class="day-kind demand">Jain</span>
+      <span class="day-kind holiday">Holiday</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="cta" href="order.html">Order for a fasting day</a>
+    <a class="cta ghost" id="icsLink" href="#" rel="nofollow">Add to my calendar</a>
+  </div>
+
+  <div id="months"></div>
+  <p class="state" id="state">Loading the calendar&hellip;</p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>&copy; 2026 Cafe Gopala &middot; Bengaluru</div>
+    <div style="margin-top:.35rem;font-size:.85em;opacity:.75">Website design &amp; development &#169; 2026 <a href="https://guhya.co.in" target="_blank" rel="noopener">Guhya Software Solutions Private Limited</a> &middot; Online ordering &amp; table reservations powered by <a href="https://fastpos.in" target="_blank" rel="noopener">FastPOS</a></div>
+    <div style="margin-top:.4rem">
+      <a href="index.html">Home</a> &middot;
+      <a href="order.html">Order &amp; collect</a> &middot;
+      <a href="story.html">Our story</a> &middot;
+      <a href="reviews.html">Reviews</a> &middot;
+      <a href="calendar.html">Fasting days</a> &middot;
+      <a href="careers.html">Careers</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ───────────────────────────────────────────────────────────────────────────
+   The whole year from the POS calendar feed — the same public API and share
+   key the menu uses. The POS merges the calendars the cafe subscribes to
+   (temple list first, the city file behind it, any Jain or holiday calendar)
+   and tells us which one each date came from. This page only renders.
+   ─────────────────────────────────────────────────────────────────────────── */
+(function () {
+  var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
+  var POS_BASE  = CGC.base || "https://app.fastpos.in";
+  var SLUG      = CGC.slug || "cafe-gopala";
+  var SHARE_KEY = CGC.key  || "pub_898a1d4c99270a973da57277d368fabe";
+  var months = document.getElementById("months");
+  var state  = document.getElementById("state");
+  var ics    = document.getElementById("icsLink");
+
+  function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  var KIND = { ekadashi: "Ekadashi", vrat: "Fasting", festival: "Festival", holiday: "Holiday", other: "" };
+  var todayIso = new Date().toISOString().slice(0, 10);
+
+  fetch(POS_BASE + "/api/public/" + SLUG + "/calendar/?days=400", { headers: { "X-Share-Key": SHARE_KEY } })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      if (!d.days || !d.days.length) { state.textContent = "The calendar for the coming months is not published yet — please call us for Ekadashi dates."; return; }
+      if (d.ics) ics.href = d.ics.replace(/^https?:/, "webcal:"); else ics.style.display = "none";
+      var groups = {};
+      d.days.forEach(function (x) {
+        var k = x.date.slice(0, 7);
+        (groups[k] = groups[k] || []).push(x);
+      });
+      months.innerHTML = Object.keys(groups).sort().map(function (k) {
+        var first = new Date(k + "-01T00:00:00");
+        var title = first.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+        return '<section class="month"><h2>' + esc(title) + '</h2><ul>' + groups[k].map(function (x) {
+          var dt = new Date(x.date + "T00:00:00");
+          var when = dt.toLocaleDateString("en-IN", { weekday: "short", day: "numeric" });
+          var kind = x.effect === "demand" ? "demand" : x.kind;
+          var label = x.effect === "demand" ? "Jain" : (KIND[x.kind] || "");
+          var notes = [];
+          if (x.fast_break) notes.push("Break fast " + esc(x.fast_break));
+          if (x.also && x.also.length) notes.push(x.also.map(function (a) {
+            return esc(a.calendar) + " has " + new Date(a.date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+          }).join("; "));
+          return '<li' + (x.date === todayIso ? ' class="today"' : '') + '><time datetime="' + esc(x.date) + '">' + esc(when) + '</time>' +
+                 '<span class="what">' + esc(x.name) + (notes.length ? '<small>' + notes.join(' &middot; ') + '</small>' : '') + '</span>' +
+                 (label ? '<span class="day-kind ' + esc(kind) + '">' + label + '</span>' : '') + '</li>';
+        }).join("") + '</ul></section>';
+      }).join("");
+      state.textContent = "";
+      state.style.display = "none";
+    })
+    .catch(function () {
+      state.textContent = "We could not load the calendar just now. Please call us for the next Ekadashi date.";
+    });
+})();
+
+/* Mobile nav toggle */
+(function () {
+  var toggle = document.getElementById("navToggle");
+  var nav = document.getElementById("navLinks");
+  if (!toggle || !nav) return;
+  toggle.addEventListener("click", function () {
+    var open = nav.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  });
+  nav.querySelectorAll("a").forEach(function (a) {
+    a.addEventListener("click", function () {
+      nav.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open menu");
+    });
+  });
+})();
+</script>
+</body>
+</html>
