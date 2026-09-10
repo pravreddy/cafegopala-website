@@ -388,10 +388,26 @@
      comparison is concrete. */
   .ekadashi-inline{display:inline-flex;vertical-align:middle;line-height:1}
   .ekadashi-notice{background:rgba(75,42,138,.10);border:2px solid rgba(75,42,138,.28);border-radius:14px;padding:1.4rem 1.6rem;margin-top:2.2rem;color:var(--ink);font-size:1.08rem;line-height:1.7;text-align:center;max-width:44rem;margin-inline:auto;font-weight:500}
-  .ekadashi-notice strong{color:#4a2a8a;font-weight:700}
-  /* Coming up — filled from the POS calendar feed; hidden until it answers */
-  .ekadashi-card.upcoming{grid-column:1 / -1;display:none}
-  .ekadashi-card.upcoming.show{display:block}
+.ekadashi-notice strong{color:#4a2a8a;font-weight:700}
+
+  /* ---- Coming up — fasting days & festivals (own section, after Ekadashi) ----
+     The live calendar widget. It is a separate section because it depends on
+     the POS calendar feed: if the feed is off, the whole section stays hidden
+     rather than leaving a hole inside the static Ekadashi explanation. */
+  .fast-days{padding:4.2rem 0;background:linear-gradient(180deg,#f6eef9,var(--cream));color:var(--ink);border-top:1px solid var(--line)}
+  .fast-days-head{text-align:center;margin-bottom:2rem}
+  .fast-days-head h2{font-size:clamp(2rem,5vw,2.8rem);color:var(--maroon);margin:.4rem 0 .6rem}
+  .fast-days-head .sub{color:#4a2a8a;font-size:1.08rem;max-width:38rem;margin:0 auto;font-weight:600}
+  /* The widget is a single card, so the grid here is just for the layout. */
+  .fast-days-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem}
+  .fast-days-card{background:#ffffff;border:1.5px solid rgba(75,42,138,.18);border-radius:16px;padding:1.6rem 1.7rem;box-shadow:0 6px 18px rgba(62,18,6,.04)}
+  .fast-days-card h3{font-size:1.35rem;color:#4a2a8a;font-weight:700;margin:0 0 .7rem;line-height:1.25}
+  .fast-days-card p{color:var(--ink);font-size:1rem;line-height:1.7;margin:.4rem 0}
+  .fast-days-card p strong{color:#4a2a8a;font-weight:700}
+  /* Live calendar widget: hidden until the feed answers. Same behaviour as
+     the Google reviews strip — an outage costs nothing visible. */
+  .fast-days-card.upcoming{display:none}
+  .fast-days-card.upcoming.show{display:block}
   .upcoming-list{list-style:none;margin:.6rem 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.5rem .9rem}
   .upcoming-list li{display:flex;align-items:baseline;gap:.6rem;padding:.45rem 0;border-bottom:1px dashed rgba(75,42,138,.18);font-size:.98rem}
   .upcoming-list time{flex:none;width:6.2rem;color:#4a2a8a;font-weight:700;font-variant-numeric:tabular-nums}
@@ -405,11 +421,8 @@
   .upcoming-foot{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem;font-size:.92rem}
   .upcoming-foot a{color:#4a2a8a;font-weight:700}
   @media(max-width:760px){
-    .ekadashi-grid{grid-template-columns:1fr}
-    .ekadashi-card.compare{grid-column:auto}
-    .ekadashi-card.lead{grid-column:auto}
+    .fast-days-grid{grid-template-columns:1fr}
   }
-
   @media(max-width:760px){
     .jain-grid{grid-template-columns:1fr}
     .jain-card.lead{grid-column:auto}
@@ -745,19 +758,6 @@
           <p>Ekadashi is the eleventh day of each lunar fortnight &mdash; a day of fasting observed by many Vaishnavas. The rules are <strong>different from a Jain meal</strong>: grains, lentils, and regular salt are avoided, but root vegetables and dairy are welcome.</p>
           <p>We prepare <span class="jain-key">strictly grain-free Ekadashi prasadam</span> on request &mdash; cooked without grains, lentils or beans, and with <strong>sendha namak</strong> (rock salt) in place of table salt, using <strong>sabudana, samak rice, kuttu, singhara</strong>, fresh fruit, and pure dairy.</p>
         </div>
-        <!-- Filled by the script at the bottom from the POS calendar feed
-             (/api/public/cafe-gopala/calendar/). The dates are the published
-             ISKCON / Vaisnava Calendar dates the kitchen itself follows — the
-             page never calculates a tithi. Stays hidden if the feed is off. -->
-        <div class="ekadashi-card upcoming" id="upcomingCard">
-          <h3>Coming up</h3>
-          <p>The next fasting days and festivals our kitchen is planning for. Tell us a day ahead and your Ekadashi meal will be ready.</p>
-          <ul class="upcoming-list" id="upcomingList"></ul>
-          <div class="upcoming-foot">
-            <a href="calendar.html">See the whole year &rarr;</a>
-            <a id="upcomingIcs" href="#" rel="nofollow">Add to your calendar</a>
-          </div>
-        </div>
         <div class="ekadashi-card">
           <h3>When &amp; how to order</h3>
           <p>Ekadashi falls <strong>twice each lunar month</strong>. The kitchen prepares fasting dishes on request &mdash; not as standing menu items.</p>
@@ -783,6 +783,29 @@
       </div>
       <div class="ekadashi-notice">
         <strong>Observing Ekadashi or a vrat?</strong> Call us a day ahead or mention it while ordering &mdash; we will keep the kitchen ready.
+      </div>
+    </div>
+  </section>
+
+  <section class="fast-days" id="fast-days">
+    <div class="wrap">
+      <div class="fast-days-head">
+        <span class="eyebrow">On the calendar</span>
+        <h2>Coming up &mdash; fasting days &amp; festivals</h2>
+        <p class="sub">The next fasting days and festivals our kitchen is planning for. Tell us a day ahead and your Ekadashi meal will be ready.</p>
+      </div>
+      <!-- Filled by the script at the bottom from the POS calendar feed
+           (/api/public/cafe-gopala/calendar/). The dates are the published
+           ISKCON / Vaisnava Calendar dates the kitchen itself follows — the
+           page never calculates a tithi. Stays hidden if the feed is off. -->
+      <div class="fast-days-card upcoming" id="upcomingCard">
+        <h3>Coming up</h3>
+        <p>The next fasting days and festivals our kitchen is planning for. Tell us a day ahead and your Ekadashi meal will be ready.</p>
+        <ul class="upcoming-list" id="upcomingList"></ul>
+        <div class="upcoming-foot">
+          <a href="calendar.html">See the whole year &rarr;</a>
+          <a id="upcomingIcs" href="#" rel="nofollow">Add to your calendar</a>
+        </div>
       </div>
     </div>
   </section>
