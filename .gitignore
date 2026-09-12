@@ -22,3 +22,7 @@ index_backup.html
 # job (avyangah-infra). Committing it here would let the deploy overwrite the
 # live copy with a stale one. The fallback lives at data/reviews-fallback.json.
 data/reviews.json
+
+# scratch from Claude sessions — never part of the site
+Claude outputs/
+_to_delete/
