@@ -106,6 +106,17 @@
   .composer-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
   .composer .note{margin:1.4rem auto 0;max-width:34rem;text-align:center;
     font-size:.85rem;color:var(--muted);line-height:1.55}
+  /* Hint shown above the buttons, before anyone clicks. Explains the one
+     manual step so nobody is surprised when Google opens empty. */
+  .paste-hint{margin:0 auto 1.4rem;max-width:34rem;text-align:center}
+  .paste-hint p{font-size:.92rem;color:var(--ink);line-height:1.55;margin:0;
+    background:rgba(224,160,41,.10);border:1px solid var(--gold);border-radius:12px;
+    padding:.8rem 1rem}
+  .paste-hint strong{color:var(--ember)}
+  /* The "Paste again" button appears after a copy, in case the clipboard
+     got cleared when switching apps. Hidden by default. */
+  .paste-again{display:none;margin:0 auto;width:min(260px,100%);text-align:center}
+  .paste-again.show{display:block}
   .composer .cta[disabled]{opacity:.5;pointer-events:none}
   #copyState{min-height:1.3rem;text-align:center;margin-top:.9rem;
     font-size:.92rem;font-weight:600;color:var(--veg)}
@@ -207,6 +218,10 @@
       <p class="lede">Jot it down here first. Tap a prompt if you need a nudge, then
          we will copy your words and open Google so you can paste and post.</p>
 
+      <div class="paste-hint">
+        <p><strong>We can't fill Google's review box for you</strong> &mdash; no website can, and that is how Google stops fake reviews. You'll just need to paste your words into the box on Google and pick the stars. It takes about ten seconds.</p>
+      </div>
+
       <div class="chips" id="chips">
         <button type="button" class="chip-btn" data-add="The chaat was the best I have had in a while.">The chaat</button>
         <button type="button" class="chip-btn" data-add="The paneer dishes were rich and properly spiced.">The paneer</button>
@@ -231,6 +246,10 @@
       </div>
 
       <div id="copyState" role="status" aria-live="polite"></div>
+
+      <div class="paste-again" id="pasteAgain">
+        <a class="cta ghost" id="pasteAgainBtn" href="#">Copy again</a>
+      </div>
 
       <p class="note">Google reviews have to be posted from your own Google account,
          so the last step happens on their site. Please write only what you actually
@@ -334,6 +353,8 @@
     var state = document.getElementById("copyState");
     var chips = document.getElementById("chips");
     var copyOpen = document.getElementById("copyOpen");
+    var pasteAgain = document.getElementById("pasteAgain");
+    var pasteAgainBtn = document.getElementById("pasteAgainBtn");
     if (!draft || !copyOpen) return;
 
     function updateCount() {
@@ -384,6 +405,23 @@
       return ok;
     }
 
+    /* The last manual step. We can't put text into Google's review box — no
+       website can, and that is how Google stops fake reviews. So all we do
+       is copy the words, tell the user plainly what to do next, and open
+       Google. The message gets ~2 seconds on screen before the tab switches
+       away, because otherwise the user never sees it. */
+    function finishCopy(text) {
+      var copied = copyText(text);
+      state.style.color = "var(--veg)";
+      state.textContent = copied
+        ? "Copied! On Google, tap the box and choose Paste, then pick your stars."
+        : "Google is opening — copy your words above and paste them in.";
+      if (pasteAgain) pasteAgain.classList.add("show");
+      setTimeout(function () {
+        window.open(REVIEW_URL, "_blank", "noopener");
+      }, 2000);
+    }
+
     copyOpen.addEventListener("click", function (e) {
       e.preventDefault();
       var text = draft.value.trim();
@@ -393,13 +431,21 @@
         draft.focus();
         return;
       }
-      var copied = copyText(text);
-      state.style.color = "var(--veg)";
-      state.textContent = copied
-        ? "Copied. Paste it into the box on Google \u2014 thank you."
-        : "Google is opening \u2014 copy your words above and paste them in.";
-      window.open(REVIEW_URL, "_blank", "noopener");
+      finishCopy(text);
     });
+
+    /* "Copy again" — for when the clipboard got cleared switching apps, or the
+       user went back to tweak the words. Re-copies the current draft text. */
+    if (pasteAgainBtn) {
+      pasteAgainBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var text = draft.value.trim();
+        if (!text) return;
+        copyText(text);
+        state.style.color = "var(--veg)";
+        state.textContent = "Copied again. Paste it into the box on Google.";
+      });
+    }
   })();
 </script>
 
