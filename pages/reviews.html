@@ -55,6 +55,12 @@
   .cta.ghost{background:transparent;color:var(--maroon);box-shadow:none;border:1.5px solid var(--gold)}
   .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
   a:focus-visible,.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+  /* The composer's step-1 control is a <button> wearing .cta, so reset the
+     button UA styles and inherit the page font. Without this the button
+     renders in the system button theme and ignores the gold gradient. */
+  .composer-actions .cta{font:inherit;cursor:pointer;border:none;background:none;
+    display:inline-block;text-decoration:none;box-sizing:border-box}
+  .composer-actions button.cta{font-family:inherit}
 
   .eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-weight:600;font-size:.72rem;
     letter-spacing:.22em;text-transform:uppercase;color:var(--ember)}
@@ -246,11 +252,17 @@
       </div>
 
       <div class="composer-actions">
-        <!-- Single morphing button: tap 1 copies, tap 2 opens Google.
-             It starts as a plain <a href="#"> and becomes a real link to
-             Google after the copy succeeds, so the second tap is a direct
-             navigation Safari can never block. -->
-        <a class="cta" id="actionBtn" href="#">1. Copy review text &rarr;</a>
+        <!-- Step 1: a genuine <button>. iOS Safari reliably fires click and
+             touch events on real buttons; an <a> with no href is a non-
+             interactive placeholder whose touch events get dropped. -->
+        <button type="button" class="cta" id="copyBtn">1. Copy review text &rarr;</button>
+
+        <!-- Step 2: a pre-rendered native <a> link to Google, revealed after the
+             copy succeeds. It is already a complete href in the DOM, so the
+             tap is a direct navigation Safari can never block. No dynamic
+             href mutation anywhere. -->
+        <a class="cta copied-ready" id="openGoogleBtn" href="https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8" target="_blank" rel="noopener" style="display:none;">2. Open Google to paste &rarr;</a>
+
         <a class="cta ghost" id="justOpen" href="https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8" target="_blank" rel="noopener">Skip &mdash; write directly on Google</a>
       </div>
 
@@ -359,43 +371,40 @@
      Nothing leaves the browser; there is no rating step and no filtering by
      sentiment, which would be review gating and against Google's policy.
 
-     Two-phase button. Safari (iOS and macOS) enforces strict heuristics where
-     triggering a clipboard write and a programmatic window.open inside the
-     same transient click causes one of them to fail or get flagged as a popup.
-     Splitting the flow into two clean taps sidesteps that entirely: tap 1
-     copies while the document is still focused, tap 2 is a plain <a> click
-     that no browser can block. */
+     Two explicit elements, no dynamic href mutation. The morphing-<a> version
+     failed on Safari because removeAttribute("href") turns an <a> into a
+     non-interactive placeholder whose touch events iOS Safari drops, and
+     re-adding href after the handler has run means the next tap is not a clean
+     navigation. So: a real <button> for step 1, and a pre-rendered native <a>
+     for step 2 that is already in the DOM with its href intact. */
   (function () {
     var REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8";
     var draft = document.getElementById("draft");
     var count = document.getElementById("count");
     var state = document.getElementById("copyState");
     var chips = document.getElementById("chips");
-    var actionBtn = document.getElementById("actionBtn");
+    var copyBtn = document.getElementById("copyBtn");
+    var openGoogleBtn = document.getElementById("openGoogleBtn");
     var pasteAgain = document.getElementById("pasteAgain");
     var pasteAgainBtn = document.getElementById("pasteAgainBtn");
-    if (!draft || !actionBtn) return;
+    if (!draft || !copyBtn || !openGoogleBtn) return;
 
-    var isCopied = false;
-
-    function resetAction() {
-      isCopied = false;
-      actionBtn.removeAttribute("href");
-      actionBtn.removeAttribute("target");
-      actionBtn.removeAttribute("rel");
-      actionBtn.innerHTML = "1. Copy review text &rarr;";
-      actionBtn.classList.remove("copied-ready");
+    function resetState() {
+      copyBtn.style.display = "inline-block";
+      openGoogleBtn.style.display = "none";
+      if (pasteAgain) pasteAgain.classList.remove("show");
       state.textContent = "";
     }
 
     function updateCount() {
       var n = draft.value.trim().length;
       count.textContent = n === 1 ? "1 character" : n + " characters";
-      actionBtn.style.opacity = n === 0 ? "0.5" : "1";
-      actionBtn.style.pointerEvents = n === 0 ? "none" : "auto";
+      copyBtn.disabled = n === 0;
+      copyBtn.style.opacity = n === 0 ? "0.5" : "1";
+      copyBtn.style.pointerEvents = n === 0 ? "none" : "auto";
     }
     draft.addEventListener("input", function () {
-      resetAction();
+      resetState();
       updateCount();
     });
     updateCount();
@@ -408,69 +417,64 @@
         var cur = draft.value.trim();
         if (cur.indexOf(add) >= 0) return;          /* don't add the same line twice */
         draft.value = cur ? cur + " " + add : add;
-        resetAction();
+        resetState();
         updateCount();
         draft.focus();
         draft.setSelectionRange(draft.value.length, draft.value.length);
       });
     }
 
-    function executeCopy(text) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(text).catch(function () {
-          return fallbackExecCopy(text);
-        });
-      }
-      return Promise.resolve(fallbackExecCopy(text));
-    }
-
-    function fallbackExecCopy(text) {
+    /* execCommand is still the only 100% synchronous copy on older iOS Safari
+       WebKit, so it runs first. navigator.clipboard is tried too and only
+       wins if it resolves. */
+    function execCopyFallback(text) {
       try {
         var ta = document.createElement("textarea");
         ta.value = text;
         ta.setAttribute("readonly", "");
         ta.style.position = "fixed";
         ta.style.top = "-1000px";
+        ta.style.opacity = "0";
         document.body.appendChild(ta);
         ta.select();
+        ta.setSelectionRange(0, text.length);
         var ok = document.execCommand("copy");
         document.body.removeChild(ta);
         return ok;
-      } catch (e) {
+      } catch (err) {
         return false;
       }
     }
 
-    actionBtn.addEventListener("click", function (e) {
+    function executeCopy(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).catch(function () {
+          return execCopyFallback(text);
+        });
+      }
+      return Promise.resolve(execCopyFallback(text));
+    }
+
+    copyBtn.addEventListener("click", function () {
       var text = draft.value.trim();
       if (!text) {
-        e.preventDefault();
         state.style.color = "var(--ember)";
         state.textContent = "Write a line or two first.";
         draft.focus();
         return;
       }
 
-      /* Step 1: not copied yet. Copy, then morph the button into a real link
-         to Google. The second tap is then a plain <a> navigation — Safari
-         never blocks a direct link click. */
-      if (!isCopied) {
-        e.preventDefault();
-        executeCopy(text).then(function () {
-          isCopied = true;
-          actionBtn.href = REVIEW_URL;
-          actionBtn.target = "_blank";
-          actionBtn.rel = "noopener";
-          actionBtn.innerHTML = "2. Open Google to Paste &rarr;";
-          actionBtn.classList.add("copied-ready");
+      executeCopy(text).then(function () {
+        /* Step 1 done: hide the copy button, reveal the pre-rendered native
+           link to Google. Its href was always in the DOM, so the next tap is
+           a direct navigation Safari can never block. */
+        copyBtn.style.display = "none";
+        openGoogleBtn.style.display = "inline-block";
 
-          state.style.color = "var(--veg)";
-          state.textContent = "Copied to clipboard! Tap above to open Google, then paste your words into the box and pick the stars.";
-          if (pasteAgain) pasteAgain.classList.add("show");
-        });
-      }
-      /* Step 2: the button is now a genuine <a href="...">, so this click is a
-         normal navigation and needs no handler at all. */
+        state.style.color = "var(--veg)";
+        state.textContent = "Copied to clipboard! Now tap button #2 to open Google, then paste your words into the box and pick the stars.";
+        if (pasteAgain) pasteAgain.classList.add("show");
+      });
     });
 
     /* "Copy again" — for when the clipboard got cleared switching apps, or the
@@ -482,7 +486,7 @@
         if (!text) return;
         executeCopy(text).then(function () {
           state.style.color = "var(--veg)";
-          state.textContent = "Copied again. Paste it into the box on Google.";
+          state.textContent = "Copied again! Paste it into the box on Google.";
         });
       });
     }
