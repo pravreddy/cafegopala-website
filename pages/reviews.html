@@ -113,8 +113,13 @@
     background:rgba(224,160,41,.10);border:1px solid var(--gold);border-radius:12px;
     padding:.8rem 1rem}
   .paste-hint strong{color:var(--ember)}
-  /* The "Paste again" button appears after a copy, in case the clipboard
-     got cleared when switching apps. Hidden by default. */
+  /* After phase 1 the button becomes a real link to Google. A gold ring and
+     the arrow flip signal "this is now the open-Google step". */
+  .composer-actions .cta.copied-ready{
+    background:linear-gradient(180deg,var(--gold),#c98618);color:var(--maroon);
+    box-shadow:0 6px 18px rgba(224,160,41,.35)}
+  /* Small re-copy link, shown after a copy, in case the clipboard got cleared
+     when switching apps or the user wants to tweak the words first. */
   .paste-again{display:none;margin:0 auto;width:min(260px,100%);text-align:center}
   .paste-again.show{display:block}
   .composer .cta[disabled]{opacity:.5;pointer-events:none}
@@ -241,12 +246,19 @@
       </div>
 
       <div class="composer-actions">
-        <a class="cta" id="copyOpen" href="#">Copy &amp; open Google &rarr;</a>
-        <a class="cta ghost" id="justOpen" href="https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8" target="_blank" rel="noopener">Skip &mdash; write it on Google</a>
+        <!-- Single morphing button: tap 1 copies, tap 2 opens Google.
+             It starts as a plain <a href="#"> and becomes a real link to
+             Google after the copy succeeds, so the second tap is a direct
+             navigation Safari can never block. -->
+        <a class="cta" id="actionBtn" href="#">1. Copy review text &rarr;</a>
+        <a class="cta ghost" id="justOpen" href="https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8" target="_blank" rel="noopener">Skip &mdash; write directly on Google</a>
       </div>
 
       <div id="copyState" role="status" aria-live="polite"></div>
 
+      <!-- Small re-copy link, shown after phase 1. On iOS the clipboard can be
+         cleared when switching apps, and once the button has become a link to
+         Google it can't copy again — so keep a way back. -->
       <div class="paste-again" id="pasteAgain">
         <a class="cta ghost" id="pasteAgainBtn" href="#">Copy again</a>
       </div>
@@ -345,24 +357,47 @@
      Google account on their own site. So all this does is help someone get the
      words out, copy them, and open Google's write-review page to paste into.
      Nothing leaves the browser; there is no rating step and no filtering by
-     sentiment, which would be review gating and against Google's policy. */
+     sentiment, which would be review gating and against Google's policy.
+
+     Two-phase button. Safari (iOS and macOS) enforces strict heuristics where
+     triggering a clipboard write and a programmatic window.open inside the
+     same transient click causes one of them to fail or get flagged as a popup.
+     Splitting the flow into two clean taps sidesteps that entirely: tap 1
+     copies while the document is still focused, tap 2 is a plain <a> click
+     that no browser can block. */
   (function () {
     var REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJgwhbtuMXrjsRKPKZ0trYYL8";
     var draft = document.getElementById("draft");
     var count = document.getElementById("count");
     var state = document.getElementById("copyState");
     var chips = document.getElementById("chips");
-    var copyOpen = document.getElementById("copyOpen");
+    var actionBtn = document.getElementById("actionBtn");
     var pasteAgain = document.getElementById("pasteAgain");
     var pasteAgainBtn = document.getElementById("pasteAgainBtn");
-    if (!draft || !copyOpen) return;
+    if (!draft || !actionBtn) return;
+
+    var isCopied = false;
+
+    function resetAction() {
+      isCopied = false;
+      actionBtn.removeAttribute("href");
+      actionBtn.removeAttribute("target");
+      actionBtn.removeAttribute("rel");
+      actionBtn.innerHTML = "1. Copy review text &rarr;";
+      actionBtn.classList.remove("copied-ready");
+      state.textContent = "";
+    }
 
     function updateCount() {
       var n = draft.value.trim().length;
       count.textContent = n === 1 ? "1 character" : n + " characters";
-      copyOpen.disabled = n === 0;
+      actionBtn.style.opacity = n === 0 ? "0.5" : "1";
+      actionBtn.style.pointerEvents = n === 0 ? "none" : "auto";
     }
-    draft.addEventListener("input", function () { updateCount(); state.textContent = ""; });
+    draft.addEventListener("input", function () {
+      resetAction();
+      updateCount();
+    });
     updateCount();
 
     if (chips) {
@@ -373,87 +408,82 @@
         var cur = draft.value.trim();
         if (cur.indexOf(add) >= 0) return;          /* don't add the same line twice */
         draft.value = cur ? cur + " " + add : add;
+        resetAction();
         updateCount();
-        state.textContent = "";
         draft.focus();
         draft.setSelectionRange(draft.value.length, draft.value.length);
       });
     }
 
-    /* Synchronous copy. execCommand is deprecated but is the only path that
-       reliably works inside a click handler right before window.open — the async
-       clipboard API can reject once the new tab takes focus. We try the modern
-       API too, and simply carry on if both fail: the text is still on screen. */
-    function copyText(text) {
-      var ok = false;
+    function executeCopy(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).catch(function () {
+          return fallbackExecCopy(text);
+        });
+      }
+      return Promise.resolve(fallbackExecCopy(text));
+    }
+
+    function fallbackExecCopy(text) {
       try {
         var ta = document.createElement("textarea");
         ta.value = text;
         ta.setAttribute("readonly", "");
         ta.style.position = "fixed";
         ta.style.top = "-1000px";
-        ta.style.opacity = "0";
         document.body.appendChild(ta);
         ta.select();
-        ta.setSelectionRange(0, text.length);
-        ok = document.execCommand("copy");
+        var ok = document.execCommand("copy");
         document.body.removeChild(ta);
-      } catch (err) { ok = false; }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        try { navigator.clipboard.writeText(text).then(function () {}, function () {}); } catch (e2) {}
+        return ok;
+      } catch (e) {
+        return false;
       }
-      return ok;
     }
 
-    /* The last manual step. We can't put text into Google's review box — no
-       website can, and that is how Google stops fake reviews. So all we do
-       is copy the words, tell the user plainly what to do next, and open
-       Google.
-
-       The tab must open synchronously, inside the click handler, before
-       anything else. Safari (and Firefox, and in-app browsers) blocks
-       window.open once it is not a direct result of a user gesture — which
-       means any await, any setTimeout, any copy first will get it blocked
-       silently. So: open first, copy second, message third. */
-    function finishCopy(text) {
-      var win = window.open(REVIEW_URL, "_blank", "noopener");
-      var copied = copyText(text);
-      state.style.color = "var(--veg)";
-      if (!win || win.closed) {
-        /* Blocked (Safari, Firefox, in-app browser). Show a real link the
-           user can tap — a plain <a> click is never blocked. */
-        state.innerHTML = "Copied! Your browser blocked the new tab — " +
-          '<a href="' + REVIEW_URL + '" target="_blank" rel="noopener" style="color:var(--ember);font-weight:700;text-decoration:underline">tap here to open Google</a>, then paste your words into the box and pick the stars.';
-      } else if (copied) {
-        state.textContent = "Copied! On Google, tap the box and choose Paste, then pick your stars.";
-      } else {
-        state.textContent = "Google is open — copy your words above and paste them into the box.";
-      }
-      if (pasteAgain) pasteAgain.classList.add("show");
-    }
-
-    copyOpen.addEventListener("click", function (e) {
-      e.preventDefault();
+    actionBtn.addEventListener("click", function (e) {
       var text = draft.value.trim();
       if (!text) {
+        e.preventDefault();
         state.style.color = "var(--ember)";
-        state.textContent = "Write a line or two first, then we will copy it for you.";
+        state.textContent = "Write a line or two first.";
         draft.focus();
         return;
       }
-      finishCopy(text);
+
+      /* Step 1: not copied yet. Copy, then morph the button into a real link
+         to Google. The second tap is then a plain <a> navigation — Safari
+         never blocks a direct link click. */
+      if (!isCopied) {
+        e.preventDefault();
+        executeCopy(text).then(function () {
+          isCopied = true;
+          actionBtn.href = REVIEW_URL;
+          actionBtn.target = "_blank";
+          actionBtn.rel = "noopener";
+          actionBtn.innerHTML = "2. Open Google to Paste &rarr;";
+          actionBtn.classList.add("copied-ready");
+
+          state.style.color = "var(--veg)";
+          state.textContent = "Copied to clipboard! Tap above to open Google, then paste your words into the box and pick the stars.";
+          if (pasteAgain) pasteAgain.classList.add("show");
+        });
+      }
+      /* Step 2: the button is now a genuine <a href="...">, so this click is a
+         normal navigation and needs no handler at all. */
     });
 
     /* "Copy again" — for when the clipboard got cleared switching apps, or the
-       user went back to tweak the words. Re-copies the current draft text. */
+       user wants to tweak the words before opening Google. */
     if (pasteAgainBtn) {
       pasteAgainBtn.addEventListener("click", function (e) {
         e.preventDefault();
         var text = draft.value.trim();
         if (!text) return;
-        copyText(text);
-        state.style.color = "var(--veg)";
-        state.textContent = "Copied again. Paste it into the box on Google.";
+        executeCopy(text).then(function () {
+          state.style.color = "var(--veg)";
+          state.textContent = "Copied again. Paste it into the box on Google.";
+        });
       });
     }
   })();
