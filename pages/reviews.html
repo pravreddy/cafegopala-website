@@ -408,18 +408,28 @@
     /* The last manual step. We can't put text into Google's review box — no
        website can, and that is how Google stops fake reviews. So all we do
        is copy the words, tell the user plainly what to do next, and open
-       Google. The message gets ~2 seconds on screen before the tab switches
-       away, because otherwise the user never sees it. */
+       Google.
+
+       The tab must open synchronously, inside the click handler, before
+       anything else. Safari (and Firefox, and in-app browsers) blocks
+       window.open once it is not a direct result of a user gesture — which
+       means any await, any setTimeout, any copy first will get it blocked
+       silently. So: open first, copy second, message third. */
     function finishCopy(text) {
+      var win = window.open(REVIEW_URL, "_blank", "noopener");
       var copied = copyText(text);
       state.style.color = "var(--veg)";
-      state.textContent = copied
-        ? "Copied! On Google, tap the box and choose Paste, then pick your stars."
-        : "Google is opening — copy your words above and paste them in.";
+      if (!win || win.closed) {
+        /* Blocked (Safari, Firefox, in-app browser). Show a real link the
+           user can tap — a plain <a> click is never blocked. */
+        state.innerHTML = "Copied! Your browser blocked the new tab — " +
+          '<a href="' + REVIEW_URL + '" target="_blank" rel="noopener" style="color:var(--ember);font-weight:700;text-decoration:underline">tap here to open Google</a>, then paste your words into the box and pick the stars.';
+      } else if (copied) {
+        state.textContent = "Copied! On Google, tap the box and choose Paste, then pick your stars.";
+      } else {
+        state.textContent = "Google is open — copy your words above and paste them into the box.";
+      }
       if (pasteAgain) pasteAgain.classList.add("show");
-      setTimeout(function () {
-        window.open(REVIEW_URL, "_blank", "noopener");
-      }, 2000);
     }
 
     copyOpen.addEventListener("click", function (e) {
