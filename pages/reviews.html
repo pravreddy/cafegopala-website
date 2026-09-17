@@ -56,9 +56,14 @@
   .cta.ghost:hover{background:rgba(224,160,41,.14);transform:translateY(-2px)}
   a:focus-visible,.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
   /* The composer's step-1 control is a <button> wearing .cta, so reset the
-     button UA styles and inherit the page font. Without this the button
-     renders in the system button theme and ignores the gold gradient. */
-  .composer-actions .cta{font:inherit;cursor:pointer;border:none;background:none;
+     button UA chrome (appearance, padding, border-radius, border) without
+     touching background or color — those carry the gold gradient and the
+     ghost outline. Setting background:none here was stripping the gold off
+     the button and the border off the ghost link, leaving an empty pill
+     and bare text. */
+  .composer-actions .cta{font:inherit;cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    padding:.6rem 1.15rem;border-radius:999px;border:1.5px solid transparent;
     display:inline-block;text-decoration:none;box-sizing:border-box}
   .composer-actions button.cta{font-family:inherit}
 
