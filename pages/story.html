@@ -108,6 +108,29 @@
   .attribution a{color:var(--ember);text-decoration:none;font-style:normal}
   .attribution a:hover{text-decoration:underline}
 
+  /* The illustration is wrapped in a borderless button so it is clickable
+     (a plain <img> has no click target on touch). cursor:pointer and a
+     subtle focus ring make the affordance obvious. */
+  .story-img-btn{background:none;border:none;padding:0;cursor:pointer;
+    display:inline-block;border-radius:18px;line-height:0}
+  .story-img-btn:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+
+  /* Lightbox overlay. Fixed over the whole viewport, hidden by default.
+     aria-hidden keeps it out of the a11y tree while closed. */
+  .lightbox{position:fixed;inset:0;z-index:100;background:rgba(42,19,10,.86);
+    display:flex;align-items:center;justify-content:center;padding:1.5rem;
+    opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s}
+  .lightbox.open{opacity:1;visibility:visible}
+  .lightbox img{max-width:100%;max-height:92vh;width:auto;height:auto;
+    border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+  .lightbox-close{position:absolute;top:1rem;right:1rem;width:44px;height:44px;
+    border:none;border-radius:50%;background:rgba(252,244,226,.14);color:#fff;
+    font-size:1.6rem;line-height:1;cursor:pointer;display:flex;
+    align-items:center;justify-content:center}
+  .lightbox-close:hover,.lightbox-close:focus-visible{background:rgba(252,244,226,.3);
+    outline:3px solid var(--gold);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.lightbox{transition:none}}
+
   .end-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin:2.4rem 0 1rem}
   .story-review{margin:2.6rem 0 1rem;padding:1.8rem 1.6rem;text-align:center;
     background:rgba(224,160,41,.10);border:1px solid var(--line);border-radius:18px}
@@ -258,10 +281,20 @@
   </div>
 
   <div class="story-visual wide">
-    <img src="../images/Iskcon_gur_parampara.webp" alt="The Brahma-Madhva-Gaudiya guru-parampara, from Krishna through the Six Goswamis to Srila Prabhupada" loading="lazy" width="900" />
+    <button type="button" class="story-img-btn" id="paramparaBtn" aria-label="Open the guru-parampara illustration in full size">
+      <img src="../images/Iskcon_gur_parampara.webp" alt="The Brahma-Madhva-Gaudiya guru-parampara, from Krishna through the Six Goswamis to Srila Prabhupada" loading="lazy" width="900" />
+    </button>
   </div>
 
   <p class="attribution">The guru-parampara illustration above is courtesy of <a href="https://www.iskconbangalore.org/guru-parampara/" target="_blank" rel="noopener">ISKCON Bangalore</a>, used with thanks.</p>
+
+  <!-- Lightbox: tap the illustration to see it full-size. Hidden until opened,
+       and hidden again on close, backdrop click or Escape, so it never
+       interferes with the page behind it. -->
+  <div class="lightbox" id="lightbox" aria-hidden="true" hidden>
+    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close illustration">&times;</button>
+    <img class="lightbox-img" id="lightboxImg" alt="" />
+  </div>
 
   <h2>Everyone is welcome</h2>
 
@@ -314,8 +347,48 @@
         toggle.setAttribute("aria-label", "Open menu");
       });
     });
+})();
+  </script>
+
+  <script>
+  /* Lightbox for the guru-parampara illustration. Tap it to see it full-size;
+     tap the backdrop or the X, or press Escape, to close. Nothing is loaded
+     until the button is pressed, and prefers-reduced-motion disables the
+     fade. */
+  (function () {
+    var btn   = document.getElementById("paramparaBtn");
+    var lb    = document.getElementById("lightbox");
+    var close = document.getElementById("lightboxClose");
+    var img   = document.getElementById("lightboxImg");
+    if (!btn || !lb || !close || !img) return;
+
+    var source = btn.querySelector("img");
+    if (source) img.src = source.getAttribute("src");
+
+    function open() {
+      img.setAttribute("alt", source ? source.getAttribute("alt") : "");
+      lb.classList.add("open");
+      lb.removeAttribute("hidden");
+      lb.setAttribute("aria-hidden", "false");
+      close.focus();
+    }
+    function closeLb() {
+      lb.classList.remove("open");
+      lb.setAttribute("hidden", "");
+      lb.setAttribute("aria-hidden", "true");
+      img.setAttribute("alt", "");
+    }
+
+    btn.addEventListener("click", open);
+    close.addEventListener("click", closeLb);
+    lb.addEventListener("click", function (e) {
+      if (e.target === lb) closeLb();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && lb.classList.contains("open")) closeLb();
+    });
   })();
-</script>
+  </script>
 <script src="moving.js"></script>
 </body>
 </html>
