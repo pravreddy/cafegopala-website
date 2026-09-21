@@ -1,41 +1,57 @@
 /*
-  moving.js — "we are moving" notice + online ordering / reservations paused.
+  moving.js — site-wide notice strip + per-page "not open yet" switches.
   ───────────────────────────────────────────────────────────────────────────
-  ONE SWITCH. To turn everything back on when the new place opens, set
-  MOVING to false below, commit, push. Nothing else to change.
+  TWO SWITCHES, one per shop page. Edit these and the words below, not the
+  code further down. Commit + push = deploy.
 
-      var MOVING = false;
+      ORDERING_PAUSED      true  -> order.html shows a notice, no cart
+      RESERVATIONS_PAUSED  true  -> reserve.html shows a notice, no booking
 
-  What it does while MOVING is true:
-    • every page gets a strip at the very top saying we are moving
-    • order.html and reserve.html stop working — the page body is replaced
-      with the same notice, so nobody can place an order or book a table
-      (the "Order & collect" buttons elsewhere still go there; they simply
-       land on the notice instead of the shop)
+  22 Sep 2026 (Ekadashi): trial opening. Order & collect ON, table booking
+  still OFF while the kitchen is finished.
+
+  ⚠ These only change what the WEBSITE shows. The real switch is in FastPOS:
+     Settings -> Orders ("Online orders" enabled) and the table-booking
+     "enabled" toggle. Keep the two in step — a direct FastPOS link ignores
+     this file.
 
   Included from every page in pages/ with one line before </body>:
-      <script src="moving.js"></script>
+    <script src="moving.js"></script>
   The site is served flat, so pages/moving.js is https://cafegopala.in/moving.js
 */
 (function () {
-  var MOVING = true;
+  var ORDERING_PAUSED     = false;
+  var RESERVATIONS_PAUSED = true;
 
   /* ── the words. Edit these, not the code below. ───────────────────────── */
-  var FROM      = "Malleswaram";
-  var TO        = "New BEL Road, next to M S Ramaiah Memorial Hospital";
-  var STRIP     = "We are moving from " + FROM + " to " + TO +
-                  ". Online ordering and table booking are paused until we reopen.";
-  var HEADLINE  = "We are moving";
-  var BODY      = "Cafe Gopala is moving from " + FROM + " to " + TO + ".";
-  var PAUSED    = "Online ordering and table reservations are switched off until the move is finished. " +
-                  "Please do not pay for anything here — we would only have to refund it.";
-  var SOON      = "The opening date for the new place will be announced very soon. " +
-                  "Thank you for your patience — we cannot wait to serve you there.";
+  // the strip on every page ("" = no strip)
+  var STRIP_HEAD = "Trial opening Tue 22 Sep — Ekadashi.";
+  var STRIP      = "Order &amp; collect is open: please order 2+ hours ahead. " +
+                   "Table booking soon. " +
+                   '<a href="tel:+919449444469">+91 94494 44469</a>';
 
-  if (!MOVING) return;
+  // what reserve.html / order.html show while paused
+  var NOTICE = {
+    "reserve.html": {
+      title: "Table booking — coming soon",
+      body:  "We are still finishing the kitchen, so online table booking is not open yet.",
+      next:  "Order &amp; collect is open now — order at least 2 hours ahead, 3–4 hours is ideal. " +
+             'Questions? Call <a href="tel:+919449444469">+91 94494 44469</a> or ' +
+             '<a href="tel:+919449444415">+91 94494 44415</a>.',
+      link:  ["order.html", "Order &amp; collect"]
+    },
+    "order.html": {
+      title: "Online ordering is paused",
+      body:  "Online ordering is switched off for now. Please do not pay for anything here — we would only have to refund it.",
+      next:  'Please call <a href="tel:+919449444469">+91 94494 44469</a> and we will help.',
+      link:  ["index.html", "Back to the café"]
+    }
+  };
 
   var page = (location.pathname.split("/").pop() || "index.html").toLowerCase();
-  var isShop = page === "order.html" || page === "reserve.html";
+  var paused = (page === "order.html" && ORDERING_PAUSED) ||
+               (page === "reserve.html" && RESERVATIONS_PAUSED);
+  if (!STRIP && !paused) return;
 
   /* ── styles ───────────────────────────────────────────────────────────── */
   var css = document.createElement("style");
@@ -44,6 +60,7 @@
       'font-size:.95rem;line-height:1.5;text-align:center;padding:.7rem 1rem;' +
       'border-bottom:3px solid #E0A029}' +
     '.cg-moving-strip b{color:#F3C766}' +
+    '.cg-moving-strip a,.cg-moving-box .cg-soon a{color:inherit;text-decoration:underline}' +
     '.cg-moving-box{width:min(680px,92vw);margin:3.5rem auto 4rem;background:#FCF4E2;' +
       'border:1px solid rgba(62,18,6,.14);border-top:5px solid #E4611C;border-radius:14px;' +
       'padding:2.4rem 2rem;text-align:center;color:#2A130A;' +
@@ -58,12 +75,16 @@
 
   function start() {
     /* the strip, above everything, on every page */
-    var strip = document.createElement("div");
-    strip.className = "cg-moving-strip";
-    strip.innerHTML = "\u{1F69A} <b>" + HEADLINE + ".</b> " + STRIP;
-    document.body.insertBefore(strip, document.body.firstChild);
+    var strip = null;
+    if (STRIP) {
+      strip = document.createElement("div");
+      strip.className = "cg-moving-strip";
+      strip.innerHTML = "\u{1FA94} <b>" + STRIP_HEAD + "</b> " + STRIP;
+      document.body.insertBefore(strip, document.body.firstChild);
+    }
 
-    if (!isShop) return;
+    if (!paused) return;
+    var n = NOTICE[page];
 
     /* order.html / reserve.html: nothing below the header survives */
     var keep = { HEADER: 1, FOOTER: 1, SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, LINK: 1 };
@@ -80,17 +101,16 @@
     var box = document.createElement("div");
     box.className = "cg-moving-box";
     box.innerHTML =
-      "<h1>" + HEADLINE + "</h1>" +
-      "<p>" + BODY + "</p>" +
-      "<p>" + PAUSED + "</p>" +
-      '<p class="cg-soon">' + SOON + "</p>" +
-      '<a class="cg-back" href="index.html">Back to the café</a>';
+      "<h1>" + n.title + "</h1>" +
+      "<p>" + n.body + "</p>" +
+      '<p class="cg-soon">' + n.next + "</p>" +
+      '<a class="cg-back" href="' + n.link[0] + '">' + n.link[1] + "</a>";
 
     var footer = document.querySelector("footer");
     if (footer) document.body.insertBefore(box, footer);
     else document.body.appendChild(box);
 
-    document.title = HEADLINE + " — Cafe Gopala";
+    document.title = n.title + " — Cafe Gopala";
   }
 
   if (document.readyState === "loading") {
