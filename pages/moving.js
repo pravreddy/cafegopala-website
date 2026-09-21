@@ -26,7 +26,7 @@
   /* ── the words. Edit these, not the code below. ───────────────────────── */
   // the strip on every page ("" = no strip)
   var STRIP_HEAD = "Trial opening Tue 22 Sep — Ekadashi.";
-  var STRIP      = "Order &amp; collect is open: please order 2+ hours ahead. " +
+  var STRIP      = "Order &amp; collect is open — order up to a week ahead, at least 4 hours before pickup. " +
                    "Table booking soon. " +
                    '<a href="tel:+919449444469">+91 94494 44469</a>';
 
@@ -35,7 +35,7 @@
     "reserve.html": {
       title: "Table booking — coming soon",
       body:  "We are still finishing the kitchen, so online table booking is not open yet.",
-      next:  "Order &amp; collect is open now — order at least 2 hours ahead, 3–4 hours is ideal. " +
+      next:  "Order &amp; collect is open now — you can order up to a week ahead, and at least 4 hours before pickup. " +
              'Questions? Call <a href="tel:+919449444469">+91 94494 44469</a> or ' +
              '<a href="tel:+919449444415">+91 94494 44415</a>.',
       link:  ["order.html", "Order &amp; collect"]
