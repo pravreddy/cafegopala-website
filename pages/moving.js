@@ -10,6 +10,13 @@
   22 Sep 2026 (Ekadashi): trial opening. Order & collect ON, table booking
   still OFF while the kitchen is finished.
 
+  THE DATE SWITCH — OPENING_UNTIL below. Until that date every page shows the
+  "Now open" strip and the home page keeps ONE purple bar that fades between
+  the next Ekadashi and today's festivals. From that date on, with no commit
+  or push: the strip hides itself, and the home page splits the purple bar
+  into two lines — Ekadashi fixed, today's festivals fading underneath
+  (index.html reads window.CG_OPENING_UNTIL). Change the date here only.
+
   ⚠ These only change what the WEBSITE shows. The real switch is in FastPOS:
      Settings -> Orders ("Online orders" enabled) and the table-booking
      "enabled" toggle. Keep the two in step — a direct FastPOS link ignores
@@ -19,14 +26,16 @@
     <script src="moving.js"></script>
   The site is served flat, so pages/moving.js is https://cafegopala.in/moving.js
 */
+var CG_OPENING_UNTIL = window.CG_OPENING_UNTIL = "2026-10-01";   /* YYYY-MM-DD, visitor's own date */
+
 (function () {
   var ORDERING_PAUSED     = false;
   var RESERVATIONS_PAUSED = true;
 
   /* ── the words. Edit these, not the code below. ───────────────────────── */
   // the strip on every page ("" = no strip)
-  var STRIP_HEAD = "Trial opening Tue 22 Sep — Ekadashi.";
-  var STRIP      = "Order &amp; collect is open — order up to a week ahead, at least 4 hours before pickup. " +
+  var STRIP_HEAD = "Now open.";
+  var STRIP      = "Order &amp; collect — order up to a week ahead, at least 4 hours before pickup. " +
                    "Table booking soon. " +
                    '<a href="tel:+919449444469">+91 94494 44469</a>';
 
@@ -47,6 +56,11 @@
       link:  ["index.html", "Back to the café"]
     }
   };
+
+  // after OPENING_UNTIL the strip retires itself (ISO dates compare as text)
+  var d = new Date();
+  var todayIso = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  if (todayIso >= CG_OPENING_UNTIL) STRIP = "";
 
   var page = (location.pathname.split("/").pop() || "index.html").toLowerCase();
   var paused = (page === "order.html" && ORDERING_PAUSED) ||

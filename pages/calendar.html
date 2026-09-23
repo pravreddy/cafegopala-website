@@ -432,9 +432,25 @@
       maxMonth = new Date(parseInt(last.slice(0, 4), 10), parseInt(last.slice(5, 7), 10) - 1, 1);
       buildLegend();
       render();
-      // Open today, or the first upcoming Ekadashi if today is quiet.
-      var firstFast = days.filter(function (x) { return isFast(x) && x.date >= todayIso; })[0];
-      selectDay(byDate[todayIso] ? todayIso : (firstFast ? firstFast.date : todayIso));
+      // calendar.html?date=YYYY-MM-DD (the home-page bar links here): open
+      // that month and that day. Otherwise today, or the first upcoming
+      // Ekadashi if today is quiet.
+      var want = (location.search.match(/[?&]date=(\d{4}-\d{2}-\d{2})/) || [])[1];
+      if (want) {
+        var wd = new Date(want + "T00:00:00");
+        var wm = new Date(wd.getFullYear(), wd.getMonth(), 1);
+        if (!isNaN(wd) && wm >= minMonth && wm <= maxMonth) {
+          cur = wm;
+          renderMonth();
+          selectDay(want);
+          setView("month");
+          $("dayPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+        } else { want = null; }
+      }
+      if (!want) {
+        var firstFast = days.filter(function (x) { return isFast(x) && x.date >= todayIso; })[0];
+        selectDay(byDate[todayIso] ? todayIso : (firstFast ? firstFast.date : todayIso));
+      }
       $("state").style.display = "none";
     })
     .catch(function () {

@@ -109,6 +109,16 @@
   .fast-strip-more{margin-left:.4rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;opacity:.9}
   .fast-strip:hover .fast-strip-more{opacity:1}
   @media(max-width:640px){.fast-strip{font-size:.88rem;gap:.45rem}.fast-strip-more{flex-basis:100%;text-align:center;margin:0}}
+  /* The rotating line (today's festivals, and the Ekadashi while they share
+     one bar). One item at a time, a slow fade; pauses on hover/focus. */
+  .fast-strip .fs-item{display:inline-flex;align-items:center;justify-content:center;gap:.7rem;flex-wrap:wrap;
+    transition:opacity .45s ease}
+  .fast-strip .fs-item.out{opacity:0}
+  .fast-strip .fs-count{font-size:.75rem;opacity:.7;font-variant-numeric:tabular-nums}
+  .fast-strip.today-strip{background:linear-gradient(90deg,#5c3a9a,#7a5fb5);border-top:1px solid rgba(255,255,255,.14)}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+  @media(max-width:640px){.fast-strip .fs-item{gap:.45rem}}
+  @media(prefers-reduced-motion:reduce){.fast-strip .fs-item{transition:none}}
   .hero{padding:4.5rem 0 3.4rem;text-align:center;position:relative;overflow:hidden}
   .hero-pathways{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.4rem}
   .path-card{flex:1 1 140px;max-width:190px;display:flex;flex-direction:column;gap:.15rem;align-items:center;
@@ -476,12 +486,14 @@
 <!-- "When is the next Ekadashi?" — answered before anyone scrolls. Filled from
      the POS calendar feed by the script at the bottom; stays hidden until it
      answers, so a feed outage costs nothing visible. -->
-<a class="fast-strip" id="fastStrip" href="calendar.html" hidden>
-  <span class="fast-strip-label">Next Ekadashi</span>
-  <strong id="fastStripDate"></strong>
-  <span id="fastStripName"></span>
-  <span class="fast-strip-more">All fasting days &amp; festivals &rarr;</span>
-</a>
+<!-- Two lines, both filled by the script at the bottom:
+       #fastStrip  — the next Ekadashi
+       #todayStrip — today's festivals (Vaisnava / ISKCON / Jain calendars only)
+     Until window.CG_OPENING_UNTIL (set in moving.js) they SHARE #fastStrip and
+     fade one item at a time, so the top of the page is not three bars deep.
+     From that date #fastStrip is fixed and #todayStrip fades on its own. -->
+<a class="fast-strip" id="fastStrip" href="calendar.html" hidden></a>
+<a class="fast-strip today-strip" id="todayStrip" href="calendar.html" hidden></a>
 
 <main id="top">
 
@@ -1098,24 +1110,125 @@ var CGC = (typeof window !== "undefined" && window.CG_CONFIG) || {};
     if (!card || !list || !SHARE_KEY) return;
     function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
     var KIND = { ekadashi: "Ekadashi", vrat: "Fasting", festival: "Festival", holiday: "Holiday", other: "" };
+
+    /* ── the purple bar(s) ─────────────────────────────────────────────────
+       Items are {label, title, text, date}. One item = shown still. Several =
+       one at a time, a slow fade, Ekadashi first and a little longer. */
+    // Calendars that never reach the home-page bar: a regional public holiday
+    // in Haryana means nothing to a Bengaluru saatvik cafe's guests.
+    var HIDE_CALENDARS = [/public holiday/i];
+    var DWELL = 4500, EK_DWELL = 7000;
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function dayWord(dateIso, todayIso) {
+      var n = Math.round((new Date(dateIso + "T00:00:00") - new Date(todayIso + "T00:00:00")) / 86400000);
+      return n === 0 ? " — today" : n === 1 ? " — tomorrow" : " — in " + n + " days";
+    }
+    // "Sri Vamana Dvadasi: Appearance of Lord Vamanadeva" and "Vamana Jayanthi:
+    // Appearance of Lord Vamanadeva" are the same festival from two calendars.
+    function sameKey(name) {
+      var tail = name.indexOf(":") > -1 ? name.slice(name.indexOf(":") + 1) : name;
+      return tail.toLowerCase().replace(/[^a-z]/g, "");
+    }
+    function itemHtml(it, i, n) {
+      return '<span class="fs-item">' +
+        '<span class="fast-strip-label">' + esc(it.label) + '</span>' +
+        '<strong>' + esc(it.title) + '</strong>' +
+        (it.text ? '<span>' + esc(it.text) + '</span>' : '') +
+        (n > 1 ? '<span class="fs-count" aria-hidden="true">' + (i + 1) + '/' + n + '</span>' : '') +
+        '<span class="fast-strip-more">' + esc(it.more || "All fasting days & festivals") + ' &rarr;</span>' +
+      '</span>';
+    }
+    // Show `items` in `el`; rotate if more than one (unless the visitor asked
+    // their phone for less motion — then every item is listed, still).
+    function run(el, items) {
+      if (!items.length) return;
+      var all = items.map(function (it) { return it.label + ": " + it.title + (it.text ? ", " + it.text : ""); }).join(". ");
+      if (items.length === 1 || still) {
+        var it = items[0];
+        if (items.length > 1) {   // still, but nothing hidden: one line per item
+          it = { label: items[0].label, title: items.map(function (x) { return x.title; }).join(" · "), text: "", date: items[0].date, more: items[0].more };
+        }
+        el.innerHTML = itemHtml(it, 0, 1);
+        el.href = "calendar.html?date=" + encodeURIComponent(items[0].date);
+        el.hidden = false;
+        return;
+      }
+      var i = 0, timer = null, paused = false;
+      el.setAttribute("aria-label", all + ". Open the calendar.");
+      function show() {
+        el.innerHTML = itemHtml(items[i], i, items.length);
+        el.href = "calendar.html?date=" + encodeURIComponent(items[i].date);
+      }
+      function next() {
+        if (paused || document.hidden) { timer = setTimeout(next, 1000); return; }
+        var node = el.querySelector(".fs-item");
+        if (node) node.classList.add("out");
+        setTimeout(function () {
+          i = (i + 1) % items.length;
+          show();
+          var n2 = el.querySelector(".fs-item");
+          n2.classList.add("out");
+          requestAnimationFrame(function () { requestAnimationFrame(function () { n2.classList.remove("out"); }); });
+          timer = setTimeout(next, items[i].dwell || DWELL);
+        }, 450);
+      }
+      ["mouseenter", "focus"].forEach(function (e) { el.addEventListener(e, function () { paused = true; }); });
+      ["mouseleave", "blur"].forEach(function (e) { el.addEventListener(e, function () { paused = false; }); });
+      show();
+      el.hidden = false;
+      timer = setTimeout(next, items[0].dwell || DWELL);
+    }
+    function strips(d) {
+      var todayIso = d.today;
+      var ek = null;
+      for (var i = 0; i < d.days.length; i++) { if (d.days[i].kind === "ekadashi") { ek = d.days[i]; break; } }
+      var ekItem = ek && {
+        label: ek.date === todayIso ? "Ekadashi today" : "Next Ekadashi",
+        title: new Date(ek.date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }) +
+               (ek.date === todayIso ? "" : dayWord(ek.date, todayIso)),
+        text: ek.name.replace(/^Fasting for /i, "") + (ek.fast_break ? " · " + ek.fast_break : ""),
+        date: ek.date, dwell: EK_DWELL
+      };
+      var seen = {}, fests = [];
+      d.days.forEach(function (x) {
+        if (x.date !== todayIso || x.kind === "ekadashi") return;
+        if (HIDE_CALENDARS.some(function (re) { return re.test(x.calendar || ""); })) return;
+        var k = sameKey(x.name);
+        if (seen[k]) return;
+        seen[k] = 1;
+        var c = x.name.indexOf(":");
+        fests.push({
+          label: x.kind === "vrat" ? "Today · fasting" : "Today",
+          title: c > -1 ? x.name.slice(0, c).trim() : x.name.replace(/\s+--\s+/, " — "),
+          text: (c > -1 ? x.name.slice(c + 1).trim() : "") + (x.fast_break ? (c > -1 ? " · " : "") + x.fast_break : ""),
+          date: todayIso, more: "Today on the calendar"
+        });
+      });
+      var fast = document.getElementById("fastStrip"), today = document.getElementById("todayStrip");
+      var d0 = new Date();
+      var localIso = d0.getFullYear() + "-" + ("0" + (d0.getMonth() + 1)).slice(-2) + "-" + ("0" + d0.getDate()).slice(-2);
+      var split = still || localIso >= (window.CG_OPENING_UNTIL || "2026-10-01");
+      if (ek && ek.date === todayIso) {
+        run(fast, [ekItem]);                    // Ekadashi day: it stays put
+        if (split) run(today, fests);
+      } else if (split) {
+        if (ekItem) run(fast, [ekItem]);
+        run(today, fests);
+      } else {
+        run(fast, (ekItem ? [ekItem] : []).concat(fests));
+      }
+    }
+
     fetch(POS_BASE + "/api/public/" + SLUG + "/calendar/?days=60", { headers: { "X-Share-Key": SHARE_KEY } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (!d || !d.days || !d.days.length) return;
-        // The strip under the header: the first Ekadashi in the feed.
-        var strip = document.getElementById("fastStrip");
-        var ek = null;
-        for (var i = 0; i < d.days.length; i++) { if (d.days[i].kind === "ekadashi") { ek = d.days[i]; break; } }
-        if (strip && ek) {
-          var edt = new Date(ek.date + "T00:00:00");
-          var days = Math.round((edt - new Date(d.today + "T00:00:00")) / 86400000);
-          document.getElementById("fastStripDate").textContent =
-            edt.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }) +
-            (days === 0 ? " — today" : days === 1 ? " — tomorrow" : " — in " + days + " days");
-          document.getElementById("fastStripName").textContent =
-            ek.name.replace(/^Fasting for /i, "") + (ek.fast_break ? " · " + ek.fast_break : "");
-          strip.hidden = false;
-        }
+        // The purple bar(s) under the header — see strips() below.
+        // moving.js sets CG_OPENING_UNTIL and is loaded after this script:
+        // DOMContentLoaded guarantees it has run.
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { strips(d); });
+        else strips(d);
         var rows = d.days.slice(0, 8);
         list.innerHTML = rows.map(function (x) {
           var dt = new Date(x.date + "T00:00:00");
