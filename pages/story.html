@@ -115,14 +115,62 @@
     display:inline-block;border-radius:18px;line-height:0}
   .story-img-btn:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
 
+  /* Inline story figures. Each picture sits directly after the paragraph it
+     belongs to, so the succession is visible as you read instead of being
+     stacked in one gallery at the top. Every picture is a button that opens
+     the shared viewer, which steps through all of them in page order. */
+  .story-fig{margin:1.9rem 0;text-align:center}
+  .story-fig img{width:100%;max-width:340px;height:auto;border-radius:18px;border:2px solid var(--gold);
+    box-shadow:0 18px 44px rgba(62,18,6,.2);object-fit:cover}
+  .story-fig.medium img{max-width:520px}
+  .story-fig.wide img{max-width:620px}
+  .story-fig figcaption{margin-top:.55rem;font-size:.92rem;color:var(--muted);line-height:1.5}
+  .story-fig figcaption a{color:var(--ember);font-weight:600;text-decoration:none}
+  .story-fig figcaption a:hover{text-decoration:underline}
+  .tap-hint{display:block;margin-top:.2rem;font-size:.74rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted);opacity:.72}
+
+  /* Two pictures side by side. They are very different shapes (one tall, one
+     wide), so each sits in a fixed-height frame and is shown whole rather than
+     cropped — the point is to see them, not to make a tidy grid. */
+  .fig-pair{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:1.9rem 0}
+  .fig-pair .story-fig{margin:0}
+  .fig-pair .frame{display:flex;align-items:center;justify-content:center;width:100%;
+    height:290px;padding:.5rem;overflow:hidden;border:2px solid var(--gold);border-radius:18px;
+    background:linear-gradient(180deg,#fff,rgba(224,160,41,.12));
+    box-shadow:0 18px 44px rgba(62,18,6,.18)}
+  .fig-pair .frame img{max-height:100%;width:auto;height:auto;max-width:100%;
+    border:none;border-radius:10px;box-shadow:none}
+  @media(max-width:700px){.fig-pair{grid-template-columns:1fr}.fig-pair .frame{height:300px}}
+
   /* Lightbox overlay. Fixed over the whole viewport, hidden by default.
      aria-hidden keeps it out of the a11y tree while closed. */
   .lightbox{position:fixed;inset:0;z-index:100;background:rgba(42,19,10,.86);
     display:flex;align-items:center;justify-content:center;padding:1.5rem;
     opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s}
   .lightbox.open{opacity:1;visibility:visible}
-  .lightbox img{max-width:100%;max-height:92vh;width:auto;height:auto;
+  .lightbox img{max-width:100%;max-height:74vh;width:auto;height:auto;
     border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+  .lightbox-figure{display:flex;flex-direction:column;align-items:center;gap:.7rem;width:min(1000px,100%)}
+  .lightbox-caption{margin:0;color:var(--cream);font-family:"Cormorant Garamond",Georgia,serif;
+    font-size:1.15rem;line-height:1.4;text-align:center}
+  .lightbox-count{color:rgba(252,244,226,.6);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase}
+  /* Previous / next. Big enough to hit comfortably with a thumb. */
+  .lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;
+    border:none;border-radius:50%;background:rgba(42,19,10,.55);color:#fff;
+    font-size:2rem;line-height:1;padding:0 0 .16em;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    /* the arrows sit over the picture on a phone, so they need their own
+       contrast rather than relying on the backdrop behind them */
+    backdrop-filter:blur(6px);box-shadow:0 3px 14px rgba(0,0,0,.45)}
+  .lightbox-nav:hover,.lightbox-nav:focus-visible{background:rgba(252,244,226,.32);
+    outline:3px solid var(--gold);outline-offset:2px}
+  .lightbox-prev{left:1rem} .lightbox-next{right:1rem}
+  @media(max-width:700px){
+    .lightbox-nav{width:44px;height:44px;font-size:1.6rem}
+    .lightbox-prev{left:.35rem} .lightbox-next{right:.35rem}
+    .lightbox img{max-height:64vh}
+  }
   .lightbox-close{position:absolute;top:1rem;right:1rem;width:44px;height:44px;
     border:none;border-radius:50%;background:rgba(252,244,226,.14);color:#fff;
     font-size:1.6rem;line-height:1;cursor:pointer;display:flex;
@@ -180,7 +228,8 @@
     <h1>About Cafe Gopala</h1>
     <p class="lede">Cafe Gopala began the way good things often do — around a kitchen, among ISKCON friends.</p>
   </div>
-</section>
+  </section>
+
 
 <article class="prose">
 
@@ -207,6 +256,14 @@
      are welcome to receive it simply as a good meal. Many people do. It is
      offered either way.</p>
 
+  <figure class="story-fig medium">
+    <button type="button" class="story-img-btn" data-caption="Srila Prabhupada in the kitchen — cooking and offering were taught as carefully as philosophy" aria-label="Open the kitchen picture full size">
+      <img src="../images/pics/prabhupad-pics/Prabhupada-observing-devotee-cook-in-kitchen-620x350.jpg" alt="Srila Prabhupada watching a devotee cook in the kitchen" loading="lazy" width="620" height="350" />
+    </button>
+    <figcaption>Srila Prabhupada in the kitchen — cooking and offering were taught as
+      carefully as philosophy.<span class="tap-hint">Tap a picture, then use &#8249; and &#8250;</span></figcaption>
+  </figure>
+
   <div class="pullquote">
     <p>You are welcome to come for a good meal and leave having thought about
        nothing but your day. That is a perfectly good visit, and we are glad
@@ -224,11 +281,22 @@
      to, and so it is the line we belong to. The food follows from who we are,
      not the other way round.</p>
 
-  <p>A <em>sampradaya</em> is a line of teachers — knowledge handed from teacher
-     to student, person to person, without a break. The idea is unglamorous and
-     practical: what is passed down hand to hand stays intact, while what each
-     generation reinvents for itself drifts. If you want to know what was
+  <p>A <em>sampradaya</em> is a line of teachers &mdash; knowledge handed from
+     teacher to student, person to person, without a break. The idea is plain and
+     practical. What is passed down hand to hand stays intact. What each
+     generation reinvents for itself drifts. So if you want to know what was
      actually taught, you follow the chain back.</p>
+
+  <figure class="story-fig wide">
+    <button type="button" class="story-img-btn" data-caption="The guru-parampara — the chain of teachers, from Krishna down to Srila Prabhupada" aria-label="Open the guru-parampara illustration full size">
+      <img src="../images/Iskcon_gur_parampara.webp" alt="The Brahma-Madhva-Gaudiya guru-parampara, from Krishna through the Six Goswamis to Srila Prabhupada" loading="lazy" width="900" />
+    </button>
+    <figcaption>The chain, drawn out — Krishna at the top, Srila Prabhupada at the end.</figcaption>
+  </figure>
+
+  <p class="attribution">The guru-parampara illustration is courtesy of
+     <a href="https://www.iskconbangalore.org/guru-parampara/" target="_blank" rel="noopener">ISKCON Bangalore</a>,
+     used with thanks.</p>
 
   <p>The name of ours carries its own history, in three parts.</p>
 
@@ -244,25 +312,37 @@
     <b>Madhva</b>
     <p>Centuries later, in Udupi on the Karnataka coast, Sripada Madhvacharya
        received that line and gave it rigour. Against the philosophies of his
-       day, he argued for a truth that many find intuitive but that was then
-       contested: that the soul and God are eternally distinct, and that love
-       between them is therefore real and not a stage to be transcended. He also
-       built the succession into something disciplined enough to survive.</p>
+       day, he argued for something many people feel is obvious but which was
+       then hotly disputed: the soul and God are eternally distinct. And because
+       they are distinct, the love between them is real — not a stage to be
+       grown out of. He also gave the line the discipline it needed to survive.</p>
   </div>
 
   <div class="part">
     <b>Gaudiya</b>
     <p>Then, in Bengal — <em>Gauda</em> is its old name — Sri Chaitanya
        Mahaprabhu appeared, and the line took on its final character. He taught
-       that the highest relationship with God is not awe but love, and that the
-       way to it is open to everyone: the chanting of the holy names, which needs
-       no qualification, no wealth, no birth, no temple. He gave away the most
-       exalted thing he had to whoever would take it. That is the spirit we try
-       to keep in a cafe.</p>
+       that the highest relationship with God is not awe but love — and that the
+       way to it is open to everyone. That way is the chanting of the holy names.
+       It asks for no qualification, no wealth, no birth, no temple. He gave away
+       the most exalted thing he had to whoever would take it. That is the spirit
+       we try to keep in a cafe.</p>
   </div>
 
-  <div class="story-visual">
-    <img src="../images/pics/prabhupad-small/prabhupad-face-pic.jpg" alt="Srila Prabhupada" loading="lazy"/>
+  <div class="fig-pair">
+    <figure class="story-fig">
+      <button type="button" class="story-img-btn frame" data-caption="Nitai-Gauranga — Sri Chaitanya Mahaprabhu and Sri Nityananda Prabhu" aria-label="Open the Nitai-Gauranga picture full size">
+        <img src="../images/pics/lineage/nitya_goranga.jpeg" alt="Nitai-Gauranga: Sri Chaitanya Mahaprabhu and Sri Nityananda Prabhu, dancing and chanting the holy names" loading="lazy" />
+      </button>
+      <figcaption>Nitai-Gauranga — Sri Chaitanya Mahaprabhu with Sri Nityananda Prabhu.</figcaption>
+    </figure>
+    <figure class="story-fig">
+      <button type="button" class="story-img-btn frame" data-caption="The Six Goswamis of Vrindavan" aria-label="Open the Six Goswamis of Vrindavan picture full size">
+        <img src="../images/pics/lineage/sixgoswamis_0.jpg" alt="The Six Goswamis of Vrindavan" loading="lazy" />
+      </button>
+      <figcaption>The Six Goswamis of Vrindavan &mdash;
+        <a href="https://vribharat.org/vrindavan-at-a-glance/" target="_blank" rel="noopener">know more here</a></figcaption>
+    </figure>
   </div>
 
   <p>The chain continued through his followers — the Six Goswamis of Vrindavan,
@@ -273,6 +353,13 @@
      nothing. What he planted is why a cafe like this one exists, and why you can
      find prasadam in almost any city in the world today.</p>
 
+  <figure class="story-fig medium">
+    <button type="button" class="story-img-btn" data-caption="Srila Prabhupada, A.C. Bhaktivedanta Swami" aria-label="Open the picture of Srila Prabhupada full size">
+      <img src="../images/pics/prabhupad-small/prab-face-4.jpg" alt="Srila Prabhupada, A.C. Bhaktivedanta Swami" loading="lazy" width="1920" height="1080" />
+    </button>
+    <figcaption>Srila Prabhupada, A.C. Bhaktivedanta Swami</figcaption>
+  </figure>
+
   <div class="lineage">
     <span class="eyebrow">The line we belong to</span>
     <p>Krishna &middot; Brahma &middot; Narada &middot; Vyasa &middot; Madhvacharya<br/>
@@ -280,22 +367,6 @@
        Sri Chaitanya Mahaprabhu &middot; the Six Goswamis<br/>
        Bhaktivinoda Thakura &middot; Bhaktisiddhanta Saraswati Thakura<br/>
        Srila Prabhupada</p>
-  </div>
-
-  <div class="story-visual wide">
-    <button type="button" class="story-img-btn" id="paramparaBtn" aria-label="Open the guru-parampara illustration in full size">
-      <img src="../images/Iskcon_gur_parampara.webp" alt="The Brahma-Madhva-Gaudiya guru-parampara, from Krishna through the Six Goswamis to Srila Prabhupada" loading="lazy" width="900" />
-    </button>
-  </div>
-
-  <p class="attribution">The guru-parampara illustration above is courtesy of <a href="https://www.iskconbangalore.org/guru-parampara/" target="_blank" rel="noopener">ISKCON Bangalore</a>, used with thanks.</p>
-
-  <!-- Lightbox: tap the illustration to see it full-size. Hidden until opened,
-       and hidden again on close, backdrop click or Escape, so it never
-       interferes with the page behind it. -->
-  <div class="lightbox" id="lightbox" aria-hidden="true" hidden>
-    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close illustration">&times;</button>
-    <img class="lightbox-img" id="lightboxImg" alt="" />
   </div>
 
   <h2>Everyone is welcome</h2>
@@ -331,6 +402,21 @@
   </div>
 </footer>
 
+<!-- Shared picture viewer. Every picture in the story opens here, and the
+     arrows step through all of them in the order they appear on the page, so
+     the line can be followed in pictures alone. Closed with the X, the
+     backdrop or Escape; arrow keys and swipe also work. -->
+<div class="lightbox" id="lightbox" aria-hidden="true" hidden role="dialog" aria-modal="true" aria-label="Pictures from our story">
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close picture">&times;</button>
+  <button type="button" class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous picture">&#8249;</button>
+  <button type="button" class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next picture">&#8250;</button>
+  <div class="lightbox-figure" id="lightboxFigure">
+    <img class="lightbox-img" id="lightboxImg" alt="" />
+    <p class="lightbox-caption" id="lightboxCaption"></p>
+    <span class="lightbox-count" id="lightboxCount"></span>
+  </div>
+</div>
+
 <script>
   /* Mobile nav toggle — same behaviour as index.html */
   (function () {
@@ -353,42 +439,94 @@
   </script>
 
   <script>
-  /* Lightbox for the guru-parampara illustration. Tap it to see it full-size;
-     tap the backdrop or the X, or press Escape, to close. Nothing is loaded
-     until the button is pressed, and prefers-reduced-motion disables the
-     fade. */
+  /* Shared picture viewer. The figure buttons are read in document order, so
+     "next" moves down the page and "previous" moves back up: the pictures run
+     in the same sequence as the story. Nothing is loaded until one is tapped. */
   (function () {
-    var btn   = document.getElementById("paramparaBtn");
-    var lb    = document.getElementById("lightbox");
-    var close = document.getElementById("lightboxClose");
-    var img   = document.getElementById("lightboxImg");
-    if (!btn || !lb || !close || !img) return;
+    var btns = Array.prototype.slice.call(document.querySelectorAll(".story-img-btn"));
+    var lb   = document.getElementById("lightbox");
+    if (!btns.length || !lb) return;
 
-    var source = btn.querySelector("img");
-    if (source) img.src = source.getAttribute("src");
+    var img      = document.getElementById("lightboxImg");
+    var cap      = document.getElementById("lightboxCaption");
+    var count    = document.getElementById("lightboxCount");
+    var closeBtn = document.getElementById("lightboxClose");
+    var prevBtn  = document.getElementById("lightboxPrev");
+    var nextBtn  = document.getElementById("lightboxNext");
+    if (!img || !cap || !count || !closeBtn || !prevBtn || !nextBtn) return;
 
-    function open() {
-      img.setAttribute("alt", source ? source.getAttribute("alt") : "");
-      lb.classList.add("open");
+    var items = btns.map(function (btn) {
+      var source = btn.querySelector("img");
+      return {
+        src: source ? source.getAttribute("src") : "",
+        alt: source ? (source.getAttribute("alt") || "") : "",
+        caption: btn.getAttribute("data-caption") || ""
+      };
+    });
+
+    var index = 0;
+    var lastFocus = null;
+
+    function show(n) {
+      index = (n + items.length) % items.length;   /* wraps, so it never dead-ends */
+      var it = items[index];
+      img.setAttribute("src", it.src);
+      img.setAttribute("alt", it.alt);
+      cap.textContent = it.caption;
+      count.textContent = (index + 1) + " of " + items.length;
+    }
+
+    function openAt(n) {
+      lastFocus = document.activeElement;
+      show(n);
       lb.removeAttribute("hidden");
       lb.setAttribute("aria-hidden", "false");
-      close.focus();
+      /* added on the next frame so the fade actually runs */
+      requestAnimationFrame(function () { lb.classList.add("open"); });
+      document.body.style.overflow = "hidden";
+      nextBtn.focus();
     }
+
     function closeLb() {
       lb.classList.remove("open");
       lb.setAttribute("hidden", "");
       lb.setAttribute("aria-hidden", "true");
       img.setAttribute("alt", "");
+      document.body.style.overflow = "";
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
     }
 
-    btn.addEventListener("click", open);
-    close.addEventListener("click", closeLb);
+    btns.forEach(function (btn, i) {
+      btn.addEventListener("click", function () { openAt(i); });
+    });
+    prevBtn.addEventListener("click", function () { show(index - 1); });
+    nextBtn.addEventListener("click", function () { show(index + 1); });
+    closeBtn.addEventListener("click", closeLb);
+
+    /* Only the backdrop closes it: clicks on the picture itself must not. */
     lb.addEventListener("click", function (e) {
-      if (e.target === lb) closeLb();
+      if (e.target === lb || e.target.id === "lightboxFigure") closeLb();
     });
+
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && lb.classList.contains("open")) closeLb();
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") closeLb();
+      else if (e.key === "ArrowLeft") show(index - 1);
+      else if (e.key === "ArrowRight") show(index + 1);
     });
+
+    /* Swipe on a phone. The threshold is wide enough that a tap, or a small
+       drag while trying to scroll, does not change the picture. */
+    var startX = null;
+    lb.addEventListener("touchstart", function (e) {
+      startX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    lb.addEventListener("touchend", function (e) {
+      if (startX === null) return;
+      var dx = e.changedTouches[0].clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 45) show(dx < 0 ? index + 1 : index - 1);
+    }, { passive: true });
   })();
   </script>
 <script src="moving.js"></script>
